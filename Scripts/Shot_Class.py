@@ -22,23 +22,7 @@ from data_access_funcs import load_signal_data
 # eg from signal_dict_06_OCT_11 import signals, shotnos
 #    from signal_dict_10_NOV_11 import signals
 # =============================================================================
-#from signal_dict_10_NOV_11 import signals
-
-class Transition():
-    def __init__(self, LHorHL, t0, tplus, tminus, shot):
-        """
-        transition class
-        """
-        self.flavour = LHorHL
-        self.t0 = t0
-        self.tplus = tplus
-        self.tminus = tminus
-        self.shot = shot
-        self.parameters = {}
     
-    def add_param(self, parameter, value):
-        self.parameters[parameter] = value
-        
 
 
 class Shot():
@@ -51,7 +35,6 @@ class Shot():
         self.ShotNumber = ShotNumber
         self._LHt = LHt
         self._HLt = HLt
-        self._transitions = []
         
         self.unloaded = []
         for sig in signals:
@@ -71,17 +54,10 @@ class Shot():
         else:
             return True
 
-    def plot_signal(self, SignalName, figname = None):
-        # this could go into another file anyway with plotting stuff
-        if len(self.data[SignalName]['data'].shape) >1:
-            x, y = self.data[SignalName]['time'] , np.nanmean(self.data[SignalName]['data'], axis=1) 
-        else:
-            x,y = self.data[SignalName]['time'], self.data[SignalName]['data']
-            
+    def plot_signal(self, SignalName):
+        # this should go into another file anyway with plotting stuff
+        x,y = self.data[SignalName]['time'], self.data[SignalName]['data']
         units = self.data[SignalName]['units']
-        
-        if figname != None:
-            plt.figure(figname)
         try:
             plt.plot(x,y)
             
@@ -93,79 +69,19 @@ class Shot():
    
     
     def plot_compare(self, signalslist):
-        """ Plot arbitrary number of self.signals in subplots of a single figure
-        
-        signalslist = ['npos', 'ngrad']
-        """
         n = len(signalslist)
         fig, ax = plt.subplots(n, sharex=True, figsize=(11,7))
         
         
         for i, signal in enumerate(signalslist):
             self._plot_ax_sig(ax, signal, i, signame= signal)
-            
-    def transitions_generator(self, additional_params = None):
-        if self._LHt == None and self._HLt == None:
-            print('no transitions')
-            return
-        
-        parameters = ['IP','BT','Ploss','KAPPA','ANE_DENSITY','AYC_NE' ] # AYC_NE, AYE_NE doesnt work
-        if additional_params != None:
-            parameters.extend(additional_params)
-            
-        list_of_transitions = []
-        for t  in self._LHt:
-            list_of_transitions.append((t,'LH'))
-        for t in self._HLt:
-            list_of_transitions.append((t,'HL'))
-        print(list_of_transitions)
-        
-        for tran,name in list_of_transitions:
-            tclass = Transition(name, tran[0], tran[1], tran[2], self.ShotNumber)
-            
-            for param in parameters:
-                print(param)
-                if param not in self.signals_present()[1]:
-                    print('signal not present')
-                    continue
-                units = self.data[param]['units']
-                
-                if len(self.data[param]['data'].shape) >1:
-                    print('Signal {} has been squashed into one dimension'.format(param))
-                    p_0 = np.interp(tclass.t0, self.data[param]['time'] , np.nanmean(self.data[param]['data'], axis=1))
-                    p_0_err = np.interp(tclass.t0, self.data[param]['time'] , np.nanmean(self.data[param]['errors'], axis=1))
-                    t_err_range = np.interp(np.linspace(tclass.tminus,tclass.tplus,30), self.data[param]['time'] , np.nanmean(self.data[param]['data'], axis=1))
-
-                else:
-                    p_0 = np.interp(tclass.t0, self.data[param]['time'] , self.data[param]['data'])
-                    try:
-                        p_0_err = np.interp(tclass.t0, self.data[param]['time'] , self.data[param]['errors'])
-                    except:
-                        p_0_err = 0
-                    t_err_range = np.interp(np.linspace(tclass.tminus,tclass.tplus,30), self.data[param]['time'] , self.data[param]['data'])
-                
-                t_err_err = np.ptp(t_err_range) # numpy range function, max-min
-                error = np.sqrt(t_err_err**2 + p_0_err**2) # some math/logic to do overall error
-                
-                dictionary = {'p_0': p_0,
-                              'p_0_err': p_0_err,
-                              't_err': t_err_err,
-                              'error': error,
-                              'units': units }
-                tclass.add_param(param, dictionary)
-            
-            self._transitions.append(tclass)
-            
-            
+  
     def transition_params(self, additional_params = None):
         if self._LHt == None or self._HLt == None:
-            """ parameters at transition times including errors
-            outputs to excel and self._pandas
-            """
-            print('ABORT: No LH or HL in shot {}'.format(self.ShotNumber))
+            print('abort No LH or HL in shot {}'.format(self.ShotNumber))
             return
         
-        parameters = ['IP','BT','Ploss','KAPPA','ANE_DENSITY','NE', 'AYE_NE','AYC_NE','X1Z','X2Z'] # AYC_NE, AYE_NE doesnt work
+        parameters = ['IP','BT','Ploss','KAPPA','ANE_DENSITY','AYC_NE', 'AYE_NE'] # AYC_NE, AYE_NE doesnt work
         if additional_params != None: parameters.extend(additional_params)
         
         # prepare dict for pandas
@@ -181,40 +97,24 @@ class Shot():
                 'range_err':[]
                 }
         
-        # why?
         parameter = 'IP'
         
         # compbine LHt and HLt 
         list_of_transitions = []
         list_of_transitions.extend(self._LHt)
         list_of_transitions.extend(self._HLt)
-        
         for parameter in parameters:
-            if parameter not in self.signals_present()[1]: 
-                # WHAT DOES THIS DO PRACTICALLY?
-                continue # if singal doesnt exist, continue
             
+            if parameter not in self.signals_present()[1]: continue # if singal doesnt exist, continue
             
             # for problematic data
-            # WHY DOES THIS ONLY WORK FOR SPECIFIED 'AYCE_NE'?
             try:
                 self.data['AYC_NE']['data']=np.nanmean(self.data['AYC_NE']['data'],axis=1)
                 self.data['AYC_NE']['errors']=np.nanmean(self.data['AYC_NE']['errors'],axis=1)
                 self.data['AYE_NE']['data']=np.nanmean(self.data['AYE_NE']['data'],axis=1)
                 self.data['AYE_NE']['errors']=np.nanmean(self.data['AYE_NE']['errors'],axis=1)
-            except:
-                pass
-            try:         
-                # for NE for 08 JP shots
-                self.data['NE']['data']=np.nanmean(self.data['NE']['data'],axis=1)
-                self.data['NE']['errors']=np.nanmean(self.data['NE']['errors'],axis=1)
-                self.data['NE']['data']=np.nanmean(self.data['NE']['data'],axis=1)
-                self.data['NE']['errors']=np.nanmean(self.data['NE']['errors'],axis=1)
-                print(self.data['NE'])
-            except: 
-                pass
-            
-            print(parameter)
+            except: pass
+        
             for t in list_of_transitions:
                 print('truing: {}'.format(parameter))
                 t1 = t[0]   #time of tranision
@@ -257,14 +157,18 @@ class Shot():
                 # calculate spread in singal during t range and add mean error
                 singal_t_err_spread = max(singal_t_err_range) - min(singal_t_err_range) + np.mean(np.abs(singal_t_err_error_range))
                 
+                # FIX FOR DENSIRTY TO USE ONLY INSTRUMENTAL ERROR
+                if parameter in ['ANE_DENSITY','AYC_NE', 'AYE_NE']:
+                    singal_t_err_spread = np.mean(np.abs(singal_t_err_error_range))
+                    
+                
                 # add to dict
                 self._pandas['shot'].append(self.ShotNumber)
                 if t in self._LHt:
                     self._pandas['LH/HL'].append('LH')
                 elif t in self._HLt:
                     self._pandas['LH/HL'].append('HL')
-                else: 
-                    self._pandas['LH/HL'].append('WTF?') #:)
+                else: self._pandas['LH/HL'].append('WTF?')
                 self._pandas['time'].append(t1)
                 self._pandas['units'].append(units)
                 self._pandas['param'].append(parameter)
@@ -282,7 +186,7 @@ class Shot():
         writer.save()
        
         
-    def plot_JP(self, tlim = (0,0.5), ip = 'IP', wmhd = 'WMHD', coreTe = 'AYC_TE0', 
+    def plot_JP(self, tlim = (0,1), ip = 'IP', wmhd = 'WMHD', coreTe = 'AYC_TE0', 
                 ne = 'ANE_DENSITY', Dalpha = 'AIM_DA_TO', Bt = 'BT',
                 Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM'
                 ):
@@ -299,7 +203,6 @@ class Shot():
         
         # make figure and adjust boundaries
         fig, ax = plt.subplots(n_signals, sharex=True, figsize=(11,7))
-        fig.canvas.set_window_title('Shot {}'.format(self.ShotNumber))
         fig.subplots_adjust(top=0.935,bottom=0.09,left=0.08,right=0.975,hspace=0.0,wspace=0.2)
         
         # add figure title, labels, set time range
@@ -309,15 +212,16 @@ class Shot():
         
         # mark LH, HL transition points
         if self._LHt:
-            for tset in self._LHt:  # tset = (time, -tlim_err, =tlim_err)
+            for tset in self._LHt:
                 for axes in ax:
-                    axes.axvline(tset[0], c='g', lw=1, ls='--', clip_on=False) #draw vertical line for transition
+                    axes.axvline(tset[0], c='g', lw=1, ls='--', clip_on=False)
                     if tset[1] != 0:
-                        axes.axvline(tset[1], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+                        axes.axvline(tset[1], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6)
                     if tset[2] != 0:
-                        axes.axvline(tset[2], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+                        axes.axvline(tset[2], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6)
+                #elif len(t) == 3:
         if self._HLt:
-            for tset in self._HLt:  # tset = (time, -tlim_err, +tlim_err)
+            for tset in self._HLt:
                 for axes in ax:
                     axes.axvline(tset[0], c='r', lw=1, ls='--', clip_on=False)   
                     if tset[1] != 0:
@@ -352,8 +256,6 @@ class Shot():
         plots signal (sig) on subplot axes (ax[panel]) and labels with signame (and sig units)
         need to add error handeling
         Note: use units with care, as not longer automatic, maybe just use for presentation plots
-        
-        TOMAS, COULD YOU CLEAN UP/COMMENT?
         """
         # type(ax[panel]) might want to make sure its correct
         shape = self.data[sig]['data'].shape
@@ -377,7 +279,7 @@ class Shot():
         else:
             pass
         if units == 'MW': 
-            data=data*10e6/5 # what?
+            data=data*10e6/5 #what?
         
         if signame!='': 
             label=signame
@@ -398,27 +300,9 @@ class Shot():
         
         ax[panel].annotate(r'$%s \ [%s]$' %(signame, units), xy=(0.01,0.7), xycoords='axes fraction', fontsize=11)
         ax[panel].legend()
-        
-    # EXPERIMENTAL #
-    def add_ir_signal(self, signals= ['AIT_PTOT_ISP', 'AIT_PTOT_OSP']):
-        #signals must be same type, ie just use the default
-        times = self.data[signals[0]]['time']
-        unit = self.data[signals[0]]['units']
-#        errors = None  #for this case
-        power = self.data[signals[0]]['data']
-        for p in signals[1:]:
-            power = + self.data[p]['data']
-        
-        di = {'time': times,
-              'data': power,
-              'errors': None,
-              'units': unit}
-        self.data['Ploss_IR'] = di
     
 
 def plot_shot_comparison(shots, tlim = (0,1), ip = 'IP', wmhd = 'WMHD', coreTe = 'AYC_TE0', ne = 'ANE_DENSITY', Dalpha = 'AIM_DA_TO', Bt = 'BT', Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM'):
-    """
-    """
     n_signals = 4
     fig, ax = plt.subplots(n_signals, sharex=True, figsize=(11,7))
     fig.suptitle('Multiple shots')
