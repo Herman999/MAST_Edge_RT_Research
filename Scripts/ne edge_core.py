@@ -7,16 +7,18 @@ Created on Sat Jan 19 11:25:30 2019
 NE edge v core comparison and calibration
 """
 
-from Shot_Class import *
+#from Shot_Class import Shot
 import numpy as np
 import matplotlib.pyplot as plt
-
-all_shots = [Shot(24130, LHt=[(0.285,0,0)]), Shot(24129), Shot(24128, LHt=[(0.258,0,0)])]
-    
+global signals
+from signal_dict_13_DEC_PULL import signals
+#all_shots = [Shot(24130, LHt=[(0.285,0,0)]), Shot(24129), Shot(24128, LHt=[(0.258,0,0)])]
+all_shots = [Shot(24129)]    
 plt.figure(11)
 ees=[]
 ccs=[]
 for shot in all_shots:
+    print(shot)
     for i, j in enumerate(shot.data['AYE_R']['time']):
         r_edge = shot.data['AYE_R']['data'][i]
         ne_edge = shot.data['AYE_NE']['data'][i]
@@ -38,8 +40,9 @@ for shot in all_shots:
             e_poly = np.poly1d(np.polyfit(r_edge,ne_edge,15))
             c_poly = np.poly1d(np.polyfit(r_core,ne_core,15))
         
-            
-            for r in r_edge:
+            min_r = max(min(r_core), min(r_edge))
+            max_r = min(max(r_core), max(r_edge))
+            for r in np.linspace(min_r, max_r, 20):
                 if r<np.max(r_core):
                     if r>np.min(r_core):
                         print('yes')
@@ -78,7 +81,7 @@ plt.scatter(ccs,ees,marker='x',c='b', alpha=0.5)
 st_poly = np.poly1d(np.polyfit(ccs,ees,1)) # fit line to data points
 
 x = np.linspace(0,4e19)
-plt.plot(x,st_poly(x), c='k', label='fit={}'.format(str(st_poly)))
+plt.plot(x,st_poly(x), c='red', label='fit={}'.format(str(st_poly)))
 
 plt.legend()
 

@@ -24,8 +24,10 @@ from fit_funcs import do_odr, ped_tanh_odr2, tanh
 # import your own signal dictionary when running code
 # eg from signal_dict_06_OCT_11 import signals, shotnos
 #    from signal_dict_10_NOV_11 import signals
+#    from signal_dict_13_DEC_PULL import signals
 # =============================================================================
-#from signal_dict_10_NOV_11 import signals
+#global signals
+#from signal_dict_13_DEC_PULL import signals
 
 class Transition():
     def __init__(self, LHorHL, t0, tplus, tminus, shot):
@@ -61,7 +63,6 @@ class Shot():
         self._LHt = LHt
         self._HLt = HLt
         self._transitions = []
-        
         self.unloaded = []
         for sig in signals:
             try:
