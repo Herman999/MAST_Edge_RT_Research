@@ -17,14 +17,12 @@ from data_access_funcs import save_signal_data
 shotnos = [27030, #standard shot, intermittent h-mode
            27031, #repeat standard shot, ok.
            27032, #bad shot
-           #above all have no PINJ as no NBI power injected
-           
            27033, #NBI lost at 0.17
            27034, #one breakdown during SS injection
            27035, #poor density control -> event at 0.31
            27036, #h-mode but later entry, smaller faster ELMs than ref 26500. density on target at 0.22s but higher by time h-mode starts
            27037, #not bad, later smaller elms than reference
-           27038, #abort elm : useless, no signals_
+           27038, #abort elm a
            27039, #ok. earlier h-mode but dropped out soon after
            
            26500 #From 7 July 11, a reference shot referenced in the 6 Oct session.

@@ -33,9 +33,9 @@ shotnos = [     #28 jan 10: lh transition dynamics
            ]
 
 signals=dict(# NEW AT TOP
-            EFM_R_PSI100_OUT = 'EFM_R(PSI100)_OUT', # Outboard radius of 100% normalised magnetic flux; f(B)
-            EFM_R_PSI90_OUT = 'EFM_R(PSI90)_OUT', # Outboard radius of 90% normalised magnetic flux; f(B)
-            EFM_R_PSI95_OUT = 'EFM_R(PSI95)_OUT', # Outboard radius of 95% normalised magnetic flux; f(B)
+            EFM_RPSI100_OUT = 'EFM_R(PSI100)_OUT', # Outboard radius of 100% normalised magnetic flux; f(B)
+            EFM_RPSI90_OUT = 'EFM_R(PSI90)_OUT', # Outboard radius of 90% normalised magnetic flux; f(B)
+            EFM_RPSI95_OUT = 'EFM_R(PSI95)_OUT', # Outboard radius of 95% normalised magnetic flux; f(B)
         
             AIT_ETOT_ISP = 'AIT_ETOT_ISP', #Instantaneous energy to divertor inner
             AIT_ETOT_OSP = 'AIT_ETOT_OSP', #Instantaneous energy to divertor outer

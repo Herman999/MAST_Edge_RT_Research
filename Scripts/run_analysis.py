@@ -5,9 +5,60 @@ Created on Mon Nov 12 17:02:00 2018
 @author: Tomas
 """
 
-import Shot_Class
-import matplotlib.pyplot as plt
 
+
+import matplotlib.pyplot as plt
+from signal_dict_10_NOV_11 import signals
+
+# run shot calss
+
+# This is analysis for session 10_NOV_11
+plt.close('all')
+
+
+shot = Shot(24124
+
+
+)
+
+#shot = Shot(20381, LHt=[(0.2342,0.2341,0.2343)], HLt=[(0.3108,0.31079,0.31081)])
+
+
+shot.plot_JP()
+
+
+#shot.plot_compare(['IP','WMHD','AYC_TE0','ANE_DENSITY','AIT_PTOT_OSP','AIM_DA_TO','Ploss','PINJ' ])
+
+#shot.plot_compare(['IP','WMHD','TE0','NE','Dalphstrp','Dalphint','ngrad','Ploss','PINJ' ])
+
+
+#%%
+
+shot = Shot(27444, LHt=[(0.254,0.251,0.259)], HLt=[(0.324,0.323,0.325)])
+
+
+
+
+
+plt.figure()
+plt.title(r'I_p vs B_t')
+
+b_t = np.interp(np.linspace(min(shot.data['BT']['time']),max(shot.data['BT']['time']),1000), shot.data['BT']['time'], shot.data['BT']['data'])
+i_p = np.interp(np.linspace(min(shot.data['BT']['time']),max(shot.data['BT']['time']),1000), shot.data['IP']['time'], shot.data['IP']['data'])
+
+plt.plot(np.linspace(min(shot.data['BT']['time']),max(shot.data['BT']['time']),1000), i_p/b_t)
+plt.show()
+
+
+
+
+
+
+
+
+
+
+"""
 test = Shot_Class.Shot(27772)
 
 print( test.signals_present())
@@ -57,3 +108,5 @@ import matplotlib.pyplot as plt
 plt.figure()
 plt.errorbar(test.data[sig]['time'],test.data[sig]['data'],yerr=test.data[sig]['errors'])
 plt.show()
+
+"""

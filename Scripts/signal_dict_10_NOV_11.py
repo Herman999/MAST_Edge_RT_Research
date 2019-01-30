@@ -80,7 +80,7 @@ signals=dict(# NEW AT TOP
             AYE_TIME = 'AYE_TIME',
             
             # ATS Analysed Ruby THOMSON scattering data
-            ATS_N_E = 'ATS_N_E', # SIGNLE profile at radii given by ATS_R at time ATS_TIME
+            ATS_N_E = 'ATS_N_E', 
             ATS_P_E = 'ATS_P_E',  
             ATS_T_E = 'ATS_T_E',
             ATS_R = 'ATS_R', # radial coordinates

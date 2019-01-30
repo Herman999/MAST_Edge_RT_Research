@@ -23,7 +23,7 @@ def save_signal_data(sig,filename):
 def load_signal_data(filename):
     '''Loads and returns a dictionary of data, errors, time and units from a pickle-file.
     '''
-    filedir='../MASTdata/' + filename # only works for current setup, change if using in different folder
+    filedir='MASTdata/' + filename # deleted ../ only works for current setup, change if using in different folder
     sig_dict=pickle.load(open( filedir, "rb" )) # open file and save to dictionary
     return sig_dict
 

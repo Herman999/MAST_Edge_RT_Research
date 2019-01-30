@@ -6,8 +6,6 @@ Created on Thu Nov  8 12:28:08 2018
 """
 import matplotlib.pyplot as plt
 import numpy as np
-import bisect
-
 
 # Import this using below:
 #import sys
@@ -18,7 +16,6 @@ import bisect
 # import signals dictionaries
 # import pickle loading function
 from data_access_funcs import load_signal_data
-from fit_funcs import do_odr, ped_tanh_odr2, tanh
 
 # =============================================================================
 # import your own signal dictionary when running code
@@ -38,17 +35,11 @@ class Transition():
         self.tminus = tminus
         self.shot = shot
         self.parameters = {}
-        self.__id = '{s}_{t}'.format(s=self.shot, t=self.t0)
-
+    
     def add_param(self, parameter, value):
         self.parameters[parameter] = value
-
-    def update_database(self):
-        """
-        store record in central database
-        if record exists in database, do nothing
-        """
         
+
 
 class Shot():
     def __init__(self, ShotNumber, LHt = None, HLt = None):
@@ -79,226 +70,7 @@ class Shot():
             return False
         else:
             return True
-    
-    def _tanh_params(self, result):
-        """return useful values from tanh fit parameters
-        """
-        knee = result[2]-result[3]/2
-        width = result[3]
-        max_slope = -2* result[0]/result[3]
-        ne_max_slope = ped_tanh_odr2(result, knee+width/2.) # ne at max slope
-        return(knee, width, max_slope, ne_max_slope)
-    
-    def fit_after_time(self, t0, slices, edge=True, sig='NE'):
-        """
-        selects slices number of times after t0 in thomson data to tanh fit
-        and shows which in a JP plot
-        """
-        # maybe check times are the safe for core and edge. I think it's always true
-        times = self.data['AYC_NE']['time']
-        ind_0 = np.where(times>t0)[0][0]
-        inds = np.arange(ind_0, ind_0+ slices)
-        results = {}
-        
-        if edge: #edge = True
-            for i in inds:
-                fit, time, xy= self.fit_edge_tanh_pedestal(i, sig=sig)
-                results[time] = self._tanh_params(fit)
-        else: # edge = False ie want core fit
-            for i in inds:
-                fit, time = self.fit_core_tanh_pedestal(i, sig=sig)
-                results[time] = self._tanh_params(fit)
-        
-        fig, ax = self.plot_JP(plot_thomson=4)
-        for i in inds:
-            ax[4].axvline(times[i], c='r')
-        
-        return results
-    
-    def Te_Tec_L(self, index, A=1, prev=False):
-        time = self.data['AYE_R']['time'][index]
-        psi_t,psi_95 = self.data['EFM_R_PSI95_OUT']['time'],self.data['EFM_R_PSI95_OUT']['data'] 
-        R_95 = np.interp(time, psi_t, psi_95)
-        
-        r_edge, Te_edge = self.data['AYE_R']['data'][index], self.data['AYE_TE']['data'][index]
-        Te_edge_smooth = np.convolve(Te_edge, np.ones((5,))/5, mode='same')
-        T_e = np.interp(R_95, r_edge, Te_edge_smooth)
-        
-        ne_edge = self.data['AYE_NE']['data'][index]
-        ne_edge_smooth = np.convolve(ne_edge, np.ones((5,))/5, mode='same')
-        
-        ci = np.where(r_edge>R_95)[0][0]
-        ne_select , ne_r_select = ne_edge_smooth[ci-2:ci+1], r_edge[ci-2:ci+1]
-        try:
-            ne_grad = np.polyfit(ne_r_select,ne_select,1)[0]
-        except:
-            ne_grad = 1e40
-        ne_at_95 = np.interp(R_95, r_edge, ne_edge_smooth)
-    
-        Bts, B_times = self.data['BT']['data'], self.data['BT']['time']
-        B_t = np.interp(time, B_times, Bts)
-        
-        T_ec = np.sqrt(-ne_grad/ne_at_95) * np.power(np.abs(B_t), 2./3) * A
-        
-        return(T_e, T_ec)
-        
-       
-        
-    def Te_Tec(self, index, A=1, prev=False): #THIS WILL BE Te_Tec_H (mode)
-        """
-        Generate (T_e,T_ec) for given index of Thomson data (using edge)
-        A = multiplicative Tec constant
-        """
-        edge_ne_fit = self.fit_edge_tanh_pedestal(index, preview = prev) # result, time, (R's, ne's)
-        knee, width, max_slope, ne_max_slope = self._tanh_params(edge_ne_fit[0])
-        R_max_slope = knee + width /2.
-        
-        edge_te_fit = self.fit_edge_tanh_pedestal(index, sig='TE', preview = prev)
-        T_e = ped_tanh_odr2(edge_te_fit[0], R_max_slope)
-        
-        Bts, B_times = self.data['BT']['data'], self.data['BT']['time']
-        B_t = np.interp(edge_ne_fit[1], B_times, Bts)
-        
-        T_ec = np.sqrt(-max_slope/ne_max_slope) * np.power(np.abs(B_t), 2./3.) * A
-        
-        print('max slope: {0:.3e}. ne at max slope: {1:.3e}. Bt = {2}'.format(max_slope, ne_max_slope, B_t))
-        return (T_e, T_ec)
-    
-    def Te_Tec_all(self, first, last):
-        
-        #
-        
-        cols = {'LH':'orange', 
-                'L':'red', 
-                'H':'green', 
-                'HL':'blue'
-                }
-        
-        lookup = [(self._LHt[0][1], 'L'),
-                  (self._LHt[0][2], 'LH'),
-                  (self._HLt[0][1], 'H'),
-                  (self._HLt[0][2], 'HL'),
-                  (0.5, 'L')
-                  ]
-        if len(self._LHt)>1:
-            print('more than one h mode period. shot {}'.format(self.ShotNumber))
-            return 
-            # must insert for second trasitions.
-        
-        plt.figure('Te/c')
-        plt.xlabel('Tec')
-        plt.ylabel('Te')
-        plt.xlim(0,10)
-        plt.ylim(0,300)
-# =============================================================================
-# plt.scatter(-1,-1, marker='x', c='r', label='L')
-# plt.scatter(-1,-1, marker='x', c='g', label='H')
-# plt.scatter(-1,-1, marker='x', c='orange', label='LH')
-# plt.scatter(-1,-1, marker='x', c='blue', label='HL')
-# plt.legend()
-# =============================================================================
-        
-        for ind, time in enumerate(self.data['AYE_R']['time']):
-            if ind<first: #cutoffs for bad timings
-                pass
-            elif ind>last:
-                pass
-            else:
-                label= lookup[bisect.bisect(lookup,(time,))][1] #'L', 'LH', 'H' etc
-                if label in ['L','LH']:
-                    Te,Tec = self.Te_Tec(ind)
-                else: # its 'H' or 'HL'
-                    Te,Tec = self.Te_Tec(ind)
-                
-                plt.figure('Te/c')
-                plt.scatter(Tec, Te, marker='x', c=cols[label])
-                
-                #check whether time in L, H, or LHt, HLt...
-        
-    
-    def fit_edge_tanh_pedestal(self, index, sig='NE', preview = True):
-        """
-        Fit the modified 'ped_tanh_odr2' fn to the AYE tomson data for specified signal, index. Like:
-        x = self.data['AYE_sig']['data'][index]
-        y = self.data['AYE_R']['data'][index]
-    
-        Returns fitted parameters
-        """
-        y = self.data['AYE_{}'.format(sig)]['data'][index]
-        y_er = self.data['AYE_{}'.format(sig)]['errors'][index]
-        x = self.data['AYE_R']['data'][index]
-        x_er = self.data['AYE_R']['errors'][index]
-        time = self.data['AYE_R']['time'][index]
-        
-        # remove nans
-        condition = np.where(~np.isnan(y))
-        y, y_er, x, x_er = y[condition], y_er[condition], x[condition], x_er[condition]
-        
-        #do fitting
-        result = do_odr([x,y,x_er,y_er]) # a,b,x_sym, width, slope, dwell, x_well
-        
-        if preview:
-            self._pedestal_preview(x,y,x_er,y_er, time, result, sig)
-            
-        return result, time, (x,y)
-        
-    def fit_core_tanh_pedestal(self, index, sig='NE', preview=True):
-        """ as above
-        """
-        # all core data
-        y = self.data['AYC_{}'.format(sig)]['data'][index]
-        y_er = self.data['AYC_{}'.format(sig)]['errors'][index]
-        x = self.data['AYC_R']['data'][index]
-        x_er = self.data['AYC_R']['errors'][index]
-        time = self.data['AYC_R']['time'][index]
-        
-        #cutoff radius for fitting. defined as lowest R present in edge data
-        r_cutoff= self.data['AYE_R']['data'][index][0]
-        condition = np.where((x > r_cutoff)&(~np.isnan(y)))
-        
-        y, y_er, x, x_er = y[condition], y_er[condition], x[condition], x_er[condition]
-        
-        
-        # may need to pad core values outside LCFS
-        
-        #do fitting on reduced data
-        result = do_odr([x,y,x_er,y_er]) # a,b,x_sym, width, slope, dwell, x_well
-                
-        if preview:
-            self._pedestal_preview(x,y,x_er,y_er, time,result,sig)
-########            # add title for core or edge ########
-        return result, time
-    
-    def _pedestal_preview(self, x,y,xr,yr, time,result,sig):
-        """
-        For 'preview' of result from fit_core/edge_tanh_pedestal only.
-        """
-        fig = plt.figure()
-        fig.canvas.set_window_title('{0} {1} pedestal at {2:3f} s'.format(self.ShotNumber,sig,time))
-        
-        #show data and fit
-        plt.errorbar(x,y, yerr=yr, xerr=xr, elinewidth=0.5)
-        plt.plot(x, ped_tanh_odr2(result,x), c='r', label='mtanh fit')
-        plt.xlabel('R [m]')
-        plt.ylabel(sig)
-        plt.ylim(0,)
 
-        # mark useful labels
-        knee = result[2]-result[3]/2
-        width = result[3]
-        midpt = knee + width/2
-        max_slope = -2* result[0]/result[3]
-        y_knee = ped_tanh_odr2(result, knee)
-        plt.axvline(knee, ls='--', c='k',label='knee= {0:.3g}'.format(y_knee))
-        plt.axvline(knee + width,ls='--', c='b', label='knee+width')
-    
-        # show max slope 
-        slope_xs = x
-        y_mid = ped_tanh_odr2(result, midpt)
-        slope_ys = (y_mid-max_slope*midpt) + max_slope* slope_xs
-        plt.plot(slope_xs, slope_ys, c='g',label='grad= {0:.2g}'.format(max_slope))
-        plt.legend() 
-    
     def plot_signal(self, SignalName, figname = None):
         # this could go into another file anyway with plotting stuff
         if len(self.data[SignalName]['data'].shape) >1:
@@ -393,7 +165,7 @@ class Shot():
             print('ABORT: No LH or HL in shot {}'.format(self.ShotNumber))
             return
         
-        parameters = ['IP','BT','Ploss','KAPPA','ANE_DENSITY','AYC_NE', 'AYE_NE'] # AYC_NE, AYE_NE doesnt work
+        parameters = ['IP','BT','Ploss','KAPPA','ANE_DENSITY','NE', 'AYE_NE','AYC_NE','X1Z','X2Z'] # AYC_NE, AYE_NE doesnt work
         if additional_params != None: parameters.extend(additional_params)
         
         # prepare dict for pandas
@@ -422,6 +194,7 @@ class Shot():
                 # WHAT DOES THIS DO PRACTICALLY?
                 continue # if singal doesnt exist, continue
             
+            
             # for problematic data
             # WHY DOES THIS ONLY WORK FOR SPECIFIED 'AYCE_NE'?
             try:
@@ -429,9 +202,19 @@ class Shot():
                 self.data['AYC_NE']['errors']=np.nanmean(self.data['AYC_NE']['errors'],axis=1)
                 self.data['AYE_NE']['data']=np.nanmean(self.data['AYE_NE']['data'],axis=1)
                 self.data['AYE_NE']['errors']=np.nanmean(self.data['AYE_NE']['errors'],axis=1)
+            except:
+                pass
+            try:         
+                # for NE for 08 JP shots
+                self.data['NE']['data']=np.nanmean(self.data['NE']['data'],axis=1)
+                self.data['NE']['errors']=np.nanmean(self.data['NE']['errors'],axis=1)
+                self.data['NE']['data']=np.nanmean(self.data['NE']['data'],axis=1)
+                self.data['NE']['errors']=np.nanmean(self.data['NE']['errors'],axis=1)
+                print(self.data['NE'])
             except: 
                 pass
-        
+            
+            print(parameter)
             for t in list_of_transitions:
                 print('truing: {}'.format(parameter))
                 t1 = t[0]   #time of tranision
@@ -501,8 +284,8 @@ class Shot():
         
     def plot_JP(self, tlim = (0,0.5), ip = 'IP', wmhd = 'WMHD', coreTe = 'AYC_TE0', 
                 ne = 'ANE_DENSITY', Dalpha = 'AIM_DA_TO', Bt = 'BT',
-                Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM',
-                plot_thomson = False):
+                Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM'
+                ):
         """
         Plot some signals together on single figure
         """
@@ -543,11 +326,7 @@ class Shot():
                         axes.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6)
         else:
             print('No transitions known')
-        
-        if plot_thomson:
-            for i in self.data['AYE_NE']['time']:
-                ax[plot_thomson].axvline(i)
-        
+            
         # plot plasma current, ax = 0
         self._plot_ax_sig(ax, ip, 0, signame = 'I_{p}')
         # plot n_e
@@ -565,7 +344,7 @@ class Shot():
         self._plot_ax_sig(ax, Ploss, panel = 6, signame = 'Ploss', label='Ploss', plot_errors='fill')
         self._plot_ax_sig(ax, PINJ, panel = 6, signame = 'PINJ', label='PINJ', plot_errors='fill')
         
-        return fig, ax
+        
 
     
     def _plot_ax_sig(self, ax, sig, panel, signame='', plot_errors=False, units=None, label=None):
