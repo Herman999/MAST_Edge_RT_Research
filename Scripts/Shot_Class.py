@@ -202,6 +202,7 @@ class Shot():
         """
         # maybe check times are the safe for core and edge. I think it's always true
         times = self.data['AYC_NE']['time']
+    
         ind_0 = np.where(times>t0)[0][0]
         inds = np.arange(ind_0, ind_0+ slices)
         results = {}
