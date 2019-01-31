@@ -12,11 +12,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 global signals
 from signal_dict_13_DEC_PULL import signals
-#all_shots = [Shot(24130, LHt=[(0.285,0,0)]), Shot(24129), Shot(24128, LHt=[(0.258,0,0)])]
-all_shots = [Shot(24129)]    
+all_shots = [Shot(24130, LHt=[(0.285,0,0)]), Shot(24129), Shot(24128, LHt=[(0.258,0,0)])]
+#all_shots = [Shot(24129)]    
 plt.figure(11)
 ees=[]
 ccs=[]
+
+# =============================================================================
+all_shots = nall
+# =============================================================================
 for shot in all_shots:
     print(shot)
     for i, j in enumerate(shot.data['AYE_R']['time']):
@@ -66,7 +70,7 @@ plt.figure()
 #plt.xlim(0,4e19)
 
 x = np.linspace(0,5e19)
-plt.plot(x,x, ls='--', c='k', label='1:1')
+plt.plot(x,x, ls='--', c='red', label='1:1')
 plt.xlabel('ne_core')
 plt.ylabel('ne_edge')
 

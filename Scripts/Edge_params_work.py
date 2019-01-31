@@ -553,24 +553,61 @@ for i,time in enumerate(time_e[:2]):
 # work on 31/1/19
 # point 2.4: where is tanh fit reliable?
     
+def fit_params(result, shot):
+    fig,ax = plt.subplots(4, sharex=True)
+    fig.canvas.set_window_title('{} tanh fit params'.format(shot.ShotNumber))
+    for res in result:
+        ax[0].scatter(res, result[res][0], c='k') #scatter knee value
+        ax[1].scatter(res, result[res][1], c='r') #plot width
+        ax[2].scatter(res, result[res][2], c='b') #plot max slope
+        ax[3].scatter(res, result[res][3], c='orange') #plot ne at max slope
+    
+    plt.title('Tanh fit parameters')
+    ax[0].set_title('knee position')
+    ax[1].set_title('width')
+    ax[2].set_title('max slope')
+    ax[3].set_title('ne at max slope')
+    
+    for axes in ax:
+        axes.axvline(ts._LHt[0][0], c='green')
+        axes.axvline(ts._HLt[0][0], C='red')
+    
+    return fig,ax    
+
+
 # to define signals...
 from signal_dict_13_DEC_PULL import signals, shotnos
 # a test shot
 ts = Shot(24130, LHt=[(0.285,0,0)], HLt=[(0.324,0,0)])
-#jplot = ts.plot_JP(plot_thomson=4)
+ts2= Shot(27035, LHt=[(0.1150,0.1017,0.1281)], HLt = [(0.3096,0.3096,0.3098)])
 
+#generate shot tanh fit results
 result = ts.fit_after_time(0,80, prev=False)
+result2= ts2.fit_after_time(0.0,80, prev=False)
+#plot results
+fig,ax = fit_params(result, ts)
+fig2,ax2 = fit_params(result2, ts2)
 
-fig,ax = plt.subplots(4, sharex=True)
-for res in result:
-    ax[0].scatter(res, result[res][0], c='k') #scatter knee value
-    ax[1].scatter(res, result[res][1], c='r') #plot width
-    ax[2].scatter(res, result[res][2], c='b') #plot max slope
-    ax[3].scatter(res, result[res][3], c='orange') #plot ne at max slope
+# =============================================================================
+# No easy parameter to use to defin ewhether fit good
+# =============================================================================
 
-for axes in ax:
-    axes.axvline(ts._LHt[0][0], c='green')
-    axes.axvline(ts._HLt[0][0], C='red')
+#%%
+# point 2.5
+
+ts = Shot(24130, LHt=[(0.285,0,0)], HLt=[(0.324,0,0)])
+ts2= Shot(27035, LHt=[(0.1150,0.1017,0.1281)], HLt = [(0.3096,0.3096,0.3098)])
+
+res_t = ts2.fit_after_time(0.01,79, sig='TE', prev=True)
+res_n = ts2.fit_after_time(0.01,70, sig='NE', prev=False)
+plt.figure()
+plt.title('blue=Te, red=ne')
+for i, j in zip(res_t, res_n):
+    plt.scatter(i, res_t[i][0], c='b')
+    plt.scatter(j, res_n[j][0], c='r')
+
+
+
 
 
 
