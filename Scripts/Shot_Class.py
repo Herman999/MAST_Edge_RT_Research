@@ -81,41 +81,6 @@ class Shot():
         else:
             return True
     
-    def _tanh_params(self, result):
-        """return useful values from tanh fit parameters
-        """
-        knee = result[2]-result[3]/2
-        width = result[3]
-        max_slope = -2* result[0]/result[3]
-        ne_max_slope = ped_tanh_odr2(result, knee+width/2.) # ne at max slope
-        return(knee, width, max_slope, ne_max_slope)
-    
-    def fit_after_time(self, t0, slices, edge=True, sig='NE'):
-        """
-        selects slices number of times after t0 in thomson data to tanh fit
-        and shows which in a JP plot
-        """
-        # maybe check times are the safe for core and edge. I think it's always true
-        times = self.data['AYC_NE']['time']
-        ind_0 = np.where(times>t0)[0][0]
-        inds = np.arange(ind_0, ind_0+ slices)
-        results = {}
-        
-        if edge: #edge = True
-            for i in inds:
-                fit, time, xy= self.fit_edge_tanh_pedestal(i, sig=sig)
-                results[time] = self._tanh_params(fit)
-        else: # edge = False ie want core fit
-            for i in inds:
-                fit, time = self.fit_core_tanh_pedestal(i, sig=sig)
-                results[time] = self._tanh_params(fit)
-        
-        fig, ax = self.plot_JP(plot_thomson=4)
-        for i in inds:
-            ax[4].axvline(times[i], c='r')
-        
-        return results
-    
     def Te_Tec_L(self, index, A=1, prev=False):
         time = self.data['AYE_R']['time'][index]
         psi_t,psi_95 = self.data['EFM_R_PSI95_OUT']['time'],self.data['EFM_R_PSI95_OUT']['data'] 
@@ -215,7 +180,46 @@ class Shot():
                 plt.scatter(Tec, Te, marker='x', c=cols[label])
                 
                 #check whether time in L, H, or LHt, HLt...
+    
+    def _tanh_params(self, result):
+        """return useful values from tanh fit parameters
+        """
+        knee = result[2]-result[3]/2
+        width = result[3]
+        max_slope = -2* result[0]/result[3]
+        ne_max_slope = ped_tanh_odr2(result, knee+width/2.) # ne at max slope
+        return(knee, width, max_slope, ne_max_slope)
+    
+    def fit_after_time(self, t0, slices, edge=True, sig='NE', prev=True):
+        """
+        selects slices number of times after t0 in thomson data to tanh fit
+        and shows which in a JP plot
         
+        results = {t0: (knee, width, max_slope, ne|max slope)
+                   t1: ...
+                   }
+        """
+        # maybe check times are the safe for core and edge. I think it's always true
+        times = self.data['AYC_NE']['time']
+        ind_0 = np.where(times>t0)[0][0]
+        inds = np.arange(ind_0, ind_0+ slices)
+        results = {}
+        
+        if edge: #edge = True
+            for i in inds:
+                fit, time, xy= self.fit_edge_tanh_pedestal(i, sig=sig, preview=prev)
+                results[time] = self._tanh_params(fit)
+        else: # edge = False ie want core fit
+            for i in inds:
+                fit, time = self.fit_core_tanh_pedestal(i, sig=sig, preview=prev)
+                results[time] = self._tanh_params(fit)
+        
+        fig, ax = self.plot_JP(plot_thomson=4)
+        fig.canvas.set_window_title('Where {} fitted (red lines)'.format(self.ShotNumber))
+        for i in inds:
+            ax[4].axvline(times[i], c='r')
+        
+        return results        
     
     def fit_edge_tanh_pedestal(self, index, sig='NE', preview = True):
         """
@@ -267,7 +271,7 @@ class Shot():
                 
         if preview:
             self._pedestal_preview(x,y,x_er,y_er, time,result,sig)
-########            # add title for core or edge ########
+######### add title for core or edge ########
         return result, time
     
     def _pedestal_preview(self, x,y,xr,yr, time,result,sig):

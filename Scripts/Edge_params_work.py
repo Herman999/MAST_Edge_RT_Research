@@ -548,3 +548,20 @@ for i,time in enumerate(time_e[:2]):
     plt.plot(rad_c[i],ne_c[i])
     
     print(fit_c)
+
+#%%
+# work on 31/1/19
+# point 2.4: where is tanh fit reliable?
+    
+#to define signals...
+from signal_dict_13_DEC_PULL import signals, shotnos
+ts = Shot(24130, LHt=[(0.285,0,0)])
+jplot = ts.plot_JP(plot_thomson=4)
+
+result = ts.fit_after_time(0,80, )
+
+
+
+
+
+
