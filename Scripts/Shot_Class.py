@@ -188,14 +188,15 @@ class Shot():
         width = result[3]
         max_slope = -2* result[0]/result[3]
         ne_max_slope = ped_tanh_odr2(result, knee+width/2.) # ne at max slope
-        return(knee, width, max_slope, ne_max_slope)
+        ne_at_knee = ped_tanh_odr2(result, knee) # ne at max slope
+        return(knee, width, max_slope, ne_max_slope,ne_at_knee)
     
     def fit_after_time(self, t0, slices, edge=True, sig='NE', prev=True):
         """
         selects slices number of times after t0 in thomson data to tanh fit
         and shows which in a JP plot
         
-        results = {t0: (knee, width, max_slope, ne|max slope)
+        results = {t0: (knee, width, max_slope, ne|max slope, ne at knee)
                    t1: ...
                    }
         """
@@ -213,12 +214,12 @@ class Shot():
             for i in inds:
                 fit, time = self.fit_core_tanh_pedestal(i, sig=sig, preview=prev)
                 results[time] = self._tanh_params(fit)
-        
-        fig, ax = self.plot_JP(plot_thomson=4)
-        fig.canvas.set_window_title('Where {} fitted (red lines)'.format(self.ShotNumber))
-        for i in inds:
-            ax[4].axvline(times[i], c='r')
-        
+        if prev == True:
+            fig, ax = self.plot_JP(plot_thomson=4)
+            fig.canvas.set_window_title('Where {} fitted (red lines)'.format(self.ShotNumber))
+            for i in inds:
+                ax[4].axvline(times[i], c='r')
+            
         return results        
     
     def fit_edge_tanh_pedestal(self, index, sig='NE', preview = True):
