@@ -335,7 +335,6 @@ class Shot():
         """
         n = len(signalslist)
         fig, ax = plt.subplots(n, sharex=True, figsize=(11,7))
-    
         
         for i, signal in enumerate(signalslist):
             self._plot_ax_sig(ax, signal, i, signame= signal)
