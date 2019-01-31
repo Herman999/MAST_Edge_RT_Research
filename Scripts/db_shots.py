@@ -25,7 +25,7 @@ dic = (['shot','shot_time','time','time_em','time_ep','transition',
 """
 
 
-db = pd.DataFrame(columns=['shot', 'shot_time', 'time', 'time_em', 'time_ep', 'transition', 'session', 'geometry', 'Ploss', 'Ploss_e', 'BT', 'BT_e', 'IP', 'IP_e', 'KAPPA', 'KAPPA_e', 'AYC_NE', 'AYC_NE_e', 'AYE_NE', 'AYE_NE_e', 'ANE_DENSITY', 'ANE_DENSITY_e', 'AYC_TE', 'AYC_TE_e', 'AYE_TE', 'AYE_TE_e', 'AYC_PE', 'AYC_PE_e', 'AYE_PE', 'AYE_PE_e', 'NE', 'NE_e', 'TE', 'TE_e', 'PE', 'PE_e', 'X1Z', 'X1Z_e', 'X2Z', 'X2Z_e'])
+db = pd.DataFrame(columns=['shot', 'shot_time', 'time', 'time_em', 'time_ep', 'transition', 'session', 'geometry', 'Ploss', 'Ploss_e', 'BT', 'BT_e','BTOut','BTOut_e','IP', 'IP_e', 'KAPPA', 'KAPPA_e', 'AYC_NE', 'AYC_NE_e', 'AYE_NE', 'AYE_NE_e', 'ANE_DENSITY', 'ANE_DENSITY_e', 'AYC_TE', 'AYC_TE_e', 'AYE_TE', 'AYE_TE_e', 'AYC_PE', 'AYC_PE_e', 'AYE_PE', 'AYE_PE_e', 'NE', 'NE_e', 'TE', 'TE_e', 'PE', 'PE_e', 'X1Z', 'X1Z_e', 'X2Z', 'X2Z_e'])
 
 #db.loc[len(db)]=dic
 
@@ -212,6 +212,14 @@ for shot_str in shots:
         
         dic['session'] = session
         dic['geometry'] = geometry
+        
+        # Add BTout
+        A = 1.3 # mast aspect ratio
+        dic['BTOut'] = A/(A+1) * np.interp(t1, s.data['BT']['time'] , s.data['BT']['data'])
+        singal_t_err_range =  A/(A+1)*np.interp(np.linspace(t_err1,t_err2,30), s.data['BT']['time'] , s.data['BT']['data'])
+        singal_t_err_error_range = np.zeros(30)
+        dic['BTOut_e'] = max(singal_t_err_range) - min(singal_t_err_range) + np.mean(np.abs(singal_t_err_error_range))
+        
             
         # now load up parameteres
         for parameter in parameters:
