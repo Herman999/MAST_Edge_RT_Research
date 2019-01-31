@@ -553,14 +553,24 @@ for i,time in enumerate(time_e[:2]):
 # work on 31/1/19
 # point 2.4: where is tanh fit reliable?
     
-#to define signals...
+# to define signals...
 from signal_dict_13_DEC_PULL import signals, shotnos
-ts = Shot(24130, LHt=[(0.285,0,0)])
-jplot = ts.plot_JP(plot_thomson=4)
+# a test shot
+ts = Shot(24130, LHt=[(0.285,0,0)], HLt=[(0.324,0,0)])
+#jplot = ts.plot_JP(plot_thomson=4)
 
-result = ts.fit_after_time(0,80, )
+result = ts.fit_after_time(0,80, prev=False)
 
+fig,ax = plt.subplots(4, sharex=True)
+for res in result:
+    ax[0].scatter(res, result[res][0], c='k') #scatter knee value
+    ax[1].scatter(res, result[res][1], c='r') #plot width
+    ax[2].scatter(res, result[res][2], c='b') #plot max slope
+    ax[3].scatter(res, result[res][3], c='orange') #plot ne at max slope
 
+for axes in ax:
+    axes.axvline(ts._LHt[0][0], c='green')
+    axes.axvline(ts._HLt[0][0], C='red')
 
 
 
