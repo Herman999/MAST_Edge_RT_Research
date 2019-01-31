@@ -598,8 +598,8 @@ fig2,ax2 = fit_params(result2, ts2)
 ts = Shot(24130, LHt=[(0.285,0,0)], HLt=[(0.324,0,0)])
 ts2= Shot(27035, LHt=[(0.1150,0.1017,0.1281)], HLt = [(0.3096,0.3096,0.3098)])
 
-res_t = ts2.fit_after_time(0.01,79, sig='TE', prev=True)
-res_n = ts2.fit_after_time(0.01,70, sig='NE', prev=False)
+res_t = ts2.fit_after_time(0.01,129, sig='TE', prev=True)
+res_n = ts2.fit_after_time(0.01,129, sig='NE', prev=False)
 plt.figure()
 plt.title('blue=Te, red=ne')
 for i, j in zip(res_t, res_n):
