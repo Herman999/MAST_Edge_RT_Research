@@ -21,6 +21,29 @@ slices = 1
 # to get value at knee --> resutls
 ne_average = []
 ne_at_ped = []
+te_at_ped = []
+pe_at_ped = []
+
+def TE_point_at_pedestal(s,knee,t):
+    index = np.where(s.data['AYC_TE']['time']==t)
+    
+    # remove nans
+    #condition = np.where(~np.isnan(s.data['AYC_TE']['data'][index]))
+    s.data['AYC_TE']['data'][index] = np.nan_to_num(s.data['AYC_TE']['data'][index])
+    
+    TE_knee = np.interp(knee,s.data['AYC_R']['data'][index][0],s.data['AYC_TE']['data'][index][0])
+    
+    return TE_knee
+def PE_point_at_pedestal(s,knee,t):
+    index = np.where(s.data['AYC_PE']['time']==t)
+    
+    # remove nans
+    #condition = np.where(~np.isnan(s.data['AYC_TE']['data'][index]))
+    s.data['AYC_PE']['data'][index] = np.nan_to_num(s.data['AYC_PE']['data'][index])
+    
+    PE_knee = np.interp(knee,s.data['AYC_R']['data'][index][0],s.data['AYC_PE']['data'][index][0])
+    
+    return PE_knee
 
 def NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,t1):
      # now got what we need
@@ -40,7 +63,8 @@ def NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,t1):
         ne_average.append(\
                           np.nanmean(s.data['NE']['data'][index]))
     except: pass
-    return ne_at_ped,ne_average
+    print('Got ONE!')
+    return ne_at_ped,ne_average,res[slice_time][0],slice_time
 #%%
 
 
@@ -53,32 +77,137 @@ for shot_str in shots:
     s=eval(shot_str)
     
     #delete corrupted shots
-    if s.ShotNumber in [24330]:
+    if s.ShotNumber in [24330,27030]:
         continue
 #s = Shot(24129, LHt=[(0.2922,0.290,0.295)], HLt=[(0.3174,0.317,0.318)])
     # LH
     t0 = s._LHt[0][0]
     t1 = s._LHt[0][1]
     t2 = s._LHt[0][2]
+    # HL
+    t0 = s._LHt[1][0]
+    t1 = s._LHt[1][1]
+    t2 = s._LHt[1][2]
     
     
-    res = s.fit_after_time(t0, slices, edge=True, sig='NE',prev=False)
+    res = s.fit_after_time(t0, slices, edge=True, sig='NE',prev=True)
     slice_time = list(res.keys())[0]
     
     if slice_time < t2: # after transition time
-        ne_at_ped,ne_average = NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,slice_time-0.00001)
+        #ne
+        ne_at_ped,ne_average,knee,t = NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,slice_time-0.00001)
+        #te
+        te_at_ped.append(TE_point_at_pedestal(s,knee,t))
+        #pe
+        pe_at_ped.append(PE_point_at_pedestal(s,knee,t))
+        
     else: # after trans time - error before
         res = s.fit_after_time(t1, slices, edge=True, sig='NE',prev=False)
         slice_time = list(res.keys())[0]
-        if slice_time < t2:
-            ne_at_ped,ne_average = NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,t1)
+        if slice_time-0.001 < t2+0.001:
+            #ne
+            ne_at_ped,ne_average,knee,t = NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,t1)
+            #te
+            te_at_ped.append(TE_point_at_pedestal(s,knee,t))
+            #pe
+            pe_at_ped.append(PE_point_at_pedestal(s,knee,t))
+            
         else:
             print('AYE not within transition times')
+
+
 #%%
-plt.figure('LH Pedestal Params test')
-plt.scatter(ne_average,ne_at_ped)
-plt.xlabel('ne average')
-plt.ylabel('ne at pedestal')
+            
+LH_ne_at_ped = ne_at_ped
+LH_te_at_ped = te_at_ped
+LH_pe_at_ped = pe_at_ped
+LH_ne_average = ne_average
+
+
+#%%
+#Anaylysis HL
+
+ne_average = []
+ne_at_ped = []
+te_at_ped = []
+pe_at_ped = []
+
+for shot_str in shots:
+
+    s=eval(shot_str)
+    
+    #delete corrupted shots
+    if s.ShotNumber in [24330,27030]:
+        continue
+#s = Shot(24129, LHt=[(0.2922,0.290,0.295)], HLt=[(0.3174,0.317,0.318)])
+    # LH
+    #t0 = s._LHt[0][0]
+    #t1 = s._LHt[0][1]
+    #t2 = s._LHt[0][2]
+    # HL
+    t0 = s._HLt[0][0]
+    t1 = s._HLt[0][1]
+    t2 = s._HLt[0][2]
+    
+    
+    res = s.fit_after_time(t0, slices, edge=True, sig='NE',prev=True)
+    slice_time = list(res.keys())[0]
+    
+    if slice_time < t2: # after transition time
+        #ne
+        ne_at_ped,ne_average,knee,t = NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,slice_time-0.00001)
+        #te
+        te_at_ped.append(TE_point_at_pedestal(s,knee,t))
+        #pe
+        pe_at_ped.append(PE_point_at_pedestal(s,knee,t))
+        
+    else: # after trans time - error before
+        res = s.fit_after_time(t1, slices, edge=True, sig='NE',prev=False)
+        slice_time = list(res.keys())[0]
+        if slice_time-0.001 < t2+0.001:
+            #ne
+            ne_at_ped,ne_average,knee,t = NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,t1)
+            #te
+            te_at_ped.append(TE_point_at_pedestal(s,knee,t))
+            #pe
+            pe_at_ped.append(PE_point_at_pedestal(s,knee,t))
+            
+        else:
+            print('AYE not within transition times')
+
+#%%
+            
+HL_ne_at_ped = ne_at_ped
+HL_te_at_ped = te_at_ped
+HL_pe_at_ped = pe_at_ped
+HL_ne_average = ne_average
+
+#%% PL<OT
+            
+fig, ax = plt.subplots(3,sharex=True)
+#fig.title.set_text('LH Pedestal Params')
+ax[0].set_title('LH Pedestal Params')
+ax[0].scatter(LH_ne_average,LH_ne_at_ped,c='orange',label='LH')
+ax[0].scatter(HL_ne_average,HL_ne_at_ped,c='blue',label='HL')
+ax[0].set_xlabel('ne_average')
+ax[0].set_ylabel('ne_at_ped')
+ax[0].legend()
+
+ax[1].scatter(LH_ne_average,LH_te_at_ped,c='orange',label='LH')
+ax[1].scatter(HL_ne_average,HL_te_at_ped,c='blue',label='HL')
+ax[1].set_xlabel('ne_average')
+ax[1].set_ylabel('te_at_ped')
+ax[1].legend()
+
+ax[2].scatter(LH_ne_average,LH_pe_at_ped,c='orange',label='LH')
+ax[2].scatter(HL_ne_average,HL_pe_at_ped,c='blue',label='HL')
+ax[2].set_xlabel('ne_average')
+ax[2].set_ylabel('pe_at_ped')
+ax[2].legend()
+
+
+
+
 
 
 
