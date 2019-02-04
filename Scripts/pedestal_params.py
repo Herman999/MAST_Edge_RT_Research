@@ -23,6 +23,7 @@ ne_average = []
 ne_at_ped = []
 te_at_ped = []
 pe_at_ped = []
+shot_list = []
 
 def TE_point_at_pedestal(s,knee,t):
     index = np.where(s.data['AYC_TE']['time']==t)
@@ -84,13 +85,9 @@ for shot_str in shots:
     t0 = s._LHt[0][0]
     t1 = s._LHt[0][1]
     t2 = s._LHt[0][2]
-    # HL
-    t0 = s._LHt[1][0]
-    t1 = s._LHt[1][1]
-    t2 = s._LHt[1][2]
+   
     
-    
-    res = s.fit_after_time(t0, slices, edge=True, sig='NE',prev=True)
+    res = s.fit_after_time(t0, slices, edge=True, sig='NE',prev=False)
     slice_time = list(res.keys())[0]
     
     if slice_time < t2: # after transition time
@@ -100,6 +97,7 @@ for shot_str in shots:
         te_at_ped.append(TE_point_at_pedestal(s,knee,t))
         #pe
         pe_at_ped.append(PE_point_at_pedestal(s,knee,t))
+        shot_list.append(s.ShotNumber)
         
     else: # after trans time - error before
         res = s.fit_after_time(t1, slices, edge=True, sig='NE',prev=False)
@@ -111,6 +109,7 @@ for shot_str in shots:
             te_at_ped.append(TE_point_at_pedestal(s,knee,t))
             #pe
             pe_at_ped.append(PE_point_at_pedestal(s,knee,t))
+            shot_list.append(s.ShotNumber)
             
         else:
             print('AYE not within transition times')
@@ -122,6 +121,8 @@ LH_ne_at_ped = ne_at_ped
 LH_te_at_ped = te_at_ped
 LH_pe_at_ped = pe_at_ped
 LH_ne_average = ne_average
+LH_shot_list = shot_list
+
 
 
 #%%
@@ -131,13 +132,16 @@ ne_average = []
 ne_at_ped = []
 te_at_ped = []
 pe_at_ped = []
+shot_list = []
 
+#%%
 for shot_str in shots:
 
     s=eval(shot_str)
     
     #delete corrupted shots
-    if s.ShotNumber in [24330,27030]:
+    if s.ShotNumber in [24330,27030,24133,20377,27444,27449]:
+        print('skip')
         continue
 #s = Shot(24129, LHt=[(0.2922,0.290,0.295)], HLt=[(0.3174,0.317,0.318)])
     # LH
@@ -150,7 +154,7 @@ for shot_str in shots:
     t2 = s._HLt[0][2]
     
     
-    res = s.fit_after_time(t0, slices, edge=True, sig='NE',prev=True)
+    res = s.fit_after_time(t0, slices, edge=True, sig='NE',prev=False)
     slice_time = list(res.keys())[0]
     
     if slice_time < t2: # after transition time
@@ -160,6 +164,7 @@ for shot_str in shots:
         te_at_ped.append(TE_point_at_pedestal(s,knee,t))
         #pe
         pe_at_ped.append(PE_point_at_pedestal(s,knee,t))
+        shot_list.append(s.ShotNumber)
         
     else: # after trans time - error before
         res = s.fit_after_time(t1, slices, edge=True, sig='NE',prev=False)
@@ -171,6 +176,7 @@ for shot_str in shots:
             te_at_ped.append(TE_point_at_pedestal(s,knee,t))
             #pe
             pe_at_ped.append(PE_point_at_pedestal(s,knee,t))
+            shot_list.append(s.ShotNumber)
             
         else:
             print('AYE not within transition times')
@@ -181,6 +187,22 @@ HL_ne_at_ped = ne_at_ped
 HL_te_at_ped = te_at_ped
 HL_pe_at_ped = pe_at_ped
 HL_ne_average = ne_average
+HL_shot_list = shot_list
+
+#%%
+
+ne_average = LH_ne_average.copy()
+ne_average.extend(HL_ne_average)
+
+ne_at_ped = LH_ne_at_ped.copy()
+ne_at_ped.extend(HL_ne_at_ped)
+
+
+te_at_ped = LH_te_at_ped.copy()
+te_at_ped.extend(HL_te_at_ped)
+
+pe_at_ped = LH_pe_at_ped.copy()
+pe_at_ped.extend(HL_pe_at_ped)
 
 #%% PL<OT
             
@@ -189,18 +211,65 @@ fig, ax = plt.subplots(3,sharex=True)
 ax[0].set_title('LH Pedestal Params')
 ax[0].scatter(LH_ne_average,LH_ne_at_ped,c='orange',label='LH')
 ax[0].scatter(HL_ne_average,HL_ne_at_ped,c='blue',label='HL')
+
+for i, txt in enumerate(LH_shot_list):
+    ax[0].annotate(txt, (LH_ne_average[i], LH_ne_at_ped[i]))
+    
+for i, txt in enumerate(HL_shot_list):
+    ax[0].annotate(txt, (HL_ne_average[i], HL_ne_at_ped[i]))
+
+# lin fit
+
+
+(res,cov) = np.polyfit(ne_average,ne_at_ped,deg=1,cov=True)
+neav = np.linspace(min(LH_ne_average),max(LH_ne_average))
+nefit = res[1] + res[0] * neav
+ax[0].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
+    
 ax[0].set_xlabel('ne_average')
 ax[0].set_ylabel('ne_at_ped')
 ax[0].legend()
+#ax[0].set_ylim([0,0.05e21])
 
 ax[1].scatter(LH_ne_average,LH_te_at_ped,c='orange',label='LH')
 ax[1].scatter(HL_ne_average,HL_te_at_ped,c='blue',label='HL')
+
+for i, txt in enumerate(LH_shot_list):
+    ax[1].annotate(txt, (LH_ne_average[i], LH_te_at_ped[i]))
+    
+for i, txt in enumerate(HL_shot_list):
+    ax[1].annotate(txt, (HL_ne_average[i], HL_te_at_ped[i]))
+
+#ne_average = LH_ne_average
+#ne_average.extend(HL_ne_average)
+
+(res,cov) = np.polyfit(ne_average,te_at_ped,deg=1,cov=True)
+neav = np.linspace(min(ne_average),max(ne_average))
+nefit = res[1] + res[0] * neav
+ax[1].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
+
 ax[1].set_xlabel('ne_average')
 ax[1].set_ylabel('te_at_ped')
 ax[1].legend()
 
 ax[2].scatter(LH_ne_average,LH_pe_at_ped,c='orange',label='LH')
 ax[2].scatter(HL_ne_average,HL_pe_at_ped,c='blue',label='HL')
+
+for i, txt in enumerate(LH_shot_list):
+    ax[2].annotate(txt, (LH_ne_average[i], LH_pe_at_ped[i]))
+    
+for i, txt in enumerate(HL_shot_list):
+    ax[2].annotate(txt, (HL_ne_average[i], HL_pe_at_ped[i]))
+    
+    
+#ne_average = LH_ne_average
+#ne_average.extend(HL_ne_average)
+
+(res,cov) = np.polyfit(ne_average,pe_at_ped,deg=1,cov=True)
+neav = np.linspace(min(ne_average),max(ne_average))
+nefit = res[1] + res[0] * neav
+ax[2].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
+
 ax[2].set_xlabel('ne_average')
 ax[2].set_ylabel('pe_at_ped')
 ax[2].legend()
