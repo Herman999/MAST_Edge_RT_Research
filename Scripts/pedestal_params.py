@@ -140,7 +140,7 @@ for shot_str in shots:
     s=eval(shot_str)
     
     #delete corrupted shots
-    if s.ShotNumber in [24330,27030,24133,20377,27444,27449]:
+    if s.ShotNumber in [24330,27030,24133,20377,27444,27449,27037]:
         print('skip')
         continue
 #s = Shot(24129, LHt=[(0.2922,0.290,0.295)], HLt=[(0.3174,0.317,0.318)])
@@ -205,10 +205,10 @@ pe_at_ped = LH_pe_at_ped.copy()
 pe_at_ped.extend(HL_pe_at_ped)
 
 #%% PL<OT
-            
+
+# NE            
 fig, ax = plt.subplots(3,sharex=True)
-#fig.title.set_text('LH Pedestal Params')
-ax[0].set_title('LH Pedestal Params')
+ax[0].set_title(r'LH + HL Pedestal Params')
 ax[0].scatter(LH_ne_average,LH_ne_at_ped,c='orange',label='LH')
 ax[0].scatter(HL_ne_average,HL_ne_at_ped,c='blue',label='HL')
 
@@ -219,10 +219,8 @@ for i, txt in enumerate(HL_shot_list):
     ax[0].annotate(txt, (HL_ne_average[i], HL_ne_at_ped[i]))
 
 # lin fit
-
-
 (res,cov) = np.polyfit(ne_average,ne_at_ped,deg=1,cov=True)
-neav = np.linspace(min(LH_ne_average),max(LH_ne_average))
+neav = np.linspace(min(ne_average),max(ne_average))
 nefit = res[1] + res[0] * neav
 ax[0].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
     
@@ -231,6 +229,7 @@ ax[0].set_ylabel('ne_at_ped')
 ax[0].legend()
 #ax[0].set_ylim([0,0.05e21])
 
+# TE
 ax[1].scatter(LH_ne_average,LH_te_at_ped,c='orange',label='LH')
 ax[1].scatter(HL_ne_average,HL_te_at_ped,c='blue',label='HL')
 
@@ -240,18 +239,22 @@ for i, txt in enumerate(LH_shot_list):
 for i, txt in enumerate(HL_shot_list):
     ax[1].annotate(txt, (HL_ne_average[i], HL_te_at_ped[i]))
 
-#ne_average = LH_ne_average
-#ne_average.extend(HL_ne_average)
-
 (res,cov) = np.polyfit(ne_average,te_at_ped,deg=1,cov=True)
 neav = np.linspace(min(ne_average),max(ne_average))
 nefit = res[1] + res[0] * neav
-ax[1].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
+ax[1].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,1]),"{:.2E}".format(res[1])))
+
+#attempt for error calculation
+#nefitm = res[1] + (res[0] ) * neav - cov[0,0]
+#nefitp = res[1] + (res[0] ) * neav + cov[0,0]
+#ax[1].plot(neav,nefitm,color = 'orange',linestyle = 'dashed', alpha = 0.5)
+#ax[1].plot(neav,nefitp,color = 'orange',linestyle = 'dashed', alpha = 0.5)
 
 ax[1].set_xlabel('ne_average')
 ax[1].set_ylabel('te_at_ped')
 ax[1].legend()
 
+# PE
 ax[2].scatter(LH_ne_average,LH_pe_at_ped,c='orange',label='LH')
 ax[2].scatter(HL_ne_average,HL_pe_at_ped,c='blue',label='HL')
 
@@ -261,9 +264,6 @@ for i, txt in enumerate(LH_shot_list):
 for i, txt in enumerate(HL_shot_list):
     ax[2].annotate(txt, (HL_ne_average[i], HL_pe_at_ped[i]))
     
-    
-#ne_average = LH_ne_average
-#ne_average.extend(HL_ne_average)
 
 (res,cov) = np.polyfit(ne_average,pe_at_ped,deg=1,cov=True)
 neav = np.linspace(min(ne_average),max(ne_average))
@@ -273,11 +273,6 @@ ax[2].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".form
 ax[2].set_xlabel('ne_average')
 ax[2].set_ylabel('pe_at_ped')
 ax[2].legend()
-
-
-
-
-
 
 
 
