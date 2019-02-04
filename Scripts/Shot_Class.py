@@ -215,6 +215,7 @@ class Shot():
             for i in inds:
                 fit, time = self.fit_core_tanh_pedestal(i, sig=sig, preview=prev)
                 results[time] = self._tanh_params(fit)
+                
         if prev == True:
             fig, ax = self.plot_JP(plot_thomson=4)
             fig.canvas.set_window_title('Where {} fitted (red lines)'.format(self.ShotNumber))
@@ -334,7 +335,6 @@ class Shot():
         """
         n = len(signalslist)
         fig, ax = plt.subplots(n, sharex=True, figsize=(11,7))
-        
         
         for i, signal in enumerate(signalslist):
             self._plot_ax_sig(ax, signal, i, signame= signal)
