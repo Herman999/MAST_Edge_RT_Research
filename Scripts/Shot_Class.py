@@ -108,7 +108,72 @@ class Shot():
         
         return(T_e, T_ec)
         
-       
+    def _Ln_Te(self, index):
+        """ Find L_n, T_e at number of Thomson bursts after time given. 
+        """
+        # Ln = 1/n dn/dr|(max slope)
+        edge_ne_fit, time, (radii, ne) = self.fit_edge_tanh_pedestal(index, preview = False) # caution this is put in one variable in some other methods
+        knee, width, max_slope, ne_max_slope, ne_knee = self._tanh_params(edge_ne_fit) # caution this is done differently in Te_Tec for eg.
+        R_max_slope = knee + width /2. # slope = dn/dr
+        
+        Ln = max_slope / ne_max_slope
+        print(Ln)
+        
+        fig, ax = self._plot_edge_pedestal(index, sig='TE') # Te data
+        # want  vlines for Psi95, Psi90, R_max_slope, 
+        ax.axvline(knee, ls='--', c='b', label='NE knee')
+        ax.axvline(R_max_slope, ls='--', c='r', label='NE max slope')        
+        ax.axvline(knee+width, ls='--', c='b', label='NE knee+width')
+
+        #Psi data
+        PsiTime, Psi100, Psi95, Psi90 = [self.data['EFM_R_PSI100_OUT']['time'], 
+                                         self.data['EFM_R_PSI100_OUT']['data'],
+                                         self.data['EFM_R_PSI95_OUT']['data'],
+                                         self.data['EFM_R_PSI90_OUT']['data'] ]
+        P100, P95, P90 = [np.interp(time, PsiTime, Psi100),
+                          np.interp(time, PsiTime, Psi95),
+                          np.interp(time, PsiTime, Psi90) ]
+        
+        ax.axvline(P100, ls='-.', c='lightgray', label='P 100')
+        ax.axvline(P95, ls='-.', c='darkgray', label='P 95')
+        ax.axvline(P90, ls='-.', c='dimgray', label='P 90')
+        ax.legend()
+        
+        # calculate a Te
+        
+        return fig, ax, Ln
+    
+    def Te_after_time(self, t0, slices):
+        """Playing around with Te profile. Where can it be cut off?"""
+        times = self.data['AYC_NE']['time']
+        ind_0 = np.where(times>t0)[0][0]
+        inds = np.arange(ind_0, ind_0+ slices)
+        
+        for i in inds:
+            self._Ln_Te(i)
+    
+    def _plot_edge_pedestal(self, index, sig='NE'):
+        """ plot with errors the edge data (pedestal) of sig at index given
+        """
+        y = self.data['AYE_{}'.format(sig)]['data'][index]
+        y_er = self.data['AYE_{}'.format(sig)]['errors'][index]
+        x = self.data['AYE_R']['data'][index]
+        x_er = self.data['AYE_R']['errors'][index]
+        time = self.data['AYE_R']['time'][index]
+        
+        # remove nans
+        condition = np.where(~np.isnan(y))
+        y, y_er, x, x_er = y[condition], y_er[condition], x[condition], x_er[condition]
+        
+        fig, ax = plt.subplots(1)
+        fig.canvas.set_window_title('{0} {1} edge data at {2:3f} s'.format(self.ShotNumber,sig,time))
+        ax.errorbar(x,y,yerr=y_er,xerr=x_er, elinewidth=0.5, label='data')
+        ax.set_xlabel('R [m]')
+        ax.set_ylabel(sig)
+        ax.set_ylim(0,)
+        ax.legend()
+        return fig, ax
+        
         
     def Te_Tec(self, index, A=1, prev=False): #THIS WILL BE Te_Tec_H (mode)
         """
@@ -116,7 +181,7 @@ class Shot():
         A = multiplicative Tec constant
         """
         edge_ne_fit = self.fit_edge_tanh_pedestal(index, preview = prev) # result, time, (R's, ne's)
-        knee, width, max_slope, ne_max_slope = self._tanh_params(edge_ne_fit[0])
+        knee, width, max_slope, ne_max_slope, ne_knee = self._tanh_params(edge_ne_fit[0])
         R_max_slope = knee + width /2.
         
         edge_te_fit = self.fit_edge_tanh_pedestal(index, sig='TE', preview = prev)
@@ -189,7 +254,7 @@ class Shot():
         max_slope = -2* result[0]/result[3]
         ne_max_slope = ped_tanh_odr2(result, knee+width/2.) # ne at max slope
         ne_at_knee = ped_tanh_odr2(result, knee) # ne at max slope
-        return(knee, width, max_slope, ne_max_slope,ne_at_knee)
+        return(knee, width, max_slope, ne_max_slope, ne_at_knee)
     
     def fit_after_time(self, t0, slices, edge=True, sig='NE', prev=True):
         """
@@ -275,7 +340,52 @@ class Shot():
         if preview:
             self._pedestal_preview(x,y,x_er,y_er, time,result,sig)
 ######### add title for core or edge ########
-        return result, time
+        return result, time (x,y)
+    
+    def fit_tanh_pedestal(self, index, scaling = 1./0.8, sig='NE', preview=True):
+        """ Fits modified 'ped_tanh_odr2' fn to AYE thomson for signal=sig at index
+        x = self.data['AYE_sig']['data'][index] + self.data['AYC_sig']['data'][index]
+        y = self.data['AYE_R']['data'][index]   (+ iff in valid R range)
+        
+        scaling = applied to edge data to bring in line with core values
+        """
+        # EDGE data
+        y = self.data['AYE_{}'.format(sig)]['data'][index] *scaling
+        y_er = self.data['AYE_{}'.format(sig)]['errors'][index] *scaling
+        x = self.data['AYE_R']['data'][index]
+        x_er = self.data['AYE_R']['errors'][index]
+        time = self.data['AYE_R']['time'][index]    
+        # remove nans
+        condition = np.where(~np.isnan(y))
+        y, y_er, x, x_er = y[condition], y_er[condition], x[condition], x_er[condition]
+    
+        # CORE data
+        c_y = self.data['AYC_{}'.format(sig)]['data'][index]
+        c_y_er = self.data['AYC_{}'.format(sig)]['errors'][index]
+        c_x = self.data['AYC_R']['data'][index]
+        c_x_er = self.data['AYC_R']['errors'][index]
+        
+        #cutoff radius for fitting. defined as lowest R present in edge data
+        r_cutoff= c_x[0]
+        condition = np.where((c_x > r_cutoff)&(~np.isnan(c_y)))
+        c_y, c_y_er, c_x, c_x_er = c_y[condition], c_y_er[condition], c_x[condition], c_x_er[condition]
+        
+# =============================================================================
+         #combine data
+         data =  zip(x,y,x_er,y_er)
+         data.extend(zip(c_x,c_y,c_x_er,c_y_er))
+         dd = sorted(data)
+         x,y,x_er,y_er = np.asarray(list(dd))
+#         BROKEN
+# =============================================================================
+        #do fitting on combined data
+        result = do_odr([x,y,x_er,y_er]) # a,b,x_sym, width, slope, dwell, x_well
+                
+        if preview:
+            self._pedestal_preview(x,y,x_er,y_er, time,result,sig)
+        return result, time (x,y)
+    
+    
     
     def _pedestal_preview(self, x,y,xr,yr, time,result,sig):
         """
@@ -306,6 +416,7 @@ class Shot():
         slope_ys = (y_mid-max_slope*midpt) + max_slope* slope_xs
         plt.plot(slope_xs, slope_ys, c='g',label='grad= {0:.2g}'.format(max_slope))
         plt.legend() 
+
     
     def plot_signal(self, SignalName, figname = None):
         # this could go into another file anyway with plotting stuff

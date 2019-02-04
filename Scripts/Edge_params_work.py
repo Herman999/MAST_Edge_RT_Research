@@ -605,7 +605,15 @@ plt.title('blue=Te, red=ne')
 for i, j in zip(res_t, res_n):
     plt.scatter(i, res_t[i][0], c='b')
     plt.scatter(j, res_n[j][0], c='r')
+    
+#%%
+# 4/2/19
+# closer look at Guzdar parameters.
 
+ts = Shot(24130, LHt=[(0.285,0,0)], HLt=[(0.324,0,0)])
+ts2= Shot(27035, LHt=[(0.1150,0.1017,0.1281)], HLt = [(0.3096,0.3096,0.3098)])
+
+# rubbish NE, TE edge fits come out during H mode. NE doesn't capture drop to zero at SOL.
 
 
 
