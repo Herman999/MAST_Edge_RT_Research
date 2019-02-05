@@ -17,8 +17,8 @@ alpha = 0.8
 data = pd.read_excel('shot_database_extended_updated.xlsx')
 
 # sellect desired configuration
-#data = data[(data['geometry']=='SN')]
-data = data[(data['geometry']=='CND') ]#(data['geometry']=='maybe CND')]
+data = data[(data['geometry']=='SN')]
+#data = data[(data['geometry']=='CND') ]#(data['geometry']=='maybe CND')]
 #data = data[(data['geometry']=='maybe CND')]
 #data = data[(data['geometry']=='CND') | (data['geometry']=='maybe CND')]
 
