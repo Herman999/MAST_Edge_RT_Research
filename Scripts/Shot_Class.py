@@ -6,6 +6,7 @@ Created on Thu Nov  8 12:28:08 2018
 """
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import bisect
 
 
@@ -342,7 +343,7 @@ class Shot():
 ######### add title for core or edge ########
         return result, time (x,y)
     
-    def fit_tanh_pedestal(self, index, scaling = 1./0.8, sig='NE', preview=True):
+    def fit_tanh_pedestal(self, index, scaling = 1./0.9, sig='NE', preview=True):
         """ Fits modified 'ped_tanh_odr2' fn to AYE thomson for signal=sig at index
         x = self.data['AYE_sig']['data'][index] + self.data['AYC_sig']['data'][index]
         y = self.data['AYE_R']['data'][index]   (+ iff in valid R range)
@@ -366,25 +367,25 @@ class Shot():
         c_x_er = self.data['AYC_R']['errors'][index]
         
         #cutoff radius for fitting. defined as lowest R present in edge data
-        r_cutoff= c_x[0]
+        r_cutoff= x[0]
         condition = np.where((c_x > r_cutoff)&(~np.isnan(c_y)))
         c_y, c_y_er, c_x, c_x_er = c_y[condition], c_y_er[condition], c_x[condition], c_x_er[condition]
+
+        # combine data into pandas DataFrame        
+        edge = pd.DataFrame({'x':x,'y':y,'x_er': x_er,'y_er': y_er})
+        core = pd.DataFrame({'x':c_x,'y':c_y,'x_er':c_x_er,'y_er':c_y_er})
+        data = edge.append(core).sort_values('x')
+        # split combined data back up
+        x,y,x_er,y_er = data['x'].values, data['y'].values, data['x_er'].values, data['y_er'].values
         
-# =============================================================================
-         #combine data
-         data =  zip(x,y,x_er,y_er)
-         data.extend(zip(c_x,c_y,c_x_er,c_y_er))
-         dd = sorted(data)
-         x,y,x_er,y_er = np.asarray(list(dd))
-#         BROKEN
-# =============================================================================
         #do fitting on combined data
         result = do_odr([x,y,x_er,y_er]) # a,b,x_sym, width, slope, dwell, x_well
                 
         if preview:
             self._pedestal_preview(x,y,x_er,y_er, time,result,sig)
-        return result, time (x,y)
-    
+####### may want to add appropriate labels to this plot #####
+
+        return result, time (x,y,x_er,y_er)
     
     
     def _pedestal_preview(self, x,y,xr,yr, time,result,sig):
@@ -610,7 +611,6 @@ class Shot():
             
       
         # transform to pandas and save to excel
-        import pandas as pd
         parameters_results = pd.DataFrame(self._pandas)
         writer = pd.ExcelWriter('parameters_output_{}.xlsx'.format(self.ShotNumber))
         parameters_results.to_excel(writer,'Sheet1')
