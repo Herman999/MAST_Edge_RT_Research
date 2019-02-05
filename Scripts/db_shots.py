@@ -320,7 +320,7 @@ for shot_str in shots:
 
 #%%
         
-writer = pd.ExcelWriter('shot_database_extended.xlsx')
+writer = pd.ExcelWriter('shot_database_extended_updated.xlsx')
 db.to_excel(writer,'Sheet1')
 writer.save()
 

@@ -14,14 +14,19 @@ import pandas as pd
 alpha = 0.8
 
 #load from db
-data = pd.read_excel('shot_database_extended.xlsx')
+data = pd.read_excel('shot_database_extended_updated.xlsx')
 
 # sellect desired configuration
-data = data[(data['geometry']=='SN')]
+#data = data[(data['geometry']=='SN')]
+data = data[(data['geometry']=='CND') ]#(data['geometry']=='maybe CND')]
+#data = data[(data['geometry']=='maybe CND')]
 #data = data[(data['geometry']=='CND') | (data['geometry']=='maybe CND')]
 
 # filter corrupted X1Z or X
 data = data[~(abs(data['X2Z_e'])>=1)]
+
+# cut of Ploss = 0 
+data = data[~(data['Ploss']==0)]
 
 # drop unnecessary columns
 data.drop(['time_em','time_ep','BT','BT_e','IP','IP_e','KAPPA','KAPPA_e','AYE_NE_e','AYE_NE','ANE_DENSITY','ANE_DENSITY_e', 'AYC_TE','AYC_TE_e','AYE_TE','AYE_TE_e','AYC_PE', 'AYC_PE_e','AYE_PE','AYE_PE_e','TE_e','PE','PE_e'],axis=1,inplace=True)
@@ -53,8 +58,7 @@ plt.title(r'X Point Height Study [$\alpha={}$, SN]'.format(alpha))
 
 
 
-
-# PLOT LH    
+# PLOT LH
 y_err = np.sqrt(list((data_LH['Ploss_e']/data_LH['Ploss'])**2 + (data_LH['NE_e']/data_LH['NE'])**2)) # perc error
 y_err = y_err * data_LH['Ploss']/(data_LH['NE']**alpha) # * data
 plt.errorbar(x = data_LH['X1Z'], markersize=15, y = data_LH['Ploss']/(data_LH['NE']**alpha),xerr = data_LH['X1Z_e'], yerr = y_err ,fmt='x', label = 'LH',color = 'red')
