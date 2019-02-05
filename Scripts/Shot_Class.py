@@ -109,40 +109,50 @@ class Shot():
         
         return(T_e, T_ec)
         
-    def _Ln_Te(self, index):
-        """ Find L_n, T_e at number of Thomson bursts after time given. 
+    def _Ln_Te(self, index, previewTe = False):
+        """ Find L_n, T_e at index of Thomson burst
         """
         # Ln = 1/n dn/dr|(max slope)
         edge_ne_fit, time, (radii, ne) = self.fit_edge_tanh_pedestal(index, preview = False) # caution this is put in one variable in some other methods
         knee, width, max_slope, ne_max_slope, ne_knee = self._tanh_params(edge_ne_fit) # caution this is done differently in Te_Tec for eg.
         R_max_slope = knee + width /2. # slope = dn/dr
         
-        Ln = max_slope / ne_max_slope
-        print(Ln)
-        
-        fig, ax = self._plot_edge_pedestal(index, sig='TE') # Te data
-        # want  vlines for Psi95, Psi90, R_max_slope, 
-        ax.axvline(knee, ls='--', c='b', label='NE knee')
-        ax.axvline(R_max_slope, ls='--', c='r', label='NE max slope')        
-        ax.axvline(knee+width, ls='--', c='b', label='NE knee+width')
+        Ln = - ne_max_slope / max_slope # gradient scale length = -n/grad(n)
+        print('Density gradient scale length:', Ln)
 
-        #Psi data
+        # Psi data
         PsiTime, Psi100, Psi95, Psi90 = [self.data['EFM_R_PSI100_OUT']['time'], 
                                          self.data['EFM_R_PSI100_OUT']['data'],
                                          self.data['EFM_R_PSI95_OUT']['data'],
-                                         self.data['EFM_R_PSI90_OUT']['data'] ]
+                                         self.data['EFM_R_PSI90_OUT']['data'] ] 
         P100, P95, P90 = [np.interp(time, PsiTime, Psi100),
                           np.interp(time, PsiTime, Psi95),
-                          np.interp(time, PsiTime, Psi90) ]
+                          np.interp(time, PsiTime, Psi90) ] # now in form R = ... m
         
-        ax.axvline(P100, ls='-.', c='lightgray', label='P 100')
-        ax.axvline(P95, ls='-.', c='darkgray', label='P 95')
-        ax.axvline(P90, ls='-.', c='dimgray', label='P 90')
-        ax.legend()
+        if previewTe == True:
+            fig, ax = self._plot_edge_pedestal(index, sig='TE') # Te data
+            # draw lines
+            ax.axvline(P100, ls='-.', c='lightgray', label='P 100')
+            ax.axvline(P95, ls='-.', c='darkgray', label='P 95')
+            ax.axvline(P90, ls='-.', c='dimgray', label='P 90')
+            ax.axvline(knee, ls='--', c='b', label='NE knee')
+            ax.axvline(R_max_slope, ls='--', c='r', label='NE max slope')        
+            ax.axvline(knee+width, ls='--', c='b', label='NE knee+width')
+            ax.legend()
         
+        # Te profile data. Radiis already known from above 
+        Tes = self.data['AYC_TE']['data'][index]
+        Te_ers = self.data['AYC_TE']['errors'][index]
+        radii = self.data['AYC_R']['data'][index]
+
         # calculate a Te
+        Te = np.interp(R_max_slope, radii, Tes) # from R of max dn/dr
+        Te_er = np.interp(R_max_slope, radii, Te_ers)
         
-        return fig, ax, Ln
+        Psi98 = np.interp(98, [95,100], [P95, P100]) # radii of Psi98
+        Te_P98 = np.interp(Psi98, radii, Tes)
+        
+        return  Ln, Te, Te_P98
     
     def Te_after_time(self, t0, slices):
         """Playing around with Te profile. Where can it be cut off?"""
@@ -150,8 +160,15 @@ class Shot():
         ind_0 = np.where(times>t0)[0][0]
         inds = np.arange(ind_0, ind_0+ slices)
         
+        results = []
+        
         for i in inds:
-            self._Ln_Te(i)
+            Ln, Te, Te_P98 = self._Ln_Te(i)
+            t = times[i]
+            results.append((t,Ln, Te, Te_P98))
+        
+        return results
+            
     
     def _plot_edge_pedestal(self, index, sig='NE'):
         """ plot with errors the edge data (pedestal) of sig at index given
@@ -197,8 +214,6 @@ class Shot():
         return (T_e, T_ec)
     
     def Te_Tec_all(self, first, last):
-        
-        #
         
         cols = {'LH':'orange', 
                 'L':'red', 
@@ -384,8 +399,8 @@ class Shot():
         if preview:
             self._pedestal_preview(x,y,x_er,y_er, time,result,sig)
 ####### may want to add appropriate labels to this plot #####
-
-        return result, time (x,y,x_er,y_er)
+            
+        return result, time, (x,y,x_er,y_er)
     
     
     def _pedestal_preview(self, x,y,xr,yr, time,result,sig):
@@ -620,7 +635,7 @@ class Shot():
     def plot_JP(self, tlim = (0,0.5), ip = 'IP', wmhd = 'WMHD', coreTe = 'AYC_TE0', 
                 ne = 'ANE_DENSITY', Dalpha = 'AIM_DA_TO', Bt = 'BT',
                 Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM',
-                plot_thomson = False):
+                plot_thomson = False, label_thomson = False):
         """
         Plot some signals together on single figure
         """
@@ -665,6 +680,9 @@ class Shot():
         if plot_thomson:
             for i in self.data['AYE_NE']['time']:
                 ax[plot_thomson].axvline(i)
+            if label_thomson == True:
+                for index, t in enumerate(self.data['AYE_NE']['time']):
+                    ax[plot_thomson].text(t,0.,str(index))
         
         # plot plasma current, ax = 0
         self._plot_ax_sig(ax, ip, 0, signame = 'I_{p}')
