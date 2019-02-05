@@ -10,8 +10,8 @@ Created on Mon Nov 12 17:02:00 2018
 import matplotlib.pyplot as plt
 
 #from signal_dict_10_NOV_11 import signals
-from signal_dict_SEP_08 import signals
-#from signal_dict_13_DEC_PULL import signals
+#from signal_dict_SEP_08 import signals
+from signal_dict_13_DEC_PULL import signals
 
 
 # run shot calss
@@ -20,12 +20,12 @@ from signal_dict_SEP_08 import signals
 #plt.close('all')
 
 
-shot = Shot(24215)
+shot = Shot(27454)
 print(shot.signals_present())
 #shot = Shot(20381, LHt=[(0.2342,0.2341,0.2343)], HLt=[(0.3108,0.31079,0.31081)])
 
 
-#shot.plot_JP()
+shot.plot_JP()
 
 
 shot.plot_compare(['BT','IP','WMHD','ANE_DENSITY','AIM_DA_TO','Ploss','PINJ' ])

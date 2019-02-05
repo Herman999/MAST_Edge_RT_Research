@@ -165,7 +165,7 @@ for shot_str in shots:
     s=eval(shot_str)
     
     #delete corrupted shots
-    if s.ShotNumber in [24330,27030,24133,20377,27444,27449,27037]:
+    if s.ShotNumber in [24130,24133,27449,27444,27037]:  #24330,27030,24133,20377,27444,27449,27037]:
         print('skip')
         continue
 #s = Shot(24129, LHt=[(0.2922,0.290,0.295)], HLt=[(0.3174,0.317,0.318)])
@@ -323,6 +323,82 @@ ax[2].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".form
 ax[2].set_xlabel('ne_average')
 ax[2].set_ylabel('pe_at_ped')
 ax[2].legend()
+
+#%%
+
+# export pedestal params into DB Pandas
+
+
+
+import pandas as pd
+
+# want to save SHot, LH/HL, ne average +e , ne at ped +e , te at ped +e, pe at ped +e
+
+ped_db = pd.DataFrame(columns=['shot', 'transition', 'ne_average','ne_average_e','ne_at_ped','ne_at_ped_e','te_at_ped','te_at_ped_e','pe_at_ped','pe_at_ped_e'])
+
+for i in range(len(LH_ne_average)):
+    dic = {}
+    dic['shot'] = LH_shot_list[i]
+    dic['transition'] = 'LH'
+    dic['ne_average'] = LH_ne_average[i]
+    dic['ne_average_e'] = LH_ne_average_e[i]
+    dic['ne_at_ped'] = LH_ne_at_ped[i]
+    dic['ne_at_ped_e'] = 0
+    dic['te_at_ped'] = LH_te_at_ped[i]
+    dic['te_at_ped_e'] =  LH_te_at_ped_e[i]
+    dic['pe_at_ped'] = LH_pe_at_ped[i]
+    dic['pe_at_ped_e'] = LH_pe_at_ped_e[i]
+    ped_db.loc[len(ped_db)]=dic
+    
+for i in range(len(HL_ne_average)):
+    dic = {}
+    dic['shot'] = HL_shot_list[i]
+    dic['transition'] = 'HL'
+    dic['ne_average'] = HL_ne_average[i]
+    dic['ne_average_e'] = HL_ne_average_e[i]
+    dic['ne_at_ped'] = HL_ne_at_ped[i]
+    dic['ne_at_ped_e'] = 0
+    dic['te_at_ped'] = HL_te_at_ped[i]
+    dic['te_at_ped_e'] =  HL_te_at_ped_e[i]
+    dic['pe_at_ped'] = HL_pe_at_ped[i]
+    dic['pe_at_ped_e'] = HL_pe_at_ped_e[i]
+    ped_db.loc[len(ped_db)]=dic
+    
+writer = pd.ExcelWriter('shot_peddb.xlsx')
+ped_db.to_excel(writer,'Sheet1')
+writer.save()
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
