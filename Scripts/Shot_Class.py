@@ -149,10 +149,11 @@ class Shot():
         Te = np.interp(R_max_slope, radii, Tes) # from R of max dn/dr
         Te_er = np.interp(R_max_slope, radii, Te_ers)
         
-        Psi98 = np.interp(98, [95,100], [P95, P100]) # radii of Psi98
-        Te_P98 = np.interp(Psi98, radii, Tes)
+        P98 = np.interp(98, [95,100], [P95, P100]) # radii of Psi98
+        Te_P98 = np.interp(P98, radii, Tes)
+        Te_P95 = np.interp(P95, radii, Tes)
         
-        return  Ln, Te, Te_P98
+        return  Ln, Te, Te_P98, Te_P95
     
     def Te_after_time(self, t0, slices):
         """Playing around with Te profile. Where can it be cut off?"""
@@ -163,9 +164,9 @@ class Shot():
         results = []
         
         for i in inds:
-            Ln, Te, Te_P98 = self._Ln_Te(i)
+            Ln, Te, Te_P98, Te_P95 = self._Ln_Te(i)
             t = times[i]
-            results.append((t,Ln, Te, Te_P98))
+            results.append((t,Ln, Te, Te_P98, Te_P95))
         
         return results
             

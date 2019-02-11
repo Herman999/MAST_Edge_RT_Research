@@ -613,10 +613,35 @@ for i, j in zip(res_t, res_n):
 ts = Shot(24130, LHt=[(0.285,0,0)], HLt=[(0.324,0,0)])
 ts2= Shot(27035, LHt=[(0.1150,0.1017,0.1281)], HLt = [(0.3096,0.3096,0.3098)])
 
+# for ts2
 # rubbish NE, TE edge fits come out during H mode. NE doesn't capture drop to zero at SOL.
+res = ts2.Te_after_time(0.05, 90)
+fig, (ax0,ax1,ax2) = plt.subplots(3, sharex=True)
+for i in res:
+    t,Ln, Te, TeP98, TeP95 = i
+    ax0.scatter(t, -Ln, c='g')
+    ax1.scatter(t, Te, c='k')
+    ax1.scatter(t, TeP98, c='r')
+sig = 'AIM_DA_TO'
+time = ts2.data[sig]['time']
+data = ts2.data[sig]['data']
+ax2.plot(time,data)
+ax0.set_title('Ln')
+ax1.set_title('Te: black = at max dn/dr; red = at Psi98')
+ax2.set_title('D alpha')
+fig.text(0.5,0.95, 'Shot 27035')
 
-
-
-
+#%%
+"""
+Te at ne max dn/dr, psi98, psi95
+"""
+ts = Shot(24130, LHt=[(0.285,0,0)], HLt=[(0.324,0,0)])
+plt.figure()
+res = ts.Te_after_time(0.27, 16)
+for i in res:
+    t,Ln, Tem, TeP98, TeP95 = i
+    plt.scatter(t,Tem,marker = 'x', c='k')
+    plt.scatter(t,TeP95,marker='o', c='r')
+    plt.scatter(t,TeP98,marker='+', c='m')
 
 
