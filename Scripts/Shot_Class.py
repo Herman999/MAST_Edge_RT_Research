@@ -645,6 +645,9 @@ class Shot():
         if ne not in self.data.keys():
             if 'AYC_NE' in self.data.keys():
                 ne = 'AYC_NE'
+            else:
+                ne='NE' #dumb data fix
+        
         
         n_signals = 7 # number of signals to be plotted
         
