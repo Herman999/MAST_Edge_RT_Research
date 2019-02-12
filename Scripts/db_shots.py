@@ -38,7 +38,8 @@ db = pd.DataFrame(columns=['shot', 'shot_time', 'time', 'time_em', 'time_ep', 't
 session = '18Sep08'
 geometry = 'CND'
 
-from signal_dict_SEP_08 import signals
+#from signal_dict_SEP_08 import signals
+from signal_dict_10_NOV_11 import signals
 
 shots = [
 'Shot(20377, LHt=[(0.2339,0.2338,0.2340)], HLt=[(0.335,0.3349,0.3351)])',
