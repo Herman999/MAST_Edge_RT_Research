@@ -55,14 +55,22 @@ def PE_point_at_pedestal(s,knee,t):
 
     return PE_knee,PE_knee_e
 
-def NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,t1):
+def NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,index):
      # now got what we need
-    slices = 1
-    res = s.fit_after_time(t1, slices, edge=True, sig='NE',prev=False)
+    #slices = 1
+    
+    #res = s.fit_after_time(t1, slices, edge=True, sig='NE',prev=False)
     # result structure t0: (knee, width, max_slope, ne|max slope, ne at knee)
     #print(res)
     #print(slice_time)
-    ne_at_ped.append(res[slice_time][4])
+    
+    
+    
+    result, time, (x,y,x_er,y_er) = s.fit_tanh_pedestal(index, scaling = 1./0.9, sig='NE', preview=True)
+    res = s._tanh_params(result)
+    
+    
+    ne_at_ped.append(res[4])
     try:
         index = np.where(s.data['AYC_NE']['time']==slice_time)
         ne_average.append(\
@@ -78,7 +86,7 @@ def NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,t1):
                           np.nanmean(s.data['NE']['errors'][index]))
     except: pass
     print('Got ONE!')
-    return ne_at_ped,ne_average,res[slice_time][0],slice_time,ne_average_e
+    return ne_at_ped,ne_average,res[0],slice_time,ne_average_e
 #%%
 
 
@@ -87,7 +95,7 @@ def NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,t1):
     #here load up shot session
 #%%
 for shot_str in shots:
-
+    test = True
     s=eval(shot_str)
     
     #delete corrupted shots
@@ -100,8 +108,35 @@ for shot_str in shots:
     t2 = s._LHt[0][2]
    
     
+    
+    times_AYE = s.data['AYE_NE']['time'].copy()
+    times_AYE -= t0
+    index = np.argmin(abs(times_AYE))
+    slice_time = s.data['AYE_NE']['time'][index]
+    
+    tolerance = 0.002
+    if min(abs(times_AYE)) >= tolerance:
+        print('outside of tolerance')
+        continue
+    
+    #result, time, (x,y,x_er,y_er) = s.fit_tanh_pedestal(index, scaling = 1./0.9, sig='NE', preview=True)
+    #s._tanh_params(result)
+    
+    
+    ne_at_ped,ne_average,knee,t,ne_average_e = NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,index)
+    
+    te_at_ped.append(TE_point_at_pedestal(s,knee,t)[0])
+    te_at_ped_e.append(TE_point_at_pedestal(s,knee,t)[1])
+    
+    pe_at_ped.append(PE_point_at_pedestal(s,knee,t)[0])
+    pe_at_ped_e.append(PE_point_at_pedestal(s,knee,t)[1])
+    shot_list.append(s.ShotNumber)
+        
+        
+    """
     res = s.fit_after_time(t0, slices, edge=True, sig='NE',prev=False)
     slice_time = list(res.keys())[0]
+    
     
     if slice_time < t2: # after transition time
         #ne
@@ -129,8 +164,13 @@ for shot_str in shots:
             shot_list.append(s.ShotNumber)
             
         else:
+            test = False
             print('AYE not within transition times')
-
+    # Plot the fit and manually investigate
+    #if test !=False:
+        #pass
+        #res = s.fit_after_time(slice_time-0.0000000000001, slices, edge=True, sig='NE',prev=True)        
+    """
 
 #%%
             
@@ -179,6 +219,31 @@ for shot_str in shots:
     t2 = s._HLt[0][2]
     
     
+    times_AYE = s.data['AYE_NE']['time'].copy()
+    times_AYE -= t0
+    index = np.argmin(abs(times_AYE))
+    slice_time = s.data['AYE_NE']['time'][index]
+    
+    tolerance = 0.002
+    if min(abs(times_AYE)) >= tolerance:
+        print('outside of tolerance')
+        continue
+    
+    #result, time, (x,y,x_er,y_er) = s.fit_tanh_pedestal(index, scaling = 1./0.9, sig='NE', preview=True)
+    #s._tanh_params(result)
+    
+    
+    ne_at_ped,ne_average,knee,t,ne_average_e = NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,index)
+    
+    te_at_ped.append(TE_point_at_pedestal(s,knee,t)[0])
+    te_at_ped_e.append(TE_point_at_pedestal(s,knee,t)[1])
+    
+    pe_at_ped.append(PE_point_at_pedestal(s,knee,t)[0])
+    pe_at_ped_e.append(PE_point_at_pedestal(s,knee,t)[1])
+    shot_list.append(s.ShotNumber)
+        
+    
+    """
     res = s.fit_after_time(t0, slices, edge=True, sig='NE',prev=False)
     slice_time = list(res.keys())[0]
     
@@ -209,6 +274,7 @@ for shot_str in shots:
             
         else:
             print('AYE not within transition times')
+    """
 
 #%%
             
