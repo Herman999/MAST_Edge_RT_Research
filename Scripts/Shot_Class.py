@@ -354,7 +354,7 @@ class Shot():
 ######### add title for core or edge ########
         return result, time (x,y)
     
-    def fit_tanh_pedestal(self, index, scaling = 1./0.9, sig='NE', preview=True):
+    def fit_tanh_pedestal(self, index, scaling = 1./0.9, sig='NE', preview=True, guess=[2.5e19,2.5e19,1.38,0.05,1e19,1.,1.]):
         """ Fits modified 'ped_tanh_odr2' fn to AYE thomson for signal=sig at index
         x = self.data['AYE_sig']['data'][index] + self.data['AYC_sig']['data'][index]
         y = self.data['AYE_R']['data'][index]   (+ iff in valid R range)
@@ -390,7 +390,7 @@ class Shot():
         x,y,x_er,y_er = data['x'].values, data['y'].values, data['x_er'].values, data['y_er'].values
         
         #do fitting on combined data
-        result = do_odr([x,y,x_er,y_er]) # a,b,x_sym, width, slope, dwell, x_well
+        result = do_odr([x,y,x_er,y_er], p=guess) # a,b,x_sym, width, slope, dwell, x_well
                 
         if preview:
             self._pedestal_preview(x,y,x_er,y_er, time,result,sig)
