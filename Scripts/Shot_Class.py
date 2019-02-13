@@ -273,7 +273,7 @@ class Shot():
         ne_at_knee = ped_tanh_odr2(result, knee) # ne at max slope
         return(knee, width, max_slope, ne_max_slope, ne_at_knee)
     
-    def fit_after_time(self, t0, slices, edge=True, sig='NE', prev=True):
+    def fit_after_time(self, t0, slices, sig='NE', scaling=1., prev=True):
         """
         selects slices number of times after t0 in thomson data to tanh fit
         and shows which in a JP plot
@@ -288,15 +288,10 @@ class Shot():
         ind_0 = np.where(times>t0)[0][0]
         inds = np.arange(ind_0, ind_0+ slices)
         results = {}
-        
-        if edge: #edge = True
-            for i in inds:
-                fit, time, xy= self.fit_edge_tanh_pedestal(i, sig=sig, preview=prev)
-                results[time] = self._tanh_params(fit)
-        else: # edge = False ie want core fit
-            for i in inds:
-                fit, time = self.fit_core_tanh_pedestal(i, sig=sig, preview=prev)
-                results[time] = self._tanh_params(fit)
+                
+        for i in inds:
+            fit, time, xy = self.fit_tanh_pedestal(i, sig=sig, scaling=scaling, preview=prev)
+            results[time] = self._tanh_params(fit)
                 
         if prev == True:
             fig, ax = self.plot_JP(plot_thomson=4)

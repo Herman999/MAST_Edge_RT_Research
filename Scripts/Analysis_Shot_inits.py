@@ -5,6 +5,9 @@ Created on Wed Feb 13 10:47:49 2019
 @author: rbatt
 
 Useful shot initialisations for testing various stuff.
+
+CAUTION 'runfile' may be Spyder specfic 
+        it's jsut a hack to get the right signal dictionaries working
 """
 from Shot_Class import Shot
 
@@ -12,9 +15,10 @@ from Shot_Class import Shot
 session = '06-Oct-11'  #Measure LH power threshold at a range of densities.
 geometry = 'CND'
 
-from signal_dict_06_NOV_11 import signals
+runfile('C:/Users/rbatt/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/rbatt/MAST_Edge_RT_Research/Scripts')
+from signal_dict_06_OCT_11 import signals
 
-s1= Shot(27030, LHt=[(0.1928, 0.193, 0.1927)], HLt=[(0.1963, 0.1963,0.19637)])
+#s1= Shot(27030, LHt=[(0.1928, 0.193, 0.1927)], HLt=[(0.1963, 0.1963,0.19637)]) ### bad shot
 s2= Shot(27035, LHt=[(0.2868,0.2865,0.287)], HLt = [(0.3096,0.3096,0.3098)])
 s3= Shot(27036, LHt = [(0.2565, 0.2545,0.258)], HLt = [(0.3261,0.3261,0.327)])
 s4= Shot(27037, LHt=[(0.2607,0.260,0.261)], HLt = [(0.3247, 0.3246, 0.3252)])
@@ -23,6 +27,7 @@ s4= Shot(27037, LHt=[(0.2607,0.260,0.261)], HLt = [(0.3247, 0.3246, 0.3252)])
 session = '10-Nov-11'  #Effect of RMPS on DND
 geometry = 'maybe CND'
 
+runfile('C:/Users/rbatt/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/rbatt/MAST_Edge_RT_Research/Scripts')
 from signal_dict_10_NOV_11 import signals
 
 s1= Shot(27444, LHt=[(0.259,0.2545,0.2595)], HLt=[(0.324,0.323,0.325)])
@@ -38,6 +43,7 @@ s8= Shot(27454, LHt=[(0.277,0.276,0.278)], HLt=[(0.2893,0.289,0.290)])
 session = '22-Jan-10' #Characterise the dynamics of the L-H transition by measuring density and temperature profile evolution with the enhanced Thomson scattering.
 geometry = 'maybe CND'
 
+runfile('C:/Users/rbatt/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/rbatt/MAST_Edge_RT_Research/Scripts')
 from signal_dict_13_DEC_PULL import signals
 
 s1= Shot(24134, LHt=[(0.3018,0.3016,0.302)], HLt=[(0.3448,0.344,0.345)])
@@ -52,5 +58,5 @@ s9= Shot(24126, LHt=[(0.2781,0.278,0.2815)], HLt=[(0.3435,0.343,0.344)])
 s10= Shot(24125, LHt=[(0.2856,0.285,0.286)], HLt=[(0.3232,0.323,0.3235)])
 s11= Shot(24124, LHt=[(0.246,0.242,0.260)], HLt=[(0.2896,0.280,0.2897)])
  
-
+#%%
 

@@ -12,12 +12,14 @@ import matplotlib.pyplot as plt
 pag.FAILSAFE = True
 
 class ohno:
-    def __init__(self, figname, result):
+    def __init__(self, figname, result, do=False):
         self._fig = figname
         self._result = result
         self.w = pag.getWindow(self._fig) 
-        
-    def get_fig(self):
+        if do: # ==True
+            self.do_verify()
+            
+    def _get_fig(self):
         self._close_others() # close what don't care about
         self.w.maximize()
         self.w.set_foreground() # bring the figure to front
@@ -53,7 +55,7 @@ class ohno:
         ws.restore()        
     
     def do_verify(self):
-        self.get_fig()
+        self._get_fig()
         self._prompt()
         self._reopen_Spyder()
         self._close_others()
