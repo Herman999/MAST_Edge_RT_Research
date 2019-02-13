@@ -22,3 +22,5 @@ ddnum.drop(labels=['shot', 'session', 'geometry','shot_time', 'time', 'time_em',
 
 # scaling may be useful here
 
+x = ddnum.drop(labels=['Ploss'],axis=1)
+y = ddnum['Ploss']
