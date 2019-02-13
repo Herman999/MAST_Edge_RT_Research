@@ -10,7 +10,10 @@ Created on Thu Nov  8 11:52:52 2018
 
 # dict of signal objects corresponding to MAST data 
 signals=dict(
-        
+            EFM_R_PSI100_OUT = 'EFM_R(PSI100)_OUT', # Outboard radius of 100% normalised magnetic flux; f(B)
+            EFM_R_PSI90_OUT = 'EFM_R(PSI90)_OUT', # Outboard radius of 90% normalised magnetic flux; f(B)
+            EFM_R_PSI95_OUT = 'EFM_R(PSI95)_OUT', # Outboard radius of 95% normalised magnetic flux; f(B)
+            
             ADA_DALPHA_INVERTED = 'ADA_DALPHA_INVERTED',
             ADA_DALPHA_RAW = 'ADA_DALPHA_RAW',
             AIM_DA_HM = 'AIM_DA_HM',

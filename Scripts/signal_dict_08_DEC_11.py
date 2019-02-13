@@ -12,6 +12,10 @@ shots = [27776,27777,27778,27779,27780,27781,27782,
          27783,27784,27785,27786,27787,27788,27789]
 # below lists signals currently in our data set, many more exist
 signals=dict(
+            EFM_R_PSI100_OUT = 'EFM_R(PSI100)_OUT', # Outboard radius of 100% normalised magnetic flux; f(B)
+            EFM_R_PSI90_OUT = 'EFM_R(PSI90)_OUT', # Outboard radius of 90% normalised magnetic flux; f(B)
+            EFM_R_PSI95_OUT = 'EFM_R(PSI95)_OUT', # Outboard radius of 95% normalised magnetic flux; f(B)
+            
             # ADA Dalpha signals
             ADA_DALPHA_INVERTED = 'ADA_DALPHA_INVERTED',
             ADA_DALPHA_RAW = 'ADA_DALPHA_RAW',

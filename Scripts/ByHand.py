@@ -59,4 +59,5 @@ class ohno:
         self._prompt()
         self._reopen_Spyder()
         self._close_others()
+        return self.verify
         

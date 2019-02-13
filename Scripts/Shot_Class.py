@@ -391,12 +391,18 @@ class Shot():
         
         #do fitting on combined data
         result = do_odr([x,y,x_er,y_er], p=guess) # a,b,x_sym, width, slope, dwell, x_well
-                
+        
+        knee, width, max_slope, ne_max_slope, ne_at_knee = self._tanh_params(result) # parameters to check if fit is decent
+        palt =[3.0e19,2.0e19,1.47,0.05,1.0e19,1,1] # alternative pguess to check if it works
+        if knee + width > 1.55 or width <0 or width < 0.005: # bad fit criteria
+            result = do_odr([x,y,x_er,y_er], p=palt) # re do fit with alternative
+        
+        canvas_name = None
         if preview:
-            self._pedestal_preview(x,y,x_er,y_er, time,result,sig)
+            canvas_name = self._pedestal_preview(x,y,x_er,y_er, time,result,sig)
 ####### may want to add appropriate labels to this plot #####
             
-        return result, time, (x,y,x_er,y_er)
+        return result, time, (x,y,x_er,y_er), canvas_name
     
     
     def _pedestal_preview(self, x,y,xr,yr, time,result,sig):
@@ -404,11 +410,13 @@ class Shot():
         For 'preview' of result from fit_core/edge_tanh_pedestal only.
         """
         fig = plt.figure()
-        fig.canvas.set_window_title('{0} {1} pedestal at {2:3f} s'.format(self.ShotNumber,sig,time))
+        canvas_name= '{0} {1} pedestal at {2:3f} s'.format(self.ShotNumber,sig,time)
+        fig.canvas.set_window_title(canvas_name)
         
         #show data and fit
         plt.errorbar(x,y, yerr=yr, xerr=xr, elinewidth=0.5)
-        plt.plot(x, ped_tanh_odr2(result,x), c='r', label='mtanh fit')
+        fitx = np.arange(np.min(x),np.max(d),step=0.001)
+        plt.plot(fitx, ped_tanh_odr2(result,fitx), c='r', label='mtanh fit')
         plt.xlabel('R [m]')
         plt.ylabel(sig)
         plt.ylim(0,)
@@ -428,7 +436,8 @@ class Shot():
         slope_ys = (y_mid-max_slope*midpt) + max_slope* slope_xs
         plt.plot(slope_xs, slope_ys, c='g',label='grad= {0:.2g}'.format(max_slope))
         plt.legend() 
-
+        
+        return canvas_name
     
     def plot_signal(self, SignalName, figname = None):
         # this could go into another file anyway with plotting stuff
