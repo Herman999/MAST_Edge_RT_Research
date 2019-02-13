@@ -4,9 +4,54 @@ Created on Mon Feb 11 13:45:58 2019
 @author: Tomas
 """
 
-# ML model preparation
+# ML Data from data file 
 
-# dummpy preparation
+import pandas as pd
+import numpy as np
+
+dd = pd.read_excel('ML_data.xlsx')
+#dd is all original data
+
+#ddnum is the test data to be used.
+ddnum = dd.copy()
+ddnum = ddnum.sample(frac=1)
+ddnum.drop(labels=['shot', 'session', 'geometry','shot_time',  'time_em', 'time',
+                   'time_ep', 'transition','Ploss_e', 'BT_e', 'BT', 'BTOut_e', 
+                   'IP_e', 'KAPPA', 'KAPPA_e', 'AYC_NE_e',  'AYC_TE_e', 'AYC_TE',
+                   'AYC_PE', 'AYC_PE_e', 'X1Z_e', 'X2Z', 'X2Z_e'],axis=1, inplace=True)
+# now ddnum.columns = 'Ploss', 'BT', 'IP', 'AYC_NE' only
+
+inputs = ddnum.iloc[0:-20].copy()
+inputs.drop(labels=['Ploss'],axis=1,inplace=True)
+print(inputs.columns)
+cols = inputs.columns
+targets=ddnum.iloc[0:-20]['Ploss']
+
+#logging
+targets = np.log(targets)
+inputs = np.abs(inputs)
+inputs = np.log(inputs)
+
+
+#taking Z value normalisation
+#inputs = (inputs-inputs.mean())/inputs.std()
+#targets = (targets-targets.mean())/targets.std()
+
+
+#for testing
+test_inputs = ddnum.iloc[-20:].copy()
+test_inputs.drop(labels=['Ploss'],axis=1,inplace=True)
+test_targets = ddnum.iloc[-20:]['Ploss']
+
+#logging
+test_inputs = np.abs(test_inputs)
+test_inputs = np.log(test_inputs)
+test_targets = np.log(test_targets)
+
+# z norm
+#test_inputs = (test_inputs-test_inputs.mean())/test_inputs.std()
+#test_targets = (test_targets-test_targets.mean())/test_targets.std()
+
 
 
 #%%
@@ -34,7 +79,7 @@ batch_size = 3
 train_dl = DataLoader(train_ds, batch_size, shuffle=True)
 
 
-model = nn.Linear(5, 1)
+model = nn.Linear(4, 1)
 
 
 
@@ -62,9 +107,10 @@ def fit(num_epochs, model, loss_fn, opt):
         print('Training epoch {} loss: '.format(epoch), loss_fn(model(inputs).squeeze(), targets))
         losstrack.append(loss_fn(model(inputs).squeeze(), targets))
     
-fit(700, model, loss_fn, opt)
+fit(1000, model, loss_fn, opt)
 plt.figure()
 plt.plot(losstrack)
+plt.title('learning rate')
 
 
 #%%
@@ -92,8 +138,9 @@ for i in range(len(inputs)):
     predictions.append(model(inputs[i]).detach().numpy())
     
 #plt.scatter(range(len(test_targets)),np.array(model(torch.from_numpy(test_inputs.values).float())),color='r',label='predicted data')
-plt.scatter(test_targets.values,model_ret)
-plt.scatter(np.array(targets),predictions)
+plt.scatter(test_targets.values,model_ret,label='blind test')
+plt.scatter(np.array(targets),predictions,label='fitting data')
+plt.plot(np.arange(0,20),np.arange(0,20),label='Ideal fit')
 
 plt.xlabel('REAL')
 plt.ylabel('PREDICTED')
