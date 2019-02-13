@@ -66,7 +66,7 @@ def NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,index):
     
     
     
-    result, time, (x,y,x_er,y_er) = s.fit_tanh_pedestal(index, scaling = 1./0.9, sig='NE', preview=True)
+    result, time, (x,y,x_er,y_er) = s.fit_tanh_pedestal(index, scaling = 1./0.9, sig='NE', preview=True, guess=[3e19,2e19,1.47,0.05,1e19,1.,1.])
     res = s._tanh_params(result)
     
     
@@ -101,6 +101,12 @@ for shot_str in shots:
     #delete corrupted shots
     if s.ShotNumber in [24330,27030]:
         continue
+    
+    # take only good data
+    if s.ShotNumber not  in [27036,27037,27444,27453]:
+        continue
+    
+    
 #s = Shot(24129, LHt=[(0.2922,0.290,0.295)], HLt=[(0.3174,0.317,0.318)])
     # LH
     t0 = s._LHt[0][0]
@@ -114,8 +120,8 @@ for shot_str in shots:
     index = np.argmin(abs(times_AYE))
     slice_time = s.data['AYE_NE']['time'][index]
     
-    tolerance = 0.002
-    if min(abs(times_AYE)) >= tolerance:
+    tolerance = 0.003
+    if min(abs(times_AYE)) >= tolerance + abs(t0-t1) + abs (t2-t0):
         print('outside of tolerance')
         continue
     
@@ -208,6 +214,13 @@ for shot_str in shots:
     if s.ShotNumber in [24130,24133,27449,27444,27037]:  #24330,27030,24133,20377,27444,27449,27037]:
         print('skip')
         continue
+    
+    
+    
+    # take only good data
+    if s.ShotNumber not  in [24215,24330,24127,24124,27035,27036]:
+        continue
+    
 #s = Shot(24129, LHt=[(0.2922,0.290,0.295)], HLt=[(0.3174,0.317,0.318)])
     # LH
     #t0 = s._LHt[0][0]
@@ -430,7 +443,7 @@ for i in range(len(HL_ne_average)):
     dic['pe_at_ped_e'] = HL_pe_at_ped_e[i]
     ped_db.loc[len(ped_db)]=dic
     
-writer = pd.ExcelWriter('shot_peddb.xlsx')
+writer = pd.ExcelWriter('shot_peddb_only_good_shots.xlsx')
 ped_db.to_excel(writer,'Sheet1')
 writer.save()
 
