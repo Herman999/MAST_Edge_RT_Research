@@ -17,10 +17,10 @@ alpha = 0.8
 data = pd.read_excel('shot_database_extended_updated.xlsx')
 
 # sellect desired configuration
-data = data[(data['geometry']=='SN')]
+#data = data[(data['geometry']=='SN')]
 #data = data[(data['geometry']=='CND') ]#(data['geometry']=='maybe CND')]
 #data = data[(data['geometry']=='maybe CND')]
-#data = data[(data['geometry']=='CND') | (data['geometry']=='maybe CND')]
+data = data[(data['geometry']=='CND') | (data['geometry']=='maybe CND')]
 
 # filter corrupted X1Z or X
 data = data[~(abs(data['X2Z_e'])>=1)]
@@ -54,7 +54,7 @@ data_HL = combined[combined['transition']=='HL']
 # PLot 
 
 plt.figure()
-plt.title(r'X Point Height Study [$\alpha={}$, SN]'.format(alpha))
+plt.title(r'X Point Height Study [$\alpha={}$, CDN + maybe CDN]'.format(alpha))
 
 
 

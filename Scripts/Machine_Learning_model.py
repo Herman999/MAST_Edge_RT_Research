@@ -34,8 +34,8 @@ inputs = np.log(inputs)
 
 
 #taking Z value normalisation
-#inputs = (inputs-inputs.mean())/inputs.std()
-#targets = (targets-targets.mean())/targets.std()
+inputs = (inputs-inputs.mean())/inputs.std()
+targets = (targets-targets.mean())/targets.std()
 
 
 #for testing
@@ -44,13 +44,13 @@ test_inputs.drop(labels=['Ploss'],axis=1,inplace=True)
 test_targets = ddnum.iloc[-20:]['Ploss']
 
 #logging
-test_inputs = np.abs(test_inputs)
-test_inputs = np.log(test_inputs)
-test_targets = np.log(test_targets)
+#test_inputs = np.abs(test_inputs)
+#test_inputs = np.log(test_inputs)
+#test_targets = np.log(test_targets)
 
 # z norm
-#test_inputs = (test_inputs-test_inputs.mean())/test_inputs.std()
-#test_targets = (test_targets-test_targets.mean())/test_targets.std()
+test_inputs = (test_inputs-test_inputs.mean())/test_inputs.std()
+test_targets = (test_targets-test_targets.mean())/test_targets.std()
 
 
 
