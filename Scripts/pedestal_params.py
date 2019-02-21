@@ -10,7 +10,7 @@ Created on Thu Jan 31 10:37:24 2019
 from signal_dict_13_DEC_PULL import signals
 import matplotlib.pyplot as plt
 import numpy as np
-
+plt.rcParams.update({'font.size': 14})
 
 
 slices = 1
@@ -66,7 +66,7 @@ def NE_point_at_pedestal(s,ne_at_ped,ne_average,slice_time,index):
     
     
     
-    result, time, (x,y,x_er,y_er) = s.fit_tanh_pedestal(index, scaling = 1./0.9, sig='NE', preview=True, guess=[3e19,2e19,1.47,0.05,1e19,1.,1.])
+    result, time, (x,y,x_er,y_er), canvas = s.fit_tanh_pedestal(index, scaling = 1./0.9, sig='NE', preview=True, guess=[3e19,2e19,1.47,0.05,1e19,1.,1.])
     res = s._tanh_params(result)
     
     
@@ -330,8 +330,8 @@ pe_at_ped_e.extend(HL_pe_at_ped_e)
 #%% PL<OT
 
 # NE            
-fig, ax = plt.subplots(3,sharex=True)
-ax[0].set_title(r'LH + HL Pedestal Params')
+fig, ax = plt.subplots(3,sharex=True,figsize=(13,9))
+ax[0].set_title(r'Pedestal Characteristics on Average Density')
 ax[0].errorbar(fmt='o',x=LH_ne_average,y=LH_ne_at_ped,xerr=LH_ne_average_e,c='orange',label='LH')
 ax[0].errorbar(fmt='o',x=HL_ne_average,y=HL_ne_at_ped,xerr=HL_ne_average_e,c='blue',label='HL')
 #ax[0].scatter(LH_ne_average,LH_ne_at_ped,c='orange',label='LH')
@@ -347,10 +347,10 @@ for i, txt in enumerate(HL_shot_list):
 (res,cov) = np.polyfit(ne_average,ne_at_ped,deg=1,cov=True)
 neav = np.linspace(min(ne_average),max(ne_average))
 nefit = res[1] + res[0] * neav
-ax[0].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
+ax[0].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
     
-ax[0].set_xlabel('ne_average')
-ax[0].set_ylabel('ne_at_ped')
+ax[0].set_xlabel(r'$\overline{N_e}$')
+ax[0].set_ylabel(r'$Ne_{ped} [M^{-3}]$')
 ax[0].legend()
 #ax[0].set_ylim([0,0.05e21])
 
@@ -368,7 +368,7 @@ for i, txt in enumerate(HL_shot_list):
 (res,cov) = np.polyfit(ne_average,te_at_ped,w=1/np.sqrt(np.array(ne_average_e)**2+np.array(te_at_ped)**2),deg=1,cov=True)
 neav = np.linspace(min(ne_average),max(ne_average))
 nefit = res[1] + res[0] * neav
-ax[1].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,1]),"{:.2E}".format(res[1])))
+ax[1].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,1]),"{:.2E}".format(res[1])))
 
 #attempt for error calculation
 #nefitm = res[1] + (res[0] ) * neav - cov[0,0]
@@ -377,8 +377,8 @@ ax[1].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".form
 #ax[1].plot(neav,nefitp,color = 'orange',linestyle = 'dashed', alpha = 0.5)
 #ax[1].set_ylim([0,455])
 #ax[1].set_xlim([0,4e19])
-ax[1].set_xlabel('ne_average')
-ax[1].set_ylabel('te_at_ped [ev]')
+ax[1].set_xlabel(r'$\overline{N_e}$')
+ax[1].set_ylabel(r'$Te_{ped} [eV]$')
 ax[1].legend()
 
 # PE
@@ -397,10 +397,10 @@ for i, txt in enumerate(HL_shot_list):
 (res,cov) = np.polyfit(ne_average,pe_at_ped,w=1/np.sqrt(np.array(ne_average_e)**2+np.array(pe_at_ped)**2),deg=1,cov=True)
 neav = np.linspace(min(ne_average),max(ne_average))
 nefit = res[1] + res[0] * neav
-ax[2].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
+ax[2].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
 
-ax[2].set_xlabel('ne_average')
-ax[2].set_ylabel('pe_at_ped')
+ax[2].set_xlabel(r'$\overline{N_e}$')
+ax[2].set_ylabel(r'$Pe_{ped} [a.u.]$')
 ax[2].legend()
 
 #%%

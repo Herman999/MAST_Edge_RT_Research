@@ -68,8 +68,8 @@ pe_HL_e = list(db_ped[(db_ped['transition']=='HL')]['pe_at_ped_e'])
 
 
 # NE            
-fig, ax = plt.subplots(3,sharex=True)
-ax[0].set_title(r'LH + HL Pedestal dependance on X point')
+fig, ax = plt.subplots(3,sharex=True,figsize=(12,7))
+ax[0].set_title(r'Pedestal Characteristics on X point height')
 ax[0].errorbar(fmt='o',x=x_LH,y=ne_LH,xerr=x_LH_e,yerr=ne_LH_e,c='orange',label='LH')
 ax[0].errorbar(fmt='o',x=x_HL,y=ne_HL,xerr=x_HL_e,yerr=ne_HL_e,c='blue',label='HL')
 #ax[0].scatter(LH_ne_average,LH_ne_at_ped,c='orange',label='LH')
@@ -91,7 +91,7 @@ ax[0].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".form
 """
     
 ax[0].set_xlabel('X point height')
-ax[0].set_ylabel('ne_at_ped')
+ax[0].set_ylabel(r'$Ne_{ped} [m^{-3}]$')
 ax[0].legend()
 #ax[0].set_ylim([0,0.05e21])
 
@@ -124,7 +124,7 @@ ax[1].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".form
 #ax[1].set_xlim([0,4e19])
 """
 ax[1].set_xlabel('X point height')
-ax[1].set_ylabel('te_at_ped [ev]')
+ax[1].set_ylabel(r'$Te_{ped} [eV]$')
 ax[1].legend()
 
 # PE
@@ -150,5 +150,5 @@ nefit = res[1] + res[0] * neav
 ax[2].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
 """
 ax[2].set_xlabel('X point height')
-ax[2].set_ylabel('pe_at_ped')
+ax[2].set_ylabel(r'$Pe_{ped} [a.u.]$')
 ax[2].legend()

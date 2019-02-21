@@ -415,8 +415,11 @@ class Shot():
         
         #show data and fit
         plt.errorbar(x,y, yerr=yr, xerr=xr, elinewidth=0.5)
+        
+        #plt.plot(x, ped_tanh_odr2(result,x), c='r', label='mtanh fit')
         fitx = np.arange(np.min(x),np.max(d),step=0.001)
         plt.plot(fitx, ped_tanh_odr2(result,fitx), c='r', label='mtanh fit')
+        
         plt.xlabel('R [m]')
         plt.ylabel(sig)
         plt.ylim(0,)
@@ -639,7 +642,7 @@ class Shot():
         
     def plot_JP(self, tlim = (0,0.5), ip = 'IP', wmhd = 'WMHD', coreTe = 'AYC_TE0', 
                 ne = 'ANE_DENSITY', Dalpha = 'AIM_DA_TO', Bt = 'BT',
-                Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM',
+                PINJ = 'PINJ',Ploss = 'Ploss', POHM = 'POHM',
                 plot_thomson = False, label_thomson = False):
         """
         Plot some signals together on single figure
@@ -687,7 +690,7 @@ class Shot():
         
         if plot_thomson:
             for i in self.data['AYE_NE']['time']:
-                ax[plot_thomson].axvline(i)
+                ax[plot_thomson].axvline(i,color='orange',linestyle='dashed')
             if label_thomson == True:
                 for index, t in enumerate(self.data['AYE_NE']['time']):
                     ax[plot_thomson].text(t,0.,str(index))
@@ -742,7 +745,7 @@ class Shot():
         else:
             pass
         if units == 'MW': 
-            data=data*10e6/5 # what?
+            data=data*10e6/7 # what?
         
         if signame!='': 
             label=signame
@@ -761,8 +764,13 @@ class Shot():
         else: 
             ax[panel].plot(time,data,label=label)
         
-        ax[panel].annotate(r'$%s \ [%s]$' %(signame, units), xy=(0.01,0.7), xycoords='axes fraction', fontsize=11)
-        ax[panel].legend()
+        if signame == 'WMHD':
+            ax[panel].ticklabel_format(axis='y', style='sci', scilimits=(4,6))
+        if signame == 'Ploss':
+            ax[panel].ticklabel_format(axis='y', style='sci', scilimits=(0,0))
+        if signame!='PINJ':
+            ax[panel].annotate(r'$%s \ [%s]$' %(signame, units), xy=(0.01,0.7), xycoords='axes fraction', fontsize=11)
+        #ax[panel].legend()
         
     # EXPERIMENTAL #
     def add_ir_signal(self, signals= ['AIT_PTOT_ISP', 'AIT_PTOT_OSP']):
