@@ -194,27 +194,47 @@ class Shot():
         return fig, ax
         
         
-    def Te_Tec(self, index, A=1, prev=False): #THIS WILL BE Te_Tec_H (mode)
+    def Te_Tec(self, index, A=1., prev=False): #THIS WILL BE Te_Tec_H (mode)
         """
         Generate (T_e,T_ec) for given index of Thomson data (using edge)
-        A = multiplicative Tec constant
+        A = multiplicative Tec constant 
+        A ~ 0.45 * Z^1/3 / (R(m)A_i)^1/6
+        
+        Only really works in H mode when tanh fit works. But pedestal fits in L still not horrendous.
         """
-        edge_ne_fit = self.fit_edge_tanh_pedestal(index, preview = prev) # result, time, (R's, ne's)
+        edge_ne_fit = self.fit_tanh_pedestal(index, preview = prev) # result, time, (R's, ne's)
         knee, width, max_slope, ne_max_slope, ne_knee = self._tanh_params(edge_ne_fit[0])
         R_max_slope = knee + width /2.
         
-        edge_te_fit = self.fit_edge_tanh_pedestal(index, sig='TE', preview = prev)
-        T_e = ped_tanh_odr2(edge_te_fit[0], R_max_slope)
+        # fitting TE pedestal is probably useless but we do it anyway
+        res,t,xys,Te_name = self.fit_tanh_pedestal(index, sig='TE', preview = False) # result, time, (x,y,x_er,y_er), canvas_name
+        # clean up data from SOL
+        cond = np.where(xys[0] < knee+ width) # only want R's inside the NE pedestal
+        # apply condition to TE data (returned from self.fit_tanh_pedestal)
+        x,y,xer,yer = xys[0][cond],xys[1][cond],xys[2][cond],xys[3][cond]
+        
+        # do straight line fit through remaining data
+# can this be done better, taking account of xer,yer?
+        try:
+            p = np.polyfit(x,y,1)
+            T_e = R_max_slope*p[0]+ p[1]
+        except:
+            T_e = -1e3
+        
+        ####################OLD T_e line###########################
+        #T_e = ped_tanh_odr2(edge_te_fit[0], R_max_slope) # this fit is bad
         
         Bts, B_times = self.data['BT']['data'], self.data['BT']['time']
-        B_t = np.interp(edge_ne_fit[1], B_times, Bts)
+        B_t = np.interp(edge_ne_fit[1], B_times, Bts) # find B_T at time of NE fit
         
-        T_ec = np.sqrt(-max_slope/ne_max_slope) * np.power(np.abs(B_t), 2./3.) * A
-        
-        print('max slope: {0:.3e}. ne at max slope: {1:.3e}. Bt = {2}'.format(max_slope, ne_max_slope, B_t))
+        Ln = -ne_max_slope/max_slope
+        Theta_c = A * np.power(np.abs(B_t), 2./3.)
+        T_ec = Theta_c * np.sqrt(Ln)
+                
+    #    print('max slope: {0:.3e}. ne at max slope: {1:.3e}. Bt = {2}'.format(max_slope, ne_max_slope, B_t))
         return (T_e, T_ec)
     
-    def Te_Tec_all(self, first, last):
+    def Te_Tec_all(self, good_indexes, A=1.):
         
         cols = {'LH':'orange', 
                 'L':'red', 
@@ -231,37 +251,39 @@ class Shot():
         if len(self._LHt)>1:
             print('more than one h mode period. shot {}'.format(self.ShotNumber))
             return 
-            # must insert for second trasitions.
+            # must edit this if second trasitions.
         
         plt.figure('Te/c')
         plt.xlabel('Tec')
         plt.ylabel('Te')
-        plt.xlim(0,10)
-        plt.ylim(0,300)
-# =============================================================================
-# plt.scatter(-1,-1, marker='x', c='r', label='L')
-# plt.scatter(-1,-1, marker='x', c='g', label='H')
-# plt.scatter(-1,-1, marker='x', c='orange', label='LH')
-# plt.scatter(-1,-1, marker='x', c='blue', label='HL')
-# plt.legend()
-# =============================================================================
+#        plt.xlim(0,10)
+#        plt.ylim(0,300)
         
         for ind, time in enumerate(self.data['AYE_R']['time']):
-            if ind<first: #cutoffs for bad timings
-                pass
-            elif ind>last:
+#            if ind<first: #cutoffs for bad timings
+#                pass
+#            elif ind>last:
+#                pass
+            if ind not in good_indexes:
                 pass
             else:
                 label= lookup[bisect.bisect(lookup,(time,))][1] #'L', 'LH', 'H' etc
                 if label in ['L','LH']:
+        # here the calls to self.Te_Tec are made for given index
                     Te,Tec = self.Te_Tec(ind)
                 else: # its 'H' or 'HL'
                     Te,Tec = self.Te_Tec(ind)
                 
                 plt.figure('Te/c')
-                plt.scatter(Tec, Te, marker='x', c=cols[label])
+                plt.scatter(Tec*A, Te, marker='x', c=cols[label])
                 
                 #check whether time in L, H, or LHt, HLt...
+        # additional plot points for legend generation
+# plt.scatter(-1,-1, marker='x', c='r', label='L')   
+# plt.scatter(-1,-1, marker='x', c='g', label='H')
+# plt.scatter(-1,-1, marker='x', c='orange', label='LH')
+# plt.scatter(-1,-1, marker='x', c='blue', label='HL')
+# plt.legend()
     
     def _tanh_params(self, result):
         """return useful values from tanh fit parameters
@@ -390,6 +412,7 @@ class Shot():
         x,y,x_er,y_er = data['x'].values, data['y'].values, data['x_er'].values, data['y_er'].values
         
         #do fitting on combined data
+# if not NE signal, want to change the p guess.
         result = do_odr([x,y,x_er,y_er], p=guess) # a,b,x_sym, width, slope, dwell, x_well
         
         knee, width, max_slope, ne_max_slope, ne_at_knee = self._tanh_params(result) # parameters to check if fit is decent
@@ -415,7 +438,7 @@ class Shot():
         
         #show data and fit
         plt.errorbar(x,y, yerr=yr, xerr=xr, elinewidth=0.5)
-        fitx = np.arange(np.min(x),np.max(d),step=0.001)
+        fitx = np.arange(np.min(x),np.max(x),step=0.001)
         plt.plot(fitx, ped_tanh_odr2(result,fitx), c='r', label='mtanh fit')
         plt.xlabel('R [m]')
         plt.ylabel(sig)
@@ -779,6 +802,130 @@ class Shot():
               'errors': None,
               'units': unit}
         self.data['Ploss_IR'] = di
+    
+    def plot_JP_report(self, tlim = (0,0.5), ip = 'IP', wmhd = 'WMHD', coreTe = 'AYC_TE0', 
+                ne = 'ANE_DENSITY', Dalpha = 'AIM_DA_TO', Bt = 'BT',
+                Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM',
+                plot_thomson = False, label_thomson = False):
+        """
+        Plot some signals together on single figure FOR REPORT
+        """         
+        n_signals = 7 # number of signals to be plotted
+        # make figure and adjust boundaries
+        fig, ax = plt.subplots(n_signals, sharex=True, figsize=(6,4))
+        fig.canvas.set_window_title('Shot {} FOR REPORT'.format(self.ShotNumber))
+        fig.subplots_adjust(top=0.935,bottom=0.12,left=0.1,right=0.975,hspace=0.0,wspace=0.2)    
+        # add figure title, labels, set time range
+#        fig.suptitle('Shot %s' % (self. ShotNumber))
+        ax[-1].set_xlabel('$time \ [s]$')
+        ax[-1].set_xlim(tlim)
+        
+        # mark LH, HL transition points
+        if self._LHt:
+            for tset in self._LHt:  # tset = (time, -tlim_err, =tlim_err)
+                for axes in ax:
+                    axes.axvline(tset[0], c='g', lw=1, ls='--', clip_on=False) #draw vertical line for transition
+                    if tset[1] != 0:
+                        axes.axvline(tset[1], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+                    if tset[2] != 0:
+                        axes.axvline(tset[2], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+        if self._HLt:
+            for tset in self._HLt:  # tset = (time, -tlim_err, +tlim_err)
+                for axes in ax:
+                    axes.axvline(tset[0], c='r', lw=1, ls='--', clip_on=False)   
+                    if tset[1] != 0:
+                        axes.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6)
+                    if tset[2] != 0:
+                        axes.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6)
+        # plot plasma current, ax = 0
+        self._plot_ax_sig2(ax, ip, 0, signame = 'I_{p}')
+        # plot n_e
+        self._plot_ax_sig2(ax, ne, 1, signame = 'n_{e}', plot_errors='fill', units=r'$x10^{20} m^{2}$', annot=False) # , units='m^{-2}')
+        ax[1].annotate(r'$n_{e} \ [x10^{20} \ m^{-2}]$', xy=(0.01,0.65), xycoords='axes fraction', fontsize=11)
+        # plot WMHD
+        self._plot_ax_sig2(ax, wmhd,2 , signame = 'W_{MHD}')
+        # plot core T_e
+        self._plot_ax_sig2(ax, coreTe, 3 , signame = 'T_{e}^{core}',plot_errors='fill')
+        # plot Dalpha of some kind
+        self._plot_ax_sig2(ax, Dalpha, 4, signame = 'D_{\\alpha}', annot=False)
+        ax[4].annotate(r'$D_{\alpha} \ [x10^{19} \ photons/sr. m^{2}. s]$', xy=(0.01,0.65), xycoords='axes fraction', fontsize=11)
+        
+        # plot B_T
+        self._plot_ax_sig2(ax, Bt, 5, signame = 'B_{T}')
+        # plot powers
+        #self._plot_ax_sig(ax, POHM, panel = 6, signame = 'Pohm', label='POHM', errors=True) #Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM'
+        self._plot_ax_sig2(ax, Ploss, panel = 6, signame = 'P_{loss}', plot_errors='fill')
+        self._plot_ax_sig2(ax, PINJ, panel = 6, plot_errors='fill', annot=False)
+        
+        ax[6].annotate(r'$P_{inj} \ [MW]$', xy = (0.01,0.3), xycoords='axes fraction', fontsize=11, color='#8B0000')
+        return fig, ax
+
+    
+    def _plot_ax_sig2(self, ax, sig, panel, signame='', plot_errors=False, units=None, label=None, annot=True):
+        """ for use in plot_JP
+        plots signal (sig) on subplot axes (ax[panel]) and labels with signame (and sig units)
+        need to add error handeling
+        Note: use units with care, as not longer automatic, maybe just use for presentation plots
+        """
+        # type(ax[panel]) might want to make sure its correct
+        shape = self.data[sig]['data'].shape
+        if len(shape) == 2:
+            print('Data format of {} has another dimension -> taking mean'.format(sig))
+            time = self.data[sig]['time']
+            data = np.nanmean(self.data[sig]['data'],axis=1)
+            try:
+                errors = np.nanmean(self.data[sig]['errors'],axis=1)
+            except:
+                print('No errors found in {}'.format(sig))
+                errors = self.data[sig]['errors']
+    
+        else:    
+            time = self.data[sig]['time']
+            data = self.data[sig]['data']
+            errors = self.data[sig]['errors'] # may be None, deal with later
+        
+        if not units:
+            units = self.data[sig]['units']
+        else:
+            pass
+        
+        # correct other units
+        if sig == 'ANE_DENSITY':
+            data = data/1e20
+        if sig == 'WMHD':
+            data = data/1e6
+            units = r'$MW$'
+        if sig == 'AYC_TE0':
+            data = data/1e3
+            units = r'$keV$'
+        if sig == 'Ploss':
+            data = data/1e6
+            units = r'$MW$'
+            errors = errors/1e6
+        if sig == 'AIM_DA_TO':
+            data = data/1e19
+        
+        if signame!='': 
+            label=signame
+        
+        # Decide how to plot depending on plot_error call
+        if plot_errors == True:
+            #linestyle = '.'
+            ax[panel].errorbar(time,data, yerr=errors,ecolor="red",label=label)
+        elif plot_errors == 'fill':
+            try:
+                if errors == None:        
+                    ax[panel].plot(time,data,label=label)
+            except:
+                ax[panel].plot(time,data,label=label)
+                ax[panel].fill_between(time, data-np.nan_to_num(errors), data + np.nan_to_num(errors), alpha=0.3)
+        else: 
+            ax[panel].plot(time,data,label=label)
+        
+        if annot:
+            ax[panel].annotate(r'$%s \ [%s]$' %(signame, units), xy=(0.01,0.65), xycoords='axes fraction', fontsize=11)
+
+        #ax[panel].legend()
     
 
 def plot_shot_comparison(shots, tlim = (0,1), ip = 'IP', wmhd = 'WMHD', coreTe = 'AYC_TE0', ne = 'ANE_DENSITY', Dalpha = 'AIM_DA_TO', Bt = 'BT', Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM'):

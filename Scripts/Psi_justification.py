@@ -8,7 +8,7 @@ Psi 95 justification or not
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from ByHand import ohno
+import ByHand as bh
 
 #%% data import
 from Shot_Class import Shot
@@ -62,10 +62,10 @@ inds = np.arange(69,75) # 69 to 74
 pguess=[3.0e19,2.0e19,1.47,0.05,1.0e19,1,1] # parameter guess for skinny pedestals
 
 shots_inds = [[s2,np.arange(69,75),True], # shot class, indexes, whether should use altered pguess or not
-              [s3,np.arange(63,79),True],
-              [s4,np.arange(63,78),True],
-              [s11,np.arange(62,77),False],
-              [s12,np.arange(66,74),False],
+#              [s3,np.arange(63,79),True],
+#              [s4,np.arange(63,78),True],
+#              [s11,np.arange(62,77),False],
+#              [s12,np.arange(66,74),False],
 #              [s13,np.arange(64,72),False],
 #              [s14,np.arange(64,72),False],
 #              [s15,np.arange(64,72),False],
@@ -79,17 +79,20 @@ shots_inds = [[s2,np.arange(69,75),True], # shot class, indexes, whether should 
 #              [s29,np.arange(64,80),False],
 #              [s210,np.arange(72,79),False],
               ]
-
+good_data = []
 for shot,inds,vrai in shots_inds:
     for i in inds:
         print(i)
+        
+        #generate the tanh fits, with preview
         if vrai:
             result, time, data, canvas_name = shot.fit_tanh_pedestal(i,guess=pguess, preview=True)
         else:
             result, time, data, canvas_name = shot.fit_tanh_pedestal(i, preview=True)
-            
+        
+        # find the relevant variables from fit
         knee, width, max_slope, ne_max_slope, ne_at_knee = shot._tanh_params(result)
-            # Psi data
+        # get Psi data
         PsiTime, Psi100, Psi95, Psi90 = [shot.data['EFM_R_PSI100_OUT']['time'], 
                                          shot.data['EFM_R_PSI100_OUT']['data'],
                                          shot.data['EFM_R_PSI95_OUT']['data'],
@@ -104,18 +107,39 @@ for shot,inds,vrai in shots_inds:
         if outside>1.55: # the width is way too large. Don't even check it by hand
             good = False 
         else: # fit may be good
-            check = ohno(canvas_name, 'fit')
+            check = bh.ohno(canvas_name, 'fit')
             good = check.do_verify()
         
-        if good:
-            plt.figure('comp5')
+        if good: # can add to plot
+            plt.figure('comp54')
             plt.scatter(knee+width/2.,P100, c='g', marker='o')
             plt.scatter(knee+width/2.,P98, c='r', marker='x')
             plt.scatter(knee+width/2.,P95, c='b', marker='^')
             plt.text(knee+width/2.,P95, shot.ShotNumber)
+            good_data.append([knee+width/2., P100, P98, P95])
     
-plt.figure('comp5')
+#%%
+
+plt.figure('comp6')
+for rf, r100, r98, r95 in good_data:
+        plt.scatter(rf,r100, c='g', marker='o')
+        plt.scatter(rf,r98, c='r', marker='x')
+        plt.scatter(rf,r95, c='b', marker='^')
+        plt.text(rf,r95, shot.ShotNumber)
 plt.title('green = P100; red = P98; blue = P95')
 plt.xlabel('R|max slope from ne pedestal')
 plt.ylabel('R|Psi')
-    
+
+plt.scatter(0,0, c='g', marker='o', label='Psi100')
+plt.scatter(0,0, c='r', marker='x', label='Psi98')
+plt.scatter(0,0, c='b', marker='^', label='Psi95')
+
+xst = np.arange(1.3,1.6, 0.01)
+plt.plot(xst,xst)    
+
+#%%
+
+gd_copy = good_data.copy()
+
+# test using different psi for Te, Tec plots
+
