@@ -53,8 +53,8 @@ data_HL = combined[combined['transition']=='HL']
 
 # PLot 
 
-plt.figure()
-plt.title(r'X Point Height Study [$\alpha={}$, CDN + maybe CDN]'.format(alpha))
+plt.figure(figsize=(13,9))
+plt.title(r'X Point Height Study ($\alpha={}$, CDN and DN)'.format(alpha))
 
 
 
@@ -63,8 +63,8 @@ y_err = np.sqrt(list((data_LH['Ploss_e']/data_LH['Ploss'])**2 + (data_LH['NE_e']
 y_err = y_err * data_LH['Ploss']/(data_LH['NE']**alpha) # * data
 plt.errorbar(x = data_LH['X1Z'], markersize=15, y = data_LH['Ploss']/(data_LH['NE']**alpha),xerr = data_LH['X1Z_e'], yerr = y_err ,fmt='x', label = 'LH',color = 'red')
 
-for i, txt in enumerate(data_LH['shot']):
-    plt.annotate(txt, (list(data_LH['X1Z'])[i], list(data_LH['Ploss']/(data_LH['NE']**alpha))[i]))
+#for i, txt in enumerate(data_LH['shot']):
+#    plt.annotate(txt, (list(data_LH['X1Z'])[i], list(data_LH['Ploss']/(data_LH['NE']**alpha))[i]))
 
 
 
@@ -73,8 +73,8 @@ y_err = np.sqrt(list((data_HL['Ploss_e']/data_HL['Ploss'])**2 + (data_HL['NE_e']
 y_err = y_err * data_HL['Ploss']/(data_HL['NE']**alpha) # * data
 plt.errorbar(x = data_HL['X1Z'], markersize=15, y = data_HL['Ploss']/(data_HL['NE']**alpha),xerr = data_HL['X1Z_e'], yerr = y_err ,fmt='x', label = 'HL',color = 'blue')
 
-for i, txt in enumerate(data_HL['shot']):
-    plt.annotate(txt, (list(data_HL['X1Z'])[i], list(data_HL['Ploss']/(data_HL['NE']**alpha))[i]))
+#for i, txt in enumerate(data_HL['shot']):
+#    plt.annotate(txt, (list(data_HL['X1Z'])[i], list(data_HL['Ploss']/(data_HL['NE']**alpha))[i]))
 
 
 
