@@ -57,7 +57,7 @@ class ohno:
     def do_verify(self):
         self._get_fig()
         self._prompt()
-        self._reopen_Spyder()
+        #self._reopen_Spyder()
         self._close_others()
         return self.verify
         
