@@ -68,9 +68,15 @@ pe_HL_e = list(db_ped[(db_ped['transition']=='HL')]['pe_at_ped_e'])
 
 
 # NE            
-fig, ax = plt.subplots(3,sharex=True,figsize=(12,7))
-ax[0].set_title(r'Pedestal Characteristics on X point height')
-ax[0].errorbar(fmt='o',x=x_LH,y=ne_LH,xerr=x_LH_e,yerr=ne_LH_e,c='orange',label='LH')
+fig, ax = plt.subplots(3,sharex=True,figsize=(13,9))
+
+
+textstr = r'$I_p=700$kA $B_t=-0.425$T'
+ax[0].text(1.08, 4.5e19, textstr, fontsize=14)
+ax[0].text(-1.045, 4.5e19, textstr, fontsize=14)
+
+ax[0].set_title(r'Pedestal Characteristics on X1 point height')
+ax[0].errorbar(fmt='o',x=x_LH,y=ne_LH,xerr=x_LH_e,yerr=ne_LH_e,c='red',label='LH')
 ax[0].errorbar(fmt='o',x=x_HL,y=ne_HL,xerr=x_HL_e,yerr=ne_HL_e,c='blue',label='HL')
 #ax[0].scatter(LH_ne_average,LH_ne_at_ped,c='orange',label='LH')
 #ax[0].scatter(HL_ne_average,HL_ne_at_ped,c='blue',label='HL')
@@ -100,7 +106,7 @@ ax[0].legend()
 #ax[1].scatter(HL_ne_average,HL_te_at_ped,c='blue',label='HL')
 #ax[1].errorbar(fmt='o',x=LH_ne_average,y=LH_te_at_ped,xerr=LH_ne_average_e,yerr=LH_te_at_ped_e,c='orange',label='LH')
 #ax[1].errorbar(fmt='o',x=HL_ne_average,y=HL_te_at_ped,xerr=HL_ne_average_e,yerr=HL_te_at_ped_e,c='blue',label='HL')
-ax[1].errorbar(fmt='o',x=x_LH,y=te_LH,xerr=x_LH_e,yerr=te_LH_e,c='orange',label='LH')
+ax[1].errorbar(fmt='o',x=x_LH,y=te_LH,xerr=x_LH_e,yerr=te_LH_e,c='red',label='LH')
 ax[1].errorbar(fmt='o',x=x_HL,y=te_HL,xerr=x_HL_e,yerr=te_HL_e,c='blue',label='HL')
 
 """
@@ -133,7 +139,7 @@ ax[1].legend()
 #ax[2].errorbar(fmt='o',x=LH_ne_average,y=LH_pe_at_ped,xerr=LH_ne_average_e,yerr=LH_pe_at_ped_e,c='orange',label='LH')
 #ax[2].errorbar(fmt='o',x=HL_ne_average,y=HL_pe_at_ped,xerr=HL_ne_average_e,yerr=HL_pe_at_ped_e,c='blue',label='HL')
 
-ax[2].errorbar(fmt='o',x=x_LH,y=pe_LH,xerr=x_LH_e,yerr=pe_LH_e,c='orange',label='LH')
+ax[2].errorbar(fmt='o',x=x_LH,y=pe_LH,xerr=x_LH_e,yerr=pe_LH_e,c='red',label='LH')
 ax[2].errorbar(fmt='o',x=x_HL,y=pe_HL,xerr=x_HL_e,yerr=pe_HL_e,c='blue',label='HL')
 """
 for i, txt in enumerate(LH_shot_list):

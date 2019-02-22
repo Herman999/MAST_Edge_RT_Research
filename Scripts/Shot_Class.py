@@ -417,7 +417,7 @@ class Shot():
         plt.errorbar(x,y, yerr=yr, xerr=xr, elinewidth=0.5)
         
         #plt.plot(x, ped_tanh_odr2(result,x), c='r', label='mtanh fit')
-        fitx = np.arange(np.min(x),np.max(d),step=0.001)
+        fitx = np.arange(np.min(x),np.max(x),step=0.001)
         plt.plot(fitx, ped_tanh_odr2(result,fitx), c='r', label='mtanh fit')
         
         plt.xlabel('R [m]')

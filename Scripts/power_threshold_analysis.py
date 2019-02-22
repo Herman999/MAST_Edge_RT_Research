@@ -91,11 +91,11 @@ dflh_ANE_NE_ploss  = dflh_ANE_NE_ploss[(dflh_ANE_NE_ploss.index.isin(dflh_ANE_NE
 
 
 
-plt.figure()
-plt.errorbar(x = dflh_AYC_NE['p_value'], markersize=10, y = dflh_AYC_NE_ploss['p_value'], xerr=dflh_AYC_NE['p_value_err'],yerr =  dflh_AYC_NE_ploss['range_err'],fmt='o', label = 'LH AYC_NE',color = 'salmon')
+plt.figure(figsize=(13,9))
+plt.errorbar(x = dflh_AYC_NE['p_value'], markersize=10, y = dflh_AYC_NE_ploss['p_value'], xerr=dflh_AYC_NE['p_value_err'],yerr =  dflh_AYC_NE_ploss['range_err'],fmt='o', label = 'LH AYC_NE',color = 'red')
 
-for i, txt in enumerate(dflh_AYC_NE_shots):
-    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
+#for i, txt in enumerate(dflh_AYC_NE_shots):
+#    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
 
 #plt.errorbar(x = dflh_ANE_NE['p_value'], markersize=10, y = dflh_ANE_NE_ploss['p_value'], xerr=dflh_ANE_NE['range_err'], yerr = dflh_ANE_NE_ploss['range_err'],fmt='o', label = 'LH ANE_NE',color = 'r')
 
@@ -157,7 +157,7 @@ print(r'the LH $\alpha$ proportanility coeficient is {0} \pm {1}'.format(a,a_v))
 #plt.scatter(np.power(x_raw,a),y_raw)
 
 xnew =np.linspace(min(x_data),max(x_data), 30)
-plt.plot(np.exp(xnew), np.exp(a*xnew+b),linestyle='dashed',label = r'$L \to H$ loglog fit $\alpha=${0} $\pm$ {1}'.format(np.round(a,2), np.round(a_v,2)))
+plt.plot(np.exp(xnew), np.exp(a*xnew+b),linestyle='dashed',color='orange',label = r'$L \to H$ loglog fit $\alpha=${0} $\pm$ {1}'.format(np.round(a,2), np.round(a_v,2)))
 
 #%%
 # Here do HL analysis and plot
@@ -187,10 +187,10 @@ dflh_ANE_NE_ploss  = dflh_ANE_NE_ploss[(dflh_ANE_NE_ploss.index.isin(dflh_ANE_NE
 
 
 
-plt.errorbar(x = dflh_AYC_NE['p_value'], markersize=10, y = dflh_AYC_NE_ploss['p_value'], xerr=dflh_AYC_NE['p_value_err'],yerr =  dflh_AYC_NE_ploss['range_err'],fmt='x', label = 'HL AYC_NE',color = 'green')
+plt.errorbar(x = dflh_AYC_NE['p_value'], markersize=10, y = dflh_AYC_NE_ploss['p_value'], xerr=dflh_AYC_NE['p_value_err'],yerr =  dflh_AYC_NE_ploss['range_err'],fmt='x', label = 'HL AYC_NE',color = 'blue')
 
-for i, txt in enumerate(dflh_AYC_NE_shots):
-    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
+#for i, txt in enumerate(dflh_AYC_NE_shots):
+#    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
 
 #plt.errorbar(x = dflh_ANE_NE['p_value'], markersize=10, y = dflh_ANE_NE_ploss['p_value'], xerr=dflh_ANE_NE['range_err'], yerr = dflh_ANE_NE_ploss['range_err'],fmt='x', label = 'HL ANE_NE',color = 'lime')
 
@@ -229,7 +229,7 @@ print(r'the HL $\alpha$ proportanility coeficient is {0} \pm {1}'.format(a,a_v))
 #plt.scatter(np.power(x_raw,a),y_raw)
 
 xnew =np.linspace(min(x_data),np.log(4e19), 30)
-plt.plot(np.exp(xnew), np.exp(a*xnew+b),linestyle='dashed',label = r'$H \to L$ loglog fit $\alpha=${0} $\pm$ {1}'.format(np.round(a,2), np.round(a_v,2)))
+plt.plot(np.exp(xnew), np.exp(a*xnew+b),linestyle='dashed', color = 'green',label = r'$H \to L$ loglog fit $\alpha=${0} $\pm$ {1}'.format(np.round(a,2), np.round(a_v,2)))
 
 
 
@@ -239,7 +239,10 @@ plt.legend(loc=2)
 #plt.xscale('log')
 #plt.yscale('log')
 plt.xlim([0,7e19])
-plt.ylim([0,9e6])
+textstr = r'$I_p=700$kA $B_t=-0.425$T'
+plt.text(3.6e19, 8e6, textstr, fontsize=14)
+plt.xlim([9e18,4.5e19])
+plt.ylim([0,7.8e6])
 plt.title(r'$P_{th}$ scaling $L \to H$ and $H \to L$')
 plt.xlabel(r'$n_e$ (AYC_NE, ANE_DENSITY) [$n^{-3}$]')
 plt.ylabel('Ploss [W]')
