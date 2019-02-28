@@ -59,7 +59,7 @@ shots = [
 'Shot(20480, LHt=[(0.1975,0.1974,0.1976)], HLt=[(0.267,0.2669,0.2671)])']
 
 #%%
-
+####yes
 session = '06-Oct-11'
 geometry = 'CND'
 
@@ -71,7 +71,7 @@ shots = ['Shot(27030, LHt=[(0.1928, 0.193, 0.1927)], HLt=[(0.1963, 0.1963,0.1963
          'Shot(27037, LHt=[(0.2607,0.260,0.261)], HLt = [(0.3247, 0.3246, 0.3252)])']
 
 #%%
-
+#####yes
 session = '10-Nov-11'
 geometry = 'maybe CND'
 
@@ -127,7 +127,7 @@ shots = ['Shot(14545, LHt=[(0.272,0.2715,0.273)], HLt=[(0.424,0.423,0.425)])',
          ]
 
 #%%
-
+######yes
 session = '22-Jan-10'
 geometry = 'maybe CND'
 
@@ -148,6 +148,7 @@ shots = [
 ]
 
 #%%
+######yes
 session = '28-Jan-10'
 geometry = 'maybe CND'
 

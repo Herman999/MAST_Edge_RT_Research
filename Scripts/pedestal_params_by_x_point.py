@@ -14,7 +14,7 @@ db_ped = pd.read_excel('shot_peddb_only_good_shots.xlsx')
 #nasty
 #db_ped = pd.read_excel('shot_peddb.xlsx')
 
-db_all = pd.read_excel('ML_data.xlsx')
+db_all = pd.read_excel('ML_data_like.xlsx')
 
 # I want to add X point height for each
 xs = []

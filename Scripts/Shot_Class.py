@@ -818,7 +818,7 @@ class Shot():
         """         
         n_signals = 7 # number of signals to be plotted
         # make figure and adjust boundaries
-        fig, ax = plt.subplots(n_signals, sharex=True, figsize=(6,4))
+        fig, ax = plt.subplots(n_signals, sharex=True, figsize=(6,5))
         fig.canvas.set_window_title('Shot {} FOR REPORT'.format(self.ShotNumber))
         fig.subplots_adjust(top=0.935,bottom=0.12,left=0.1,right=0.975,hspace=0.0,wspace=0.2)    
         # add figure title, labels, set time range
