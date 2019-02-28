@@ -57,6 +57,7 @@ data_HL = combined[combined['transition']=='HL']
 
 # PLot 
 
+
 X='X1Z'
 Xe='X1Z_e'
 
@@ -65,9 +66,11 @@ plt.title(r'NEW DATA ONLY {1} Point Height Study ($\alpha={0}$, CDN and DN)'.for
 
 
 # PLOT LH
+
 y_err = np.sqrt(list((data_LH['Ploss_e']/data_LH['Ploss'])**2 + (data_LH['AYC_NE_e']/data_LH['AYC_NE'])**2)) # perc error
 y_err = y_err * data_LH['Ploss']/(data_LH['AYC_NE']**alpha) # * data
 plt.errorbar(x = data_LH[X], markersize=15, y = data_LH['Ploss']/(data_LH['AYC_NE']**alpha),xerr = data_LH[Xe], yerr = y_err ,fmt='x', label = 'LH',color = 'red')
+
 
 #for i, txt in enumerate(data_LH['shot']):
 #    plt.annotate(txt, (list(data_LH['X1Z'])[i], list(data_LH['Ploss']/(data_LH['NE']**alpha))[i]))

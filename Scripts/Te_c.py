@@ -19,7 +19,7 @@ from signal_dict_06_OCT_11 import signals
 #s1= Shot(27030, LHt=[(0.1928, 0.193, 0.1927)], HLt=[(0.1963, 0.1963,0.19637)]) ### bad shot
 d1= Shot(27035, LHt=[(0.2868,0.2865,0.287)], HLt = [(0.3096,0.3096,0.3098)])
 d2= Shot(27036, LHt = [(0.2565, 0.2545,0.258)], HLt = [(0.3261,0.3261,0.327)])
-d3= Shot(27039, LHt=[(0.2607,0.260,0.261)], HLt = [(0.3247, 0.3246, 0.3252)])
+d3= Shot(27039, LHt=[(0.298,0.297,0.295)], HLt = [(0.330, 0.3299, 0.3301)])
 
 x1 = Shot(27453, LHt=[(0.295,0.2945,0.2955)], HLt=[(0.3105,0.3099,0.311)])
 x2 = Shot(24328, LHt=[(0.251, 0.2506, 0.2514)],HLt=[(0.2895, 0.2894, 0.2896)])
@@ -75,7 +75,7 @@ for ind in good:
 #%%
 import pickle
 
-plt.figure('Te/c', figsize=(7,5))
+plt.figure('Te/c', figsize=(6,5))
 
 for shotno, shotclass in zip([27035,27036,27039], [d1,d2,d3]):
 #for shotno, shotlcass in zip([27453,24328,24132], [x1,x2,x3]):
@@ -83,14 +83,14 @@ for shotno, shotclass in zip([27035,27036,27039], [d1,d2,d3]):
         good, bad = pickle.load(input_file) # indicies
    shotclass.Te_Tec_all(good, A=832)
 
-plt.xlabel('$Te_c\ (eV)$')
-plt.ylabel('$Te\ (eV)$')
-plt.xlim(0,140)
-plt.ylim(-20,150)
+plt.xlabel('$T_{ec}\ (eV)$')
+plt.ylabel('$T_{e}\ (eV)$')
+plt.xlim(0,145)
+plt.ylim(0,145)
 
 xs = [-20,300]
 plt.plot(xs,np.array(xs), lw=1, ls='--', alpha=0.5, c='k')
 plt.scatter(-1,-1, marker='x', c='r', label='L')   
 plt.scatter(-1,-1, marker='x', c='g', label='H')
 plt.scatter(-1,-1, marker='x', c='blue', label='HL')
-plt.legend(title=r"$Mode$")        
+#plt.legend(title=r"$Mode$")        

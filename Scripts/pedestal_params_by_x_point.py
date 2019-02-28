@@ -13,11 +13,11 @@ import numpy as np
 db_ped = pd.read_excel('shot_peddb_only_good_shots.xlsx')
 #nasty
 #db_ped = pd.read_excel('shot_peddb.xlsx')
-
 db_all = pd.read_excel('ML_data_new.xlsx')
 
 X ='X1Z' 
 X_e = 'X1Z_e'
+
 
 # I want to add X point height for each
 xs = []
