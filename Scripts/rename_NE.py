@@ -49,7 +49,7 @@ shots = [
 
 for shot in shots:
     s = eval(shot)
-    os.chdir("C:/Users/rbatt/MAST_Edge_RT_Research/Scripts/MASTdata")
+    os.chdir("C:/Users/Tomas/MAST_Edge_RT_Research/Scripts/MASTdata")
     try:
         os.rename(str(s.ShotNumber) + '_NE.p', str(s.ShotNumber) + '_AYC_NE.p')
     except: pass
@@ -67,7 +67,7 @@ for shot in shots:
 print('blody done')
 
 
-os.chdir("C:/Users/rbatt/MAST_Edge_RT_Research/Scripts/")
+os.chdir("C:/Users/Tomas/MAST_Edge_RT_Research/Scripts/")
 from signal_dict_10_NOV_11 import signals
 
 shots = [
@@ -89,7 +89,7 @@ shots = [
 
 for shot in shots:
     s = eval(shot)
-    s.plot_compare(['IP','BT','WMHD','AYC_NE','AYC_TE','Dalphint','ngrad','Ploss','PINJ' ])
+    s.plot_compare(['IP','BT','WMHD','NE','TE','Dalphint','ngrad','Ploss','PINJ' ])
     
     
     

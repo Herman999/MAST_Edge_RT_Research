@@ -21,7 +21,12 @@ s = Shot(27446, LHt=[(0.276,0.274,0.2765)], HLt=[(0.3074,0.307,0.308)])
 
 
 
-s.plot_JP(plot_thomson=4,label_thomson=False)
+f = s.plot_JP_report(plot_thomson=4,label_thomson=False)
+
+f[1][0].set_xlim([0,0.328])
+f[1][0].set_title('Example LH Transitions #27446')
+
+
 index = 56
 result, time, (x,y) = s.fit_edge_tanh_pedestal(index, sig='NE', preview = True)
 

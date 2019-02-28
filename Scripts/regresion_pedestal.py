@@ -1,5 +1,15 @@
 # -*- coding: utf-8 -*-
 """
+Created on Wed Feb 27 11:11:28 2019
+
+@author: Tomas
+"""
+
+# Regression EDGE PEDESTAL PARAMS
+
+
+# -*- coding: utf-8 -*-
+"""
 Created on Mon Feb 11 13:45:58 2019
 @author: Tomas
 """
@@ -17,13 +27,13 @@ dd = pd.read_excel('ML_data_new.xlsx')
 #ddnum is the test data to be used.
 ddnum = dd.copy()
 ddnum = ddnum.sample(frac=1)
-ddnum.drop(labels=['shot', 'session', 'geometry','shot_time',  'time_em', 'time',
-                   'time_ep', 'transition','Ploss_e', 'BT_e', 'BT', 'BTOut_e', 
-                   'IP_e', 'KAPPA', 'KAPPA_e', 'AYC_NE_e',  'AYC_TE_e', 'AYC_TE', 'SAREA_e',
-                   'AYC_PE', 'AYC_PE_e', 'X1Z_e', 'X2Z', 'X2Z_e',
+ddnum.drop(labels=[ 'session', 'geometry','shot_time',  'time_em', 'time',
+                   'time_ep', 'Ploss_e', 'BT_e', 'BT', 'BTOut_e', 
+                   'IP_e', 'KAPPA_e', 'AYC_NE_e',  'AYC_TE_e', 'AYC_TE', 'SAREA_e',
+                   'AYC_PE', 'AYC_PE_e', 'X1Z_e',  'X2Z_e',
                    'AYE_NE', 'AYE_NE_e', 'ANE_DENSITY',
                    'ANE_DENSITY_e', 'AYE_TE', 'AYE_TE_e', 'AYE_PE', 'AYE_PE_e',
-                   'IP','X1Z'
+                   
                    ],axis=1, inplace=True)
 # now ddnum.columns = 'Ploss', 'BT', 'IP', 'AYC_NE' only
 ddnum.dropna(inplace=True)
@@ -32,16 +42,64 @@ ddnum = ddnum[~(ddnum['AYC_NE']=='')] # delete rows with no density data
 
 ddnum['AYC_NE'] =ddnum['AYC_NE']/1e20 
 ddnum['Ploss'] = ddnum['Ploss']/0.0488 *np.e**+0.057
-ddnum['e'] = np.e
 
-inputs = ddnum.iloc[0:-20].copy()
+peddf = pd.read_excel('shot_peddb_only_good_shots.xlsx')
+
+cols = list(peddf.columns)
+cols.extend(['IP','X1Z','X2Z','BT','SAREA','KAPPA','Ploss','e']) # here puts things that we want from main df
+combined = pd.DataFrame(columns=cols)
+combined.columns
+
+for i in range(len(peddf)):
+    shot = peddf.iloc[i]['shot']
+    transition = peddf.iloc[i]['transition']
+    if shot in [24330,27036,27037,27035,27448]: continue
+    ip = ddnum[(ddnum['shot']==shot)&(ddnum['transition']==transition)]['IP'].values
+    x1z = ddnum[(ddnum['shot']==shot)&(ddnum['transition']==transition)]['X1Z'].values
+    x2z = ddnum[(ddnum['shot']==shot)&(ddnum['transition']==transition)]['X2Z'].values
+    bt = ddnum[(ddnum['shot']==shot)&(ddnum['transition']==transition)]['BTOut'].values
+    sarea = ddnum[(ddnum['shot']==shot)&(ddnum['transition']==transition)]['SAREA'].values
+    kappa = ddnum[(ddnum['shot']==shot)&(ddnum['transition']==transition)]['KAPPA'].values
+    ploss = ddnum[(ddnum['shot']==shot)&(ddnum['transition']==transition)]['Ploss'].values
+    try:
+        if len(ip)==2:
+            ip=ip[0]
+            x1z=x1z[0]
+            x2z=x2z[0]
+            bt=bt[0]
+            sarea=sarea[0]
+            kappa=kappa[0]
+            ploss=ploss[0]
+    except: pass
+    
+    
+    values = [shot,transition]
+    values.extend(list(np.float64(peddf.iloc[i, peddf.columns != 'transition']))[1:] )# .iloc[2].values),dtype=float32)
+    values.extend([float(ip),float(x1z),float(x2z),float(bt),float(sarea),float(kappa),float(ploss)])
+    values.extend([np.e])
+    combined.loc[i]=values
+
+
+
+
+combined.drop(labels=['shot', 'transition', 'ne_average_e', 
+                      'ne_at_ped_e', 'te_at_ped_e', 'pe_at_ped_e',
+                      'X2Z', 'BT','IP', 'SAREA', 'KAPPA'
+                   ],axis=1, inplace=True)
+    
+print(combined.columns)
+
+
+
+#inputs = ddnum.iloc[0:-20].copy()
+inputs = combined.copy()
 
 
 
 inputs.drop(labels=['Ploss'],axis=1,inplace=True)
 print(inputs.columns)
 cols = inputs.columns
-targets=ddnum.iloc[0:-20]['Ploss']
+targets=combined['Ploss']  #ddnum.iloc[0:-20]['Ploss']
 
 #logging
 targets = np.log(targets)
@@ -55,9 +113,9 @@ inputs = np.log(inputs)
 
 
 #for testing
-test_inputs = ddnum.iloc[-20:].copy()
+test_inputs = combined.iloc[-20:].copy()
 test_inputs.drop(labels=['Ploss'],axis=1,inplace=True)
-test_targets = ddnum.iloc[-20:]['Ploss']
+test_targets = combined.iloc[-20:]['Ploss']
 
 #logging
 test_inputs = np.abs( np.array(test_inputs.values,dtype=np.float32) )
@@ -109,16 +167,16 @@ def fit(num_epochs, model, loss_fn, opt):
         losstrack.append(loss_fn(model(inputs).squeeze(), targets))
 
 df = pd.DataFrame(columns = ['num_epochs','loss_out_sample','loss_last','loss_average','columns','weights'])
-range_num_epochs = [50,100,500,800,1000,1500,2000,2500,3000,3500,4000,5000,8000]
+range_num_epochs = [50,100,300,500,1000,2000,5000]
 
 for num_epochs in range_num_epochs:
 
     train_ds = TensorDataset(inputs, targets) # careful about T
-    batch_size = 5
+    batch_size = 2
     train_dl = DataLoader(train_ds, batch_size, shuffle=True)
     
     
-    model = nn.Linear(4, 1)
+    model = nn.Linear(6, 1)
     
     # Define optimizer
     opt = torch.optim.SGD(model.parameters(), lr=1e-5)
@@ -174,7 +232,7 @@ for num_epochs in range_num_epochs:
 
 #%%
 #saving
-writer = pd.ExcelWriter('ML_B_SA_NE.xlsx')
+writer = pd.ExcelWriter('PED_ML_e.xlsx')
 df.to_excel(writer,'Sheet1')
 writer.save()    
     

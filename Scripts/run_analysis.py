@@ -10,25 +10,29 @@ Created on Mon Nov 12 17:02:00 2018
 import matplotlib.pyplot as plt
 
 #from signal_dict_10_NOV_11 import signals
+
 #from signal_dict_SEP_08 import signals
-from signal_dict_13_DEC_PULL import signals
+
+from pull_data_2019_IP_new_shots import signals
 
 
 # run shot calss
 
 # This is analysis for session 10_NOV_11
-#plt.close('all')
+plt.close('all')
 
 
-shot = Shot(27454)
+shot = Shot(shotnos[42])
+print(shot.data['Ploss'])
+print(shot.ShotNumber)
 print(shot.signals_present())
 #shot = Shot(20381, LHt=[(0.2342,0.2341,0.2343)], HLt=[(0.3108,0.31079,0.31081)])
 
 
-shot.plot_JP()
+#shot.plot_JP()
 
-
-shot.plot_compare(['BT','IP','WMHD','ANE_DENSITY','AIM_DA_TO','Ploss','PINJ' ])
+shot.plot_compare(['BT','IP','AYC_NE','AIM_DA_TO','Ploss'])
+shot.plot_compare(['BT','IP','AYC_NE','AIM_DA_TO','AIM_DA_HM','ADA_DALPHA_RAW','Ploss','PINJ' ])
 
 #shot.plot_compare(['IP','BT','WMHD','TE0','NE','Dalphstrp','Dalphint','ngrad','Ploss','PINJ' ])
 
