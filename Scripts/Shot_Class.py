@@ -215,12 +215,14 @@ class Shot():
         
         # do straight line fit through remaining data
 # can this be done better, taking account of xer,yer?
-        try:
-            p = np.polyfit(x,y,1)
-            T_e = R_max_slope*p[0]+ p[1]
-        except:
-            T_e = -1e3
-        
+#        try:
+#            p = np.polyfit(x,y,1)
+#            T_e = R_max_slope*p[0]+ p[1]
+#        except:
+#            T_e = -1e3
+        # redone
+        y_smooth = pd.DataFrame(y).rolling(3).mean().values.squeeze()
+        T_e = np.interp(R_max_slope, x,y_smooth)
         ####################OLD T_e line###########################
         #T_e = ped_tanh_odr2(edge_te_fit[0], R_max_slope) # this fit is bad
         
@@ -234,7 +236,7 @@ class Shot():
     #    print('max slope: {0:.3e}. ne at max slope: {1:.3e}. Bt = {2}'.format(max_slope, ne_max_slope, B_t))
         return (T_e, T_ec)
     
-    def Te_Tec_all(self, good_indexes, A=1.):
+    def Te_Tec_all(self, good_indexes, A=1., label=False):
         
         cols = {'LH':'orange', 
                 'L':'red', 
@@ -260,10 +262,6 @@ class Shot():
 #        plt.ylim(0,300)
         
         for ind, time in enumerate(self.data['AYE_R']['time']):
-#            if ind<first: #cutoffs for bad timings
-#                pass
-#            elif ind>last:
-#                pass
             if ind not in good_indexes:
                 pass
             else:
@@ -276,8 +274,13 @@ class Shot():
                 
                 plt.figure('Te/c')
                 plt.scatter(Tec*A, Te, marker='x', c=cols[label])
-                
-                #check whether time in L, H, or LHt, HLt...
+                if label:
+                    plt.annotate(str(ind), [Tec*A, Te])
+                plt.figure('simple Te')
+                plt.scatter(time,Te, marker='x', c=cols[label])
+
+
+
         # additional plot points for legend generation
 # plt.scatter(-1,-1, marker='x', c='r', label='L')   
 # plt.scatter(-1,-1, marker='x', c='g', label='H')
@@ -355,6 +358,7 @@ class Shot():
         # all core data
         y = self.data['AYC_{}'.format(sig)]['data'][index]
         y_er = self.data['AYC_{}'.format(sig)]['errors'][index]
+
         x = self.data['AYC_R']['data'][index]
         x_er = self.data['AYC_R']['errors'][index]
         time = self.data['AYC_R']['time'][index]
@@ -362,9 +366,8 @@ class Shot():
         #cutoff radius for fitting. defined as lowest R present in edge data
         r_cutoff= self.data['AYE_R']['data'][index][0]
         condition = np.where((x > r_cutoff)&(~np.isnan(y)))
-        
+           
         y, y_er, x, x_er = y[condition], y_er[condition], x[condition], x_er[condition]
-        
         
         # may need to pad core values outside LCFS
         
@@ -711,7 +714,7 @@ class Shot():
             print('No transitions known')
         
         if plot_thomson:
-            for i in self.data['AYE_NE']['time']:
+            for i in self.data['AYC_NE']['time']:
                 ax[plot_thomson].axvline(i,color='orange',linestyle='dashed')
             if label_thomson == True:
                 for index, t in enumerate(self.data['AYE_NE']['time']):
