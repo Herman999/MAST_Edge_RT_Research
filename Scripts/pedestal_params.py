@@ -175,7 +175,7 @@ for shot_str in shots:
         continue
     #with good fits with massive errors : [27036,27037,27444,27453,27587,27573,27571,29493,29487,30356,30351]
     # take only good data LH
-    if s.ShotNumber not  in [27036,27037,27444,27453,27571,29493,29487,30356]:
+    if s.ShotNumber not  in [27036,27037,27453,27571,29493,30356]:
         continue
     
     
@@ -291,7 +291,7 @@ for shot_str in shots:
     
     # good fits HL
     # take only good data
-    if s.ShotNumber not  in [24215,24330,24127,24124,27035,27036,27587,27572,27571,24524]:
+    if s.ShotNumber not  in [24215,24330,24127,24124,27035,27036,27587,27572,27571]:
         continue
     
 #s = Shot(24129, LHt=[(0.2922,0.290,0.295)], HLt=[(0.3174,0.317,0.318)])
@@ -365,13 +365,13 @@ for shot_str in shots:
 #%%
             
 HL_ne_at_ped = ne_at_ped
-HL_te_at_ped = te_at_ped
+HL_te_at_ped = te_at_ped # exlusion of one dodgy shot
 HL_pe_at_ped = pe_at_ped
 HL_ne_average = ne_average
 HL_shot_list = shot_list
 
 HL_ne_average_e = ne_average_e
-HL_te_at_ped_e = te_at_ped_e
+HL_te_at_ped_e = te_at_ped_e # exclusion of one dodgy shot
 HL_pe_at_ped_e = pe_at_ped_e 
 
 #%%
@@ -409,7 +409,7 @@ fig, ax = plt.subplots(3,sharex=True,figsize=(13,9))
 #textstr = r'$I_p=700$kA $B_t=-0.425$T'
 #ax[0].text(3.9e19, 4.45e19, textstr, fontsize=14)
 
-ax[0].set_title(r'Pedestal Characteristics on $\overline{N_e}$')
+ax[0].set_title(r'Pedestal Characteristics on $\overline{n_e}$')
 ax[0].errorbar(fmt='o',x=LH_ne_average,y=LH_ne_at_ped,xerr=LH_ne_average_e,c='red',label='LH')
 ax[0].errorbar(fmt='o',x=HL_ne_average,y=HL_ne_at_ped,xerr=HL_ne_average_e,c='blue',label='HL')
 #ax[0].scatter(LH_ne_average,LH_ne_at_ped,c='orange',label='LH')
@@ -427,8 +427,8 @@ neav = np.linspace(min(ne_average),max(ne_average))
 nefit = res[1] + res[0] * neav
 ax[0].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
     
-ax[0].set_xlabel(r'$\overline{N_e}$ [$m^{-3}$]')
-ax[0].set_ylabel(r'$Ne_{ped} [M^{-3}]$')
+ax[0].set_xlabel(r'$\overline{n_e}$ [$m^{-3}$]')
+ax[0].set_ylabel(r'$ne_{ped} [M^{-3}]$')
 ax[0].legend()
 #ax[0].set_ylim([0,0.05e21])
 
@@ -455,7 +455,7 @@ ax[1].set_ylim([-10,250])
 #ax[1].plot(neav,nefitp,color = 'orange',linestyle = 'dashed', alpha = 0.5)
 #ax[1].set_ylim([0,455])
 #ax[1].set_xlim([0,4e19])
-ax[1].set_xlabel(r'$\overline{N_e}$ [$m^{-3}$]')
+ax[1].set_xlabel(r'$\overline{n_e}$ [$m^{-3}$]')
 ax[1].set_ylabel(r'$Te_{ped} [eV]$')
 ax[1].legend()
 
@@ -477,7 +477,7 @@ neav = np.linspace(min(ne_average),max(ne_average))
 nefit = res[1] + res[0] * neav
 ax[2].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
 
-ax[2].set_xlabel(r'$\overline{N_e}$ [$m^{-3}$]')
+ax[2].set_xlabel(r'$\overline{n_e}$ [$m^{-3}$]')
 ax[2].set_ylabel(r'$Pe_{ped} [a.u.]$')
 ax[2].legend()
 
@@ -521,7 +521,7 @@ for i in range(len(HL_ne_average)):
     dic['pe_at_ped_e'] = HL_pe_at_ped_e[i]
     ped_db.loc[len(ped_db)]=dic
     
-writer = pd.ExcelWriter('shot_peddb_only_good_shots.xlsx')
+writer = pd.ExcelWriter('ML_data_PED_new.xlsx')
 ped_db.to_excel(writer,'Sheet1')
 writer.save()
 
