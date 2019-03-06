@@ -5,7 +5,7 @@ Created on Fri Mar  1 14:49:54 2019
 @author: Tomas
 """
 
-from pull_data_2019_IP_new_shots import signals
+from signal_dict_2019_IP import signals
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -256,7 +256,7 @@ pe_HL_e = list(db_ped[(db_ped['transition']=='HL')]['Ploss_e']/
 
 
 # NE            
-fig, ax = plt.subplots(3,sharex=True,figsize=(13,9))
+fig, ax = plt.subplots(4,sharex=True,figsize=(13,9))
 
 
 textstr = r'$I_p=500-700$kA $B_t=-0.425$T'
@@ -317,7 +317,9 @@ ax[1].errorbar(fmt='o',x=x_HL,y=te_HL,xerr=x_HL_e,yerr=te_HL_e,c='blue',label='H
 #ax[1].set_ylim([0,455])
 #ax[1].set_xlim([0,4e19])
 ax[1].set_ylim([0,250])
-ax[1].set_xlim([0.438,0.535])
+ax[1].set_xlim([0.27,0.535])
+
+#ax[1].set_xlim([0.438,0.535])
 ax[1].set_xlabel('X point height')
 ax[1].set_ylabel(r'$Te_{ped}$ $ [eV]$')
 ax[1].legend()
@@ -348,6 +350,292 @@ ax[0].set_xlabel('X point height')
 ax[0].set_ylabel(r'$ Ploss   \div \overline{ne}^{0.8} $ $[a.u.]$')
 ax[0].legend()
 
+
+#%%
+
+
+# JP data
+
+from signal_dict_26_MAY_05 import signals
+
+
+alpha = 0.8 
+
+shots = [
+        
+13042,
+13043,
+13044,
+13045,
+13047,
+
+14545,
+14546,
+14547,
+14548,
+14552,
+14554,
+14555,
+
+]
+
+shot_com = [
+'Shot(13042, LHt=[(0.302,0.300,0.303)], HLt=[(0.393,0.392,0.396)])',
+'Shot(13043, LHt=[(0.314,0.310,0.315)], HLt=[(0.326,0.325,0.327)])',
+'Shot(13044, LHt=[(0.336,0.334,0.337)], HLt=[(0.346,0.345,0.347)])',
+'Shot(13045, LHt=[(0.348,0.346,0.349)], HLt=[(0.363,0.362,0.364)])',
+'Shot(13047, LHt=[(0.297,0.2965,0.298)], HLt=[(0.3835,0.383,0.384)])',
+
+'Shot(14545, LHt=[(0.272,0.2715,0.273)], HLt=[(0.424,0.423,0.425)])',
+'Shot(14546, LHt=[(0.313,0.312,0.314)], HLt=[(0.417,0.416,0.419)])',
+'Shot(14547, LHt=[(0.283,0.2825,0.289)], HLt=[(0.343,0.342,0.344)])',
+'Shot(14548, LHt=[(0.292,0.265,0.293)], HLt=[(0.359,0.358,0.360)])',
+'Shot(14552, LHt=[(0.3083,0.308,0.309)], HLt=[(0.3263,0.326,0.327)])',
+'Shot(14554, LHt=[(0.3016,0.301,0.302)], HLt=[(0.31175,0.3117,0.3118)])',
+'Shot(14555, LHt=[(0.2915,0.291,0.292)], HLt=[(0.3060,0.305,0.3065)])',
+
+]
+
+
+df = pd.read_excel('ML_data_new.xlsx')
+
+#df = df[~(df['AYC_NE']=='')]
+#df = df[~(df['Ploss']<1)]
+
+
+# shot filter
+df = df[df['shot'].isin(shots)]
+
+
+# Ploss / ne**alpha
+# IP
+
+# PLoss
+Ploss_LH = np.array( df[(df['transition']=='LH')]['Ploss'])
+Ploss_HL = np.array( df[(df['transition']=='HL')]['Ploss'])
+
+Ploss_LH_e = np.array( df[(df['transition']=='LH')]['Ploss_e'])
+Ploss_HL_e = np.array( df[(df['transition']=='HL')]['Ploss_e'])
+
+
+# x1
+
+x1_LH = np.array( df[(df['transition']=='LH')]['X1Z'])
+x1_HL = np.array( df[(df['transition']=='HL')]['X1Z'])
+
+x1_LH_e = np.array( df[(df['transition']=='LH')]['X1Z_e'])
+x1_HL_e = np.array( df[(df['transition']=='HL')]['X1Z_e'])
+
+# x2
+
+x2_LH = np.array( df[(df['transition']=='LH')]['X2Z'])
+x2_HL = np.array( df[(df['transition']=='HL')]['X2Z'])
+
+x2_LH_e = np.array( df[(df['transition']=='LH')]['X2Z_e'])
+x2_HL_e = np.array( df[(df['transition']=='HL')]['X2Z_e'])
+
+# shot
+shot_LH = np.array( df[(df['transition']=='LH')]['shot'])
+shot_HL = np.array( df[(df['transition']=='HL')]['shot'])
+
+
+
+db = pd.DataFrame(columns=['shot', 'shot_time', 'time', 'time_em', 'time_ep', 'transition', 'BTOut','BTOut_e','AYC_NE', 'AYC_NE_e'])
+
+
+
+for shot_c in shot_com:
+    
+    
+    s=eval(shot_c)
+
+    
+    parameters = ['AYC_NE']
+    
+    # here iterate shots
+    
+    # compbine LHt and HLt 
+    list_of_transitions = []
+    list_of_transitions.extend(s._LHt)
+    list_of_transitions.extend(s._HLt)
+    
+    for t in list_of_transitions:
+        dic = {}
+        t1 = t[0]   #time of tranision
+        t_err1 = t[1] # lower bound time error
+        t_err2 = t[2] # upper bound time error
+        
+        # update dic separately for LH and HL
+        dic['shot']=s.ShotNumber
+        dic['shot_time']=str(s.ShotNumber) + '_' + str(int(round(t1*1000)))
+        dic['time']=t1
+        dic['time_em']=t[1] - t[0]
+        dic['time_ep']= t[2] - t[0]
+        
+        
+        if t in s._LHt:
+            dic['transition'] = 'LH'
+        elif t in s._HLt:
+            dic['transition'] = 'HL'
+        else:
+            dic['transition'] = 'error'
+        
+        #dic['session'] = session
+        #dic['geometry'] = geometry
+        
+        # Add BTout
+        A = 1.3 # mast aspect ratio
+        dic['BTOut'] = A/(A+1) * np.interp(t1, s.data['BT']['time'] , s.data['BT']['data'])
+        singal_t_err_range =  A/(A+1)*np.interp(np.linspace(t_err1,t_err2,30), s.data['BT']['time'] , s.data['BT']['data'])
+        singal_t_err_error_range = np.zeros(30)
+        dic['BTOut_e'] = max(singal_t_err_range) - min(singal_t_err_range) + np.mean(np.abs(singal_t_err_error_range))
+        
+            
+        # now load up parameteres
+        for parameter in parameters:
+            # skip if not in data
+            if parameter not in s.signals_present()[1]: 
+                print(parameter,' Not in signals of shot {}, Skipping.'.format(s.ShotNumber))
+                
+                dic[parameter] = None
+                dic[parameter+'_e'] = None
+                continue # if singal doesnt exist, continue
+            
+            print('loading : {0} for shot {1}'.format(parameter,s.ShotNumber))
+            # for problematic data
+            try:
+                s.data['AYC_NE']['data']=np.nanmean(s.data['AYC_NE']['data'],axis=1)
+                s.data['AYC_NE']['errors']=np.nanmean(s.data['AYC_NE']['errors'],axis=1)
+                
+                s.data['AYC_TE']['data']=np.nanmean(s.data['AYC_TE']['data'],axis=1)
+                s.data['AYC_TE']['errors']=np.nanmean(s.data['AYC_TE']['errors'],axis=1)
+                
+                s.data['AYC_PE']['data']=np.nanmean(s.data['AYC_PE']['data'],axis=1)
+                s.data['AYC_PE']['errors']=np.nanmean(s.data['AYC_PE']['errors'],axis=1)
+            except:
+                pass
+            
+            try:            
+                s.data['AYE_NE']['data']=np.nanmean(s.data['AYE_NE']['data'],axis=1)
+                s.data['AYE_NE']['errors']=np.nanmean(s.data['AYE_NE']['errors'],axis=1)
+                
+                s.data['AYE_TE']['data']=np.nanmean(s.data['AYE_TE']['data'],axis=1)
+                s.data['AYE_TE']['errors']=np.nanmean(s.data['AYE_TE']['errors'],axis=1)
+                
+                s.data['AYE_PE']['data']=np.nanmean(s.data['AYE_PE']['data'],axis=1)
+                s.data['AYE_PE']['errors']=np.nanmean(s.data['AYE_PE']['errors'],axis=1)
+                
+            except:
+                pass
+            
+            try:         
+                # for NE for 08 JP shots
+                s.data['NE']['data']=np.nanmean(s.data['NE']['data'],axis=1)
+                s.data['NE']['errors']=np.nanmean(s.data['NE']['errors'],axis=1)
+                s.data['TE']['data']=np.nanmean(s.data['TE']['data'],axis=1)
+                s.data['TE']['errors']=np.nanmean(s.data['TE']['errors'],axis=1)
+                s.data['PE']['data']=np.nanmean(s.data['PE']['data'],axis=1)
+                s.data['PE']['errors']=np.nanmean(s.data['PE']['errors'],axis=1)
+                #print(s.data['NE'])
+            except: 
+                pass
+            
+            
+            
+            # get  units
+            units = s.data[parameter]['units']
+            
+            # get parameter at transition
+            singal_at_t1 = np.interp(t1, s.data[parameter]['time'] , s.data[parameter]['data'])
+            
+            # get erro in parameter at transition
+            try: # this is None case
+                if s.data[parameter]['errors'] == None:
+                    singal_at_t1_err = 0
+            except:
+                if s.data[parameter]['errors'].shape == 2:
+                    singal_at_t1_err = np.interp(t1, s.data[parameter]['time'] , np.nanmean(s.data[parameter]['errors'],axis=1))
+                else:
+                    singal_at_t1_err = np.interp(t1, s.data[parameter]['time'] , s.data[parameter]['errors'])
+        
+        
+            # get parameter range during the time error
+            singal_t_err_range = np.interp(np.linspace(t_err1,t_err2,30), s.data[parameter]['time'] , s.data[parameter]['data'])
+            #print(singal_t_err_range)
+            
+            # get errors in the range of time error
+            try: 
+                if s.data[parameter]['errors'] == None:
+                    singal_t_err_error_range = np.zeros(30)
+            except: 
+                if s.data[parameter]['errors'].shape == 2:
+                    singal_t_err_error_range = np.interp(np.linspace(t_err1,t_err2,30), s.data[parameter]['time'] , np.nanmean(s.data[parameter]['errors'],axis=1))
+                else:
+                    singal_t_err_error_range  = np.interp(np.linspace(t_err1,t_err2,30), s.data[parameter]['time'] , s.data[parameter]['errors'])
+            
+            #print(singal_t_err_error_range)
+            
+            # calculate spread in singal during t range and add mean error
+            singal_t_err_spread = max(singal_t_err_range) - min(singal_t_err_range) + np.mean(np.abs(singal_t_err_error_range))
+            
+            
+            if parameter not in ['X1Z','X2Z']:
+                # add parameter to dic
+                dic[parameter] = singal_at_t1
+                dic[parameter+'_e'] = singal_t_err_spread
+            else:
+                if parameter=='X1Z':
+                    dic[parameter] = abs(singal_at_t1 + 1.55 )# 1.55m below
+                    dic[parameter+'_e'] = abs(singal_t_err_spread)
+                elif parameter=='X2Z':
+                    dic[parameter] =abs( singal_at_t1 - 1.55 )# 1.55m above
+                    dic[parameter+'_e'] = abs(singal_t_err_spread)
+        #save db before next transition in same shot
+        print(dic)
+        db.loc[len(db)]=dic
+        del dic
+
+# ne
+ne_LH = np.array( db[(db['transition']=='LH')]['AYC_NE'])
+ne_HL = np.array( db[(db['transition']=='HL')]['AYC_NE'])
+
+ne_LH_e = np.array( db[(db['transition']=='LH')]['AYC_NE_e'])
+ne_HL_e = np.array( db[(db['transition']=='HL')]['AYC_NE_e'])
+
+
+
+
+ax[3].errorbar(fmt='o',x=x1_LH,y=Ploss_LH/(ne_LH**alpha),xerr=x1_LH_e,yerr=Ploss_LH_e/(ne_LH**alpha),c='red',label='LH')
+ax[3].errorbar(fmt='o',x=x1_HL,y=Ploss_HL/(ne_HL**alpha),xerr=x1_HL_e,yerr=Ploss_HL_e/(ne_HL**alpha),c='blue',label='HL')
+
+#for i, txt in enumerate(LH_shot_list):
+#    ax[3].annotate(txt, (x1_LH[i], (Ploss_LH/(ne_LH**alpha))[i]))
+    
+#for i, txt in enumerate(HL_shot_list):
+#    ax[3].annotate(txt, (x1_HL[i], (Ploss_HL/(ne_HL**alpha))[i]))
+    
+
+#(res,cov) = np.polyfit(ne_average,pe_at_ped,deg=1,cov=True)
+#(res,cov) = np.polyfit(ne_average,pe_at_ped,w=1/np.sqrt(np.array(ne_average_e)**2+np.array(pe_at_ped)**2),deg=1,cov=True)
+#neav = np.linspace(min(ne_average),max(ne_average))
+#nefit = res[1] + res[0] * neav
+#ax[2].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
+
+
+textstr = r'JP LH Shots SN'
+ax[3].text(0.45, 1.6e-9, textstr, fontsize=18)
+
+#ax[3].set_title('JP SHOTS PLOSS')
+ax[3].set_xlabel('X point height')
+ax[3].set_ylim([6e-12,2.01e-9])
+ax[0].set_ylim([6e-12,2.01e-9])
+ax[3].set_ylabel(r'$JP Ploss   \div \overline{ne}^{0.8} $ $[a.u.]$')
+ax[3].legend()
+
+
+
+
+#%%
 
 
 

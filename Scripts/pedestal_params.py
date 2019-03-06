@@ -138,7 +138,7 @@ shots = [
     
 #%%
 # new data shots
-from pull_data_2019_IP_new_shots import signals
+from signal_dict_2019_IP import signals
 shots = [
 'Shot(30351, LHt=[(0.300, 0.295, 0.334)],HLt=[(0.620, 0.615, 0.622)])',
 'Shot(30356, LHt=[(0.273, 0.270, 0.275)],HLt=[(0.2791, 0.2790, 0.2794)])',
