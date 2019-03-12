@@ -91,7 +91,7 @@ dflh_ANE_NE_ploss  = dflh_ANE_NE_ploss[(dflh_ANE_NE_ploss.index.isin(dflh_ANE_NE
 
 
 
-plt.figure(figsize=(13,9))
+plt.figure(figsize=(11.5,8))
 plt.errorbar(x = dflh_AYC_NE['p_value'], markersize=10, y = dflh_AYC_NE_ploss['p_value'], xerr=dflh_AYC_NE['p_value_err'],yerr =  dflh_AYC_NE_ploss['range_err'],fmt='o', label = 'LH AYC_NE',color = 'red')
 
 
@@ -245,7 +245,7 @@ plt.text(3.6e19, 8e6, textstr, fontsize=14)
 plt.xlim([9e18,4.5e19])
 plt.ylim([0,7.8e6])
 plt.title(r'$P_{th}$ scaling $L \to H$ and $H \to L$')
-plt.xlabel(r'$n_e$ (AYC_NE, ANE_DENSITY) [$n^{-3}$]')
+plt.xlabel(r'$n_e$ [$n^{-3}$]')
 plt.ylabel('Ploss [W]')
 plt.ticklabel_format(axis='y',scilimits=(0,0))
 #plt.show()

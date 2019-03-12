@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-plt.rcParams.update({'font.size': 14})
+#plt.rcParams.update({'font.size': 14})
 
 
 
@@ -96,7 +96,7 @@ ip_HL_e = np.array( df[(df['transition']=='HL')]['IP_e'])
 shot_LH = np.array( df[(df['transition']=='LH')]['shot'])
 shot_HL = np.array( df[(df['transition']=='HL')]['shot'])
 
-plt.figure(figsize=(13,9))
+plt.figure(figsize=(11.5,8))
 plt.title('Normailized Pth dependance on IP')
 
 
@@ -134,8 +134,8 @@ db_ped = pd.read_excel('ML_data_PED_new.xlsx')
 
 db_all = pd.read_excel('ML_data_new.xlsx')
 
-X ='X2Z' 
-X_e = 'X2Z_e'
+X ='X1Z' 
+X_e = 'X1Z_e'
 
 
 # I want to add X point height for each
@@ -256,7 +256,7 @@ pe_HL_e = list(db_ped[(db_ped['transition']=='HL')]['Ploss_e']/
 
 
 # NE            
-fig, ax = plt.subplots(4,sharex=True,figsize=(13,9))
+fig, ax = plt.subplots(3,sharex=True,figsize=(11.5,8))
 
 
 textstr = r'$I_p=500-700$kA $B_t=-0.425$T'
@@ -605,8 +605,8 @@ ne_HL_e = np.array( db[(db['transition']=='HL')]['AYC_NE_e'])
 
 
 
-ax[3].errorbar(fmt='o',x=x1_LH,y=Ploss_LH/(ne_LH**alpha),xerr=x1_LH_e,yerr=Ploss_LH_e/(ne_LH**alpha),c='red',label='LH')
-ax[3].errorbar(fmt='o',x=x1_HL,y=Ploss_HL/(ne_HL**alpha),xerr=x1_HL_e,yerr=Ploss_HL_e/(ne_HL**alpha),c='blue',label='HL')
+ax[0].errorbar(fmt='o',x=x1_LH,y=Ploss_LH/(ne_LH**alpha),xerr=x1_LH_e,yerr=Ploss_LH_e/(ne_LH**alpha),c='black',label='JP SN LH')
+ax[0].errorbar(fmt='o',x=x1_HL,y=Ploss_HL/(ne_HL**alpha),xerr=x1_HL_e,yerr=Ploss_HL_e/(ne_HL**alpha),c='green',label='JP SN HL')
 
 #for i, txt in enumerate(LH_shot_list):
 #    ax[3].annotate(txt, (x1_LH[i], (Ploss_LH/(ne_LH**alpha))[i]))
@@ -622,15 +622,15 @@ ax[3].errorbar(fmt='o',x=x1_HL,y=Ploss_HL/(ne_HL**alpha),xerr=x1_HL_e,yerr=Ploss
 #ax[2].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} c={2}'.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
 
 
-textstr = r'JP LH Shots SN'
-ax[3].text(0.45, 1.6e-9, textstr, fontsize=18)
+#textstr = r'JP LH Shots SN'
+#ax[3].text(0.45, 1.6e-9, textstr, fontsize=18)
 
 #ax[3].set_title('JP SHOTS PLOSS')
-ax[3].set_xlabel('X point height')
-ax[3].set_ylim([6e-12,2.01e-9])
+#ax[3].set_xlabel('X point height')
+#ax[3].set_ylim([6e-12,2.01e-9])
 ax[0].set_ylim([6e-12,2.01e-9])
-ax[3].set_ylabel(r'$JP Ploss   \div \overline{ne}^{0.8} $ $[a.u.]$')
-ax[3].legend()
+#ax[3].set_ylabel(r'$JP Ploss   \div \overline{ne}^{0.8} $ $[a.u.]$')
+ax[0].legend()
 
 
 

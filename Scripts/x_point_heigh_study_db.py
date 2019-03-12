@@ -14,7 +14,7 @@ import pandas as pd
 alpha = 0.8
 
 #load from db
-data = pd.read_excel('shot_database_ALL_SHOTS_NewX1X2.xlsx')
+data = pd.read_excel('shot_database_ALL_SHOTS_NewX1X2_.xlsx')
 
 # sellect desired configuration
 #data = data[(data['geometry']=='SN')]
@@ -58,11 +58,11 @@ data_HL = combined[combined['transition']=='HL']
 # PLot 
 
 
-X='X2Z'
-Xe='X2Z_e'
+X='X1Z'
+Xe='X1Z_e'
 
-plt.figure(figsize=(13,9))
-plt.title(r'ALL DATA ONLY {1} Point Height Study ($\alpha={0}$, CDN and DN)'.format(alpha,X))
+plt.figure(figsize=(11.5,8))
+plt.title(r'All data {1} Point Height Study ($\alpha={0}$, SN)'.format(alpha,X))
 
 
 # PLOT LH
@@ -85,8 +85,8 @@ plt.errorbar(x = data_HL[X], markersize=15, y = data_HL['Ploss']/(data_HL['AYC_N
 #for i, txt in enumerate(data_HL['shot']):
 #    plt.annotate(txt, (list(data_HL[X])[i], list(data_HL['Ploss']/(data_HL['AYC_NE']**alpha))[i]))
 
-plt.ylim([3e-10,2.2e-9])
-
+plt.ylim([0,2.6e-9])
+plt.xlim([0.28,0.65])
 plt.legend()
 plt.xlabel(r'X point height [m]' )
 plt.ylabel(r'$P_{loss}/N_e^\alpha$ [Wm^3]')

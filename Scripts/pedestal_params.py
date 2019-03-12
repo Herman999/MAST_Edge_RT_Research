@@ -10,7 +10,7 @@ Created on Thu Jan 31 10:37:24 2019
 from signal_dict_13_DEC_PULL import signals
 import matplotlib.pyplot as plt
 import numpy as np
-plt.rcParams.update({'font.size': 14})
+plt.rcParams.update({'font.size': 17})
 
 
 slices = 1
@@ -281,6 +281,7 @@ pe_at_ped_e = []
 for shot_str in shots:
 
     s=eval(shot_str)
+   
     
     #delete corrupted shots
     if s.ShotNumber in [24130,24133,27449,27444,27037]:  #24330,27030,24133,20377,27444,27449,27037]:
@@ -291,7 +292,7 @@ for shot_str in shots:
     
     # good fits HL
     # take only good data
-    if s.ShotNumber not  in [24215,24330,24127,24124,27035,27036,27587,27572,27571]:
+    if s.ShotNumber not  in [24215,24330,24127,24124,27035,27036,27587,27571]:
         continue
     
 #s = Shot(24129, LHt=[(0.2922,0.290,0.295)], HLt=[(0.3174,0.317,0.318)])
@@ -403,33 +404,36 @@ pe_at_ped_e.extend(HL_pe_at_ped_e)
 #%% PL<OT
 
 # NE            
-fig, ax = plt.subplots(3,sharex=True,figsize=(13,9))
+#fig, ax = plt.subplots(3,sharex=True,figsize=(13,9))
+
+fig, ax = plt.subplots(3,sharex=True,figsize=(11.5,6))
 
 
-#textstr = r'$I_p=700$kA $B_t=-0.425$T'
-#ax[0].text(3.9e19, 4.45e19, textstr, fontsize=14)
+textstr = r'$I_p$ $450-900$kA $B_t$ $0.37-0.45$T'
+ax[0].text(3.65e19, 4.65e19, textstr, fontsize=14)
 
-ax[0].set_title(r'Pedestal Characteristics on $\overline{n_e}$')
+#ax[0].set_title(r'Pedestal Characteristics on $\overline{n_e}$')
 ax[0].errorbar(fmt='o',x=LH_ne_average,y=LH_ne_at_ped,xerr=LH_ne_average_e,c='red',label='LH')
 ax[0].errorbar(fmt='o',x=HL_ne_average,y=HL_ne_at_ped,xerr=HL_ne_average_e,c='blue',label='HL')
 #ax[0].scatter(LH_ne_average,LH_ne_at_ped,c='orange',label='LH')
 #ax[0].scatter(HL_ne_average,HL_ne_at_ped,c='blue',label='HL')
 
-for i, txt in enumerate(LH_shot_list):
-    ax[0].annotate(txt, (LH_ne_average[i], LH_ne_at_ped[i]))
-    
-for i, txt in enumerate(HL_shot_list):
-    ax[0].annotate(txt, (HL_ne_average[i], HL_ne_at_ped[i]))
-
+#plt.rcParams.update({'font.size': 14})
+#for i, txt in enumerate(LH_shot_list):
+#    ax[0].annotate(txt, (LH_ne_average[i], LH_ne_at_ped[i]))
+#    
+#for i, txt in enumerate(HL_shot_list):
+#    ax[0].annotate(txt, (HL_ne_average[i], HL_ne_at_ped[i]))
+plt.rcParams.update({'font.size': 17})
 # lin fit
 (res,cov) = np.polyfit(ne_average,ne_at_ped,deg=1,cov=True)
 neav = np.linspace(min(ne_average),max(ne_average))
 nefit = res[1] + res[0] * neav
-ax[0].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
-    
-ax[0].set_xlabel(r'$\overline{n_e}$ [$m^{-3}$]')
+ax[0].plot(neav,nefit,'--')#,label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
+ax[0].set_ylim([0,4.5e19])
+#ax[0].set_xlabel(r'$\overline{n_e}$ [$m^{-3}$]')
 ax[0].set_ylabel(r'$ne_{ped} [M^{-3}]$')
-ax[0].legend()
+ax[0].legend(loc=4)
 #ax[0].set_ylim([0,0.05e21])
 
 # TE
@@ -437,16 +441,17 @@ ax[0].legend()
 #ax[1].scatter(HL_ne_average,HL_te_at_ped,c='blue',label='HL')
 ax[1].errorbar(fmt='o',x=LH_ne_average,y=LH_te_at_ped,xerr=LH_ne_average_e,yerr=LH_te_at_ped_e,c='red',label='LH')
 ax[1].errorbar(fmt='o',x=HL_ne_average,y=HL_te_at_ped,xerr=HL_ne_average_e,yerr=HL_te_at_ped_e,c='blue',label='HL')
-for i, txt in enumerate(LH_shot_list):
-    ax[1].annotate(txt, (LH_ne_average[i], LH_te_at_ped[i]))
-    
-for i, txt in enumerate(HL_shot_list):
-    ax[1].annotate(txt, (HL_ne_average[i], HL_te_at_ped[i]))
-
+#plt.rcParams.update({'font.size': 14})
+#for i, txt in enumerate(LH_shot_list):
+#    ax[1].annotate(txt, (LH_ne_average[i], LH_te_at_ped[i]))
+#    
+#for i, txt in enumerate(HL_shot_list):
+#    ax[1].annotate(txt, (HL_ne_average[i], HL_te_at_ped[i]))
+#plt.rcParams.update({'font.size': 17})
 (res,cov) = np.polyfit(ne_average,te_at_ped,w=1/np.sqrt(np.array(ne_average_e)**2+np.array(te_at_ped)**2),deg=1,cov=True)
 neav = np.linspace(min(ne_average),max(ne_average))
 nefit = res[1] + res[0] * neav
-ax[1].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,1]),"{:.2E}".format(res[1])))
+#ax[1].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,1]),"{:.2E}".format(res[1])))
 ax[1].set_ylim([-10,250])
 #attempt for error calculation
 #nefitm = res[1] + (res[0] ) * neav - cov[0,0]
@@ -455,21 +460,22 @@ ax[1].set_ylim([-10,250])
 #ax[1].plot(neav,nefitp,color = 'orange',linestyle = 'dashed', alpha = 0.5)
 #ax[1].set_ylim([0,455])
 #ax[1].set_xlim([0,4e19])
-ax[1].set_xlabel(r'$\overline{n_e}$ [$m^{-3}$]')
+#ax[1].set_xlabel(r'$\overline{n_e}$ [$m^{-3}$]')
 ax[1].set_ylabel(r'$Te_{ped} [eV]$')
-ax[1].legend()
+#ax[1].legend()
 
 # PE
 #ax[2].scatter(LH_ne_average,LH_pe_at_ped,c='orange',label='LH')
 #ax[2].scatter(HL_ne_average,HL_pe_at_ped,c='blue',label='HL')
 ax[2].errorbar(fmt='o',x=LH_ne_average,y=LH_pe_at_ped,xerr=LH_ne_average_e,yerr=LH_pe_at_ped_e,c='red',label='LH')
 ax[2].errorbar(fmt='o',x=HL_ne_average,y=HL_pe_at_ped,xerr=HL_ne_average_e,yerr=HL_pe_at_ped_e,c='blue',label='HL')
-for i, txt in enumerate(LH_shot_list):
-    ax[2].annotate(txt, (LH_ne_average[i], LH_pe_at_ped[i]))
-    
-for i, txt in enumerate(HL_shot_list):
-    ax[2].annotate(txt, (HL_ne_average[i], HL_pe_at_ped[i]))
-    
+#plt.rcParams.update({'font.size': 17})
+#for i, txt in enumerate(LH_shot_list):
+#    ax[2].annotate(txt, (LH_ne_average[i], LH_pe_at_ped[i]))
+#    
+#for i, txt in enumerate(HL_shot_list):
+#    ax[2].annotate(txt, (HL_ne_average[i], HL_pe_at_ped[i]))
+#plt.rcParams.update({'font.size': 17})    
 
 #(res,cov) = np.polyfit(ne_average,pe_at_ped,deg=1,cov=True)
 (res,cov) = np.polyfit(ne_average,pe_at_ped,w=1/np.sqrt(np.array(ne_average_e)**2+np.array(pe_at_ped)**2),deg=1,cov=True)
@@ -479,7 +485,7 @@ ax[2].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(re
 
 ax[2].set_xlabel(r'$\overline{n_e}$ [$m^{-3}$]')
 ax[2].set_ylabel(r'$Pe_{ped} [a.u.]$')
-ax[2].legend()
+#ax[2].legend()
 
 #%%
 

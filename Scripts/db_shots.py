@@ -25,7 +25,7 @@ dic = (['shot','shot_time','time','time_em','time_ep','transition',
 """
 
 
-db = pd.DataFrame(columns=['shot', 'shot_time', 'time', 'time_em', 'time_ep', 'transition', 'session', 'geometry', 'Ploss', 'Ploss_e', 'BT', 'BT_e','BTOut','BTOut_e','IP', 'IP_e', 'KAPPA', 'KAPPA_e', 'AYC_NE', 'AYC_NE_e', 'AYE_NE', 'AYE_NE_e', 'ANE_DENSITY', 'ANE_DENSITY_e', 'AYC_TE', 'AYC_TE_e', 'AYE_TE', 'AYE_TE_e', 'AYC_PE', 'AYC_PE_e', 'AYE_PE', 'AYE_PE_e', 'NE', 'NE_e', 'TE', 'TE_e', 'PE', 'PE_e', 'X1Z', 'X1Z_e', 'X2Z', 'X2Z_e','SAREA','SAREA_e'])
+db = pd.DataFrame(columns=['shot', 'shot_time', 'time', 'time_em', 'time_ep', 'transition', 'session', 'geometry', 'Ploss', 'Ploss_e', 'BT', 'BT_e','BTOut','BTOut_e','IP', 'IP_e', 'KAPPA', 'KAPPA_e', 'AYC_NE', 'AYC_NE_e', 'AYE_NE', 'AYE_NE_e', 'ANE_DENSITY', 'ANE_DENSITY_e', 'AYC_TE', 'AYC_TE_e', 'AYE_TE', 'AYE_TE_e', 'AYC_PE', 'AYC_PE_e', 'AYE_PE', 'AYE_PE_e', 'NE', 'NE_e', 'TE', 'TE_e', 'PE', 'PE_e', 'X1Z', 'X1Z_e', 'X2Z', 'X2Z_e','SAREA','SAREA_e','AIM_DA_TO','AIM_DA_TO_e'])
 
 #db.loc[len(db)]=dic
 
@@ -78,7 +78,7 @@ shots = [
 session = '26-May-05'
 geometry = 'SN'
 
-from signal_dict_SEP_08 import signals
+from signal_dict_26_MAY_05 import signals
 
 shots = ['Shot(13042, LHt=[(0.302,0.300,0.303)], HLt=[(0.393,0.392,0.396)])',
          'Shot(13043, LHt=[(0.314,0.310,0.315)], HLt=[(0.326,0.325,0.327)])',
@@ -99,7 +99,7 @@ shots = ['Shot(13042, LHt=[(0.302,0.300,0.303)], HLt=[(0.393,0.392,0.396)])',
 session = '10-Aug-05'
 geometry = 'CDN'
 
-from signal_dict_SEP_08 import signals
+from signal_dict_26_MAY_05 import signals
 
 shots = ['Shot(13704, LHt=[(0.337,0.334,0.360)], HLt=[(0.384,0.383,0.387)])'
          ]
@@ -195,7 +195,7 @@ for shot_str in shots:
                                'AYC_TE','AYE_TE',
                                'AYC_PE','AYE_PE',
                                'NE', 'TE', 'PE',
-                               'X1Z','X2Z','SAREA']
+                               'X1Z','X2Z','SAREA','AIM_DA_TO']
     
     # here iterate shots
     
@@ -343,7 +343,7 @@ for shot_str in shots:
 
 #%%
         
-writer = pd.ExcelWriter('shot_database_ALL_SHOTS_NewX1X2.xlsx')
+writer = pd.ExcelWriter('shot_database_ALL_SHOTS_NewX1X2_.xlsx')
 db.to_excel(writer,'Sheet1')
 writer.save()
 
