@@ -38,7 +38,10 @@ shot.plot_compare(['BT','IP','AYC_NE','AIM_DA_TO','AIM_DA_HM','ADA_DALPHA_RAW','
 
 #%%
 
-shot = Shot(27444, LHt=[(0.254,0.251,0.259)], HLt=[(0.324,0.323,0.325)])
+shot = Shot(27450, LHt=[(0.116,0.110,0.118)], HLt=[(0.305,0.303,0.306)])#, LHt=[(0.254,0.251,0.259)], HLt=[(0.324,0.323,0.325)])
+shot.plot_JP()
+
+#%%
 
 
 

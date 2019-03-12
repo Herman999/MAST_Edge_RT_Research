@@ -243,25 +243,30 @@ for shot_str in shots:
             
         # now load up parameteres
         for parameter in parameters:
-            if parameter == 'Ploss' and dic['transition'] == 'HL':
-                # define all the stuff again for special case 
-                # DO NOT INTERPOLATE
-                units = s.data[parameter]['units']
-                
-                import bisect
-                signal_ind = bisect.bisect(s.data['Ploss']['time'], t1) #get index of value we will use
-                print('################', s.data['Ploss']['time'][signal_ind-1])
-                signal_at_t1 = s.data['Ploss']['data'][signal_ind-1]        #bisect
-                signal_at_t1_err = s.data['Ploss']['errors'][signal_ind-1]         #bisect the previous value
-                
-                signal_t_err_range = 0.
-                signal_t_err_error_range = 0.
-                signal_t_err_spread = 0.
-            
-                dic[parameter] = signal_at_t1
-                dic[parameter+'_e'] = signal_at_t1_err
-                
-                continue # return to next parameter in parameters
+#            if parameter == 'Ploss' and dic['transition'] == 'HL':
+#                # define all the stuff again for special case 
+#                # DO NOT INTERPOLATE
+#                
+#                try: units = s.data[parameter]['units']
+#                except: 
+#                    dic[parameter] = None
+#                    dic[parameter+'_e'] = None
+#                    continue
+#                
+#                import bisect
+#                signal_ind = bisect.bisect(s.data['Ploss']['time'], t1) #get index of value we will use
+#                print('################', s.data['Ploss']['time'][signal_ind-1])
+#                signal_at_t1 = s.data['Ploss']['data'][signal_ind-1]        #bisect
+#                signal_at_t1_err = s.data['Ploss']['errors'][signal_ind-1]         #bisect the previous value
+#                
+#                signal_t_err_range = 0.
+#                signal_t_err_error_range = 0.
+#                signal_t_err_spread = 0.
+#            
+#                dic[parameter] = signal_at_t1
+#                dic[parameter+'_e'] = signal_at_t1_err
+#                
+#                continue # return to next parameter in parameters
             
                 
             # skip if not in data
@@ -369,7 +374,7 @@ for shot_str in shots:
 
 #%%
         
-writer = pd.ExcelWriter('shot_db_REAL_Ploss_corr.xlsx')
+writer = pd.ExcelWriter('shot_db_REAL_Ploss_NOT_corr.xlsx')
 db.to_excel(writer,'Sheet1')
 writer.save()
 

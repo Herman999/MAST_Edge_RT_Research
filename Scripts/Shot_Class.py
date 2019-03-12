@@ -588,8 +588,6 @@ class Shot():
                 'range_err':[]
                 }
         
-        # why?
-        parameter = 'IP'
         
         # compbine LHt and HLt 
         list_of_transitions = []
@@ -617,8 +615,52 @@ class Shot():
                 t_err1 = t[1] # lower bound time error
                 t_err2 = t[2] # upper bound time error
                 
-                # get  units
+                                # get  units
                 units = self.data[parameter]['units']
+                                # add to dict
+                self._pandas['shot'].append(self.ShotNumber)
+                if t in self._LHt:
+                    self._pandas['LH/HL'].append('LH')
+                elif t in self._HLt:
+                    self._pandas['LH/HL'].append('HL')
+                else: 
+                    self._pandas['LH/HL'].append('WTF?') #:)   
+                
+                if parameter == 'Ploss' and t in self._HLt:
+                        
+                    #                # define all the stuff again for special case 
+                    # DO NOT INTERPOLATE
+                    
+                    #try: units = s.data[parameter]['units']
+                    #except: 
+                    #    dic[parameter] = None
+                    #    dic[parameter+'_e'] = None
+                    #    continue
+                    
+                    import bisect
+                    signal_ind = bisect.bisect(self.data['Ploss']['time'], t1) #get index of value we will use
+                    print('################', self.data['Ploss']['time'][signal_ind-1])
+                    signal_at_t1 = self.data['Ploss']['data'][signal_ind-1]        #bisect
+                    signal_at_t1_err = self.data['Ploss']['errors'][signal_ind-1]         #bisect the previous value
+                    
+                    signal_t_err_range = 0.
+                    signal_t_err_error_range = 0.
+                    signal_t_err_spread = 0.
+                
+                    self._pandas['time'].append(t1)
+                    self._pandas['units'].append(units)
+                    self._pandas['param'].append(parameter)
+                    self._pandas['p_value'].append(singal_at_t1)
+                    self._pandas['p_value_err'].append(singal_at_t1_err)
+                    self._pandas['perc_range_err'].append(np.round(singal_t_err_spread/singal_at_t1*100,2))
+                    self._pandas['range_err'].append(singal_t_err_spread)
+                    
+                    continue # return to next parameter in parameters
+                    
+
+                
+                
+
                 
                 # get parameter at transition
                 singal_at_t1 = np.interp(t1, self.data[parameter]['time'] , self.data[parameter]['data'])
@@ -653,14 +695,7 @@ class Shot():
                 # calculate spread in singal during t range and add mean error
                 singal_t_err_spread = max(singal_t_err_range) - min(singal_t_err_range) + np.mean(np.abs(singal_t_err_error_range))
                 
-                # add to dict
-                self._pandas['shot'].append(self.ShotNumber)
-                if t in self._LHt:
-                    self._pandas['LH/HL'].append('LH')
-                elif t in self._HLt:
-                    self._pandas['LH/HL'].append('HL')
-                else: 
-                    self._pandas['LH/HL'].append('WTF?') #:)
+
                 self._pandas['time'].append(t1)
                 self._pandas['units'].append(units)
                 self._pandas['param'].append(parameter)
@@ -671,6 +706,9 @@ class Shot():
             
       
         # transform to pandas and save to excel
+        print(self._pandas)
+        for key in self._pandas.keys():
+            print(key , len(self._pandas[key]))
         parameters_results = pd.DataFrame(self._pandas)
         writer = pd.ExcelWriter('parameters_output_{}.xlsx'.format(self.ShotNumber))
         parameters_results.to_excel(writer,'Sheet1')

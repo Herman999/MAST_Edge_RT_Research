@@ -19,8 +19,8 @@ from signal_dict_10_NOV_11 import signals
 s = Shot(27444, LHt=[(0.259,0.2545,0.2595)], HLt=[(0.324,0.323,0.325)])
 s1 = Shot(27446, LHt=[(0.276,0.274,0.2765)], HLt=[(0.3074,0.307,0.308)])
 s2 = Shot(27448, LHt=[(0.110,0.105,0.118)], HLt=[(0.2894,0.2893,0.2895)])
-s3 = Shot(27449, LHt=[(0.115,0.110,0.120)], HLt=[(0.301,0.300,0.306)])
-s4 = Shot(27450, LHt=[(0.116,0.110,0.118)], HLt=[(0.305,0.303,0.306)])
+s3 = Shot(27449, LHt=[(0.115,0.110,0.120)], HLt=[(0.306,0.301,0.3061)])
+s4 = Shot(27450, LHt=[(0.116,0.110,0.118)], HLt=[(0.3055,0.303,0.306)])
 s5 = Shot(27451, LHt=[(0.2665,0.266,0.267),(0.2847,0.284,0.2855)], HLt=[(0.273,0.2725,0.2735),(0.287,0.287,0.289)])
 s6 = Shot(27453, LHt=[(0.295,0.2945,0.2955)], HLt=[(0.3105,0.3099,0.311)])
 s7 = Shot(27454, LHt=[(0.277,0.276,0.278)], HLt=[(0.2893,0.289,0.290)])
@@ -95,8 +95,8 @@ plt.figure(figsize=(11.5,8))
 plt.errorbar(x = dflh_AYC_NE['p_value'], markersize=10, y = dflh_AYC_NE_ploss['p_value'], xerr=dflh_AYC_NE['p_value_err'],yerr =  dflh_AYC_NE_ploss['range_err'],fmt='o', label = 'LH AYC_NE',color = 'red')
 
 
-#for i, txt in enumerate(dflh_AYC_NE_shots):
-#    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
+for i, txt in enumerate(dflh_AYC_NE_shots):
+    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
 
 #plt.errorbar(x = dflh_ANE_NE['p_value'], markersize=10, y = dflh_ANE_NE_ploss['p_value'], xerr=dflh_ANE_NE['range_err'], yerr = dflh_ANE_NE_ploss['range_err'],fmt='o', label = 'LH ANE_NE',color = 'r')
 
@@ -190,8 +190,8 @@ dflh_ANE_NE_ploss  = dflh_ANE_NE_ploss[(dflh_ANE_NE_ploss.index.isin(dflh_ANE_NE
 
 plt.errorbar(x = dflh_AYC_NE['p_value'], markersize=10, y = dflh_AYC_NE_ploss['p_value'], xerr=dflh_AYC_NE['p_value_err'],yerr =  dflh_AYC_NE_ploss['range_err'],fmt='x', label = 'HL AYC_NE',color = 'blue')
 
-#for i, txt in enumerate(dflh_AYC_NE_shots):
-#    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
+for i, txt in enumerate(dflh_AYC_NE_shots):
+    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
 
 #plt.errorbar(x = dflh_ANE_NE['p_value'], markersize=10, y = dflh_ANE_NE_ploss['p_value'], xerr=dflh_ANE_NE['range_err'], yerr = dflh_ANE_NE_ploss['range_err'],fmt='x', label = 'HL ANE_NE',color = 'lime')
 
