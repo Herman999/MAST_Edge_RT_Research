@@ -213,16 +213,23 @@ class Shot():
         # apply condition to TE data (returned from self.fit_tanh_pedestal)
         x,y,xer,yer = xys[0][cond],xys[1][cond],xys[2][cond],xys[3][cond]
         
-        # do straight line fit through remaining data
 # can this be done better, taking account of xer,yer?
-#        try:
-#            p = np.polyfit(x,y,1)
-#            T_e = R_max_slope*p[0]+ p[1]
-#        except:
-#            T_e = -1e3
-        # redone
-        y_smooth = pd.DataFrame(y).rolling(3).mean().values.squeeze()
+        
+        # T_e via 3 point average.
+        ptavg = 3 # how many points to average over
+        y_smooth = pd.DataFrame(y).rolling(ptavg).mean().values.squeeze()
         T_e = np.interp(R_max_slope, x,y_smooth)
+        #error calculation
+        
+        # 2 options. only use second
+        # 1: take range of y's that have been smoothed
+        cind = bisect.bisect_right(x,R_max_slope)
+        T_e_err = np.ptp(y[cind-1:cind+2])
+        
+        # 2: Te signal error only 
+        T_e_err = np.interp(R_max_slope, x,yer)
+        
+        
         ####################OLD T_e line###########################
         #T_e = ped_tanh_odr2(edge_te_fit[0], R_max_slope) # this fit is bad
         
@@ -234,9 +241,9 @@ class Shot():
         T_ec = Theta_c * np.sqrt(Ln)
                 
     #    print('max slope: {0:.3e}. ne at max slope: {1:.3e}. Bt = {2}'.format(max_slope, ne_max_slope, B_t))
-        return (T_e, T_ec)
+        return (T_e, T_e_err, T_ec, Theta_c)
     
-    def Te_Tec_all(self, good_indexes, A=1., label=False):
+    def Te_Tec_all(self, good_indexes, A=1., label=False, bigerrs=True):
         
         cols = {'LH':'orange', 
                 'L':'red', 
@@ -268,16 +275,21 @@ class Shot():
                 label= lookup[bisect.bisect(lookup,(time,))][1] #'L', 'LH', 'H' etc
                 if label in ['L','LH']:
         # here the calls to self.Te_Tec are made for given index
-                    Te,Tec = self.Te_Tec(ind)
+                    Te,Te_err,Tec,Thetac = self.Te_Tec(ind)
                 else: # its 'H' or 'HL'
-                    Te,Tec = self.Te_Tec(ind)
+                    Te,Te_err,Tec,Thetac = self.Te_Tec(ind)
+                
+                if Te_err/Te > 1:
+                    print('Error Warning index {}'.format(ind))
+                    if bigerrs == False:
+                        continue
                 
                 plt.figure('Te/c')
-                plt.scatter(Tec*A, Te, marker='x', c=cols[label])
-                if label:
+                plt.errorbar(Tec*A, Te, yerr=Te_err, marker='x', c=cols[label])
+                if label == True:
                     plt.annotate(str(ind), [Tec*A, Te])
                 plt.figure('simple Te')
-                plt.scatter(time,Te, marker='x', c=cols[label])
+                plt.errorbar(time,Te, yerr=Te_err, marker='x', c=cols[label])
 
 
 

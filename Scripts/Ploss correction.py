@@ -4,6 +4,10 @@ Created on Sat Jan 19 11:08:38 2019
 
 @author: Tomas
 
+PLOT FILE
+
+1. press play
+
 """
 
 
@@ -25,7 +29,7 @@ dic = (['shot','shot_time','time','time_em','time_ep','transition',
 """
 
 
-db = pd.DataFrame(columns=['shot', 'shot_time', 'time', 'time_em', 'time_ep', 'transition', 'session', 'geometry', 'Ploss', 'Ploss_e', 'BT', 'BT_e','BTOut','BTOut_e','IP', 'IP_e', 'KAPPA', 'KAPPA_e', 'AYC_NE', 'AYC_NE_e', 'AYE_NE', 'AYE_NE_e', 'ANE_DENSITY', 'ANE_DENSITY_e', 'AYC_TE', 'AYC_TE_e', 'AYE_TE', 'AYE_TE_e', 'AYC_PE', 'AYC_PE_e', 'AYE_PE', 'AYE_PE_e', 'NE', 'NE_e', 'TE', 'TE_e', 'PE', 'PE_e', 'X1Z', 'X1Z_e', 'X2Z', 'X2Z_e','SAREA','SAREA_e','AIM_DA_TO','AIM_DA_TO_e'])
+db = pd.DataFrame(columns=['shot', 'shot_time', 'time', 'time_em', 'time_ep', 'transition', 'session', 'geometry', 'Ploss', 'Ploss_e', 'BT', 'BT_e','BTOut','BTOut_e','IP', 'IP_e', 'KAPPA', 'KAPPA_e', 'AYC_NE', 'AYC_NE_e', 'AYE_NE', 'AYE_NE_e', 'ANE_DENSITY', 'ANE_DENSITY_e', 'AYC_TE', 'AYC_TE_e', 'AYE_TE', 'AYE_TE_e', 'AYC_PE', 'AYC_PE_e', 'AYE_PE', 'AYE_PE_e', 'NE', 'NE_e', 'TE', 'TE_e', 'PE', 'PE_e', 'X1Z', 'X1Z_e', 'X2Z', 'X2Z_e','SAREA','SAREA_e'])
 
 #db.loc[len(db)]=dic
 
@@ -78,7 +82,7 @@ shots = [
 session = '26-May-05'
 geometry = 'SN'
 
-from signal_dict_26_MAY_05 import signals
+from signal_dict_SEP_08 import signals
 
 shots = ['Shot(13042, LHt=[(0.302,0.300,0.303)], HLt=[(0.393,0.392,0.396)])',
          'Shot(13043, LHt=[(0.314,0.310,0.315)], HLt=[(0.326,0.325,0.327)])',
@@ -99,7 +103,7 @@ shots = ['Shot(13042, LHt=[(0.302,0.300,0.303)], HLt=[(0.393,0.392,0.396)])',
 session = '10-Aug-05'
 geometry = 'CDN'
 
-from signal_dict_26_MAY_05 import signals
+from signal_dict_SEP_08 import signals
 
 shots = ['Shot(13704, LHt=[(0.337,0.334,0.360)], HLt=[(0.384,0.383,0.387)])'
          ]
@@ -174,13 +178,8 @@ shots = [
 'Shot(27587, LHt=[(0.222, 0.221, 0.223)],HLt=[(0.268, 0.267, 0.269)])',
 'Shot(27588, LHt=[(0.2222, 0.222, 0.2223)],HLt=[(0.2667, 0.265, 0.267)])',
 'Shot(27589, LHt=[(0.2001, 0.200, 0.201)],HLt=[(0.329, 0.328, 0.3293)])'
-
 ]
-
-
-#%%
-
-
+shots=['Shot(27035, LHt=[(0.2868,0.2865,0.287)], HLt = [(0.3096,0.3096,0.3098)])']
 
 #%%
 
@@ -195,7 +194,7 @@ for shot_str in shots:
                                'AYC_TE','AYE_TE',
                                'AYC_PE','AYE_PE',
                                'NE', 'TE', 'PE',
-                               'X1Z','X2Z','SAREA','AIM_DA_TO']
+                               'X1Z','X2Z','SAREA']
     
     # here iterate shots
     
@@ -244,9 +243,10 @@ for shot_str in shots:
                 units = s.data[parameter]['units']
                 
                 import bisect
-                signal_ind = bisect.bisect(t1, s.data['Ploss']['time']) #get index of value we will use
-                signal_at_t1 = s.data['Ploss']['data'][signal_ind]        #bisect
-                signal_at_t1_err = s.data['Ploss']['errors'][signal_ind]         #bisect the previous value
+                signal_ind = bisect.bisect(s.data['Ploss']['time'], t1) #get index of value we will use
+                print('################', s.data['Ploss']['time'][signal_ind-1])
+                signal_at_t1 = s.data['Ploss']['data'][signal_ind-1]        #bisect
+                signal_at_t1_err = s.data['Ploss']['errors'][signal_ind-1]         #bisect the previous value
                 
                 signal_t_err_range = 0.
                 signal_t_err_error_range = 0.
@@ -363,12 +363,61 @@ for shot_str in shots:
 
 #%%
         
-writer = pd.ExcelWriter('shot_database_ALL_SHOTS_NewX1X2_.xlsx')
+writer = pd.ExcelWriter('shot_db_Ploss_corr.xlsx')
 db.to_excel(writer,'Sheet1')
 writer.save()
 
-
 #%%
-writer = pd.ExcelWriter('test2.xlsx')
-combined.to_excel(writer,'Sheet1')
-writer.save()
+#use db to plot ploss/ne v zxpt
+alpha=0.8
+data = db
+
+# filter corrupted X1Z or X
+data = data[~(abs(data['X2Z_e'])>=1)]
+
+# cut of Ploss = 0 
+data = data[~(data['Ploss']==0)]
+
+# drop unnecessary columns
+data.drop(['time_em','time_ep','BT','BT_e','IP','IP_e','KAPPA','KAPPA_e','AYE_NE_e','AYE_NE','ANE_DENSITY','ANE_DENSITY_e','AYC_TE_e','AYE_TE','AYE_TE_e','AYC_PE', 'AYC_PE_e','AYE_PE','AYE_PE_e'],axis=1,inplace=True)
+# select diagnostic for NE --> I use AYC because cross-session compatible
+AYC_NE = data #data[~(data['AYC_NE']=='')]
+# combine
+combined = pd.concat([AYC_NE])#,NE])
+#drop unnecessary columns
+combined.drop(['AYC_TE','AYC_NE','AYC_NE_e'],axis=1)
+# filter LH
+data_LH = combined[combined['transition']=='LH']
+data_HL = combined[combined['transition']=='HL']
+#%%
+
+# PLot 
+X='X1Z'
+Xe='X1Z_e'  # choose x point
+
+plt.figure(figsize=(13,9))
+plt.title(r'{1} Point Height Study ($\alpha={0}$, CDN and DN)'.format(alpha,X))
+
+# PLOT LH
+y_err = np.sqrt(list((data_LH['Ploss_e']/data_LH['Ploss'])**2 + (data_LH['AYC_NE_e']/data_LH['AYC_NE'])**2)) # perc error
+y_err = y_err * data_LH['Ploss']/(data_LH['AYC_NE']**alpha) # * data
+plt.errorbar(x = data_LH[X], markersize=15, y = data_LH['Ploss']/(data_LH['AYC_NE']**alpha),xerr = data_LH[Xe], yerr = y_err ,fmt='x', label = 'LH',color = 'red')
+
+
+#for i, txt in enumerate(data_LH['shot']):
+#    plt.annotate(txt, (list(data_LH['X1Z'])[i], list(data_LH['Ploss']/(data_LH['NE']**alpha))[i]))
+
+# PLOT HL   
+y_err = np.sqrt(list((data_HL['Ploss_e']/data_HL['Ploss'])**2 + (data_HL['AYC_NE_e']/data_HL['AYC_NE'])**2)) # perc error
+y_err = y_err * data_HL['Ploss']/(data_HL['AYC_NE']**alpha) # * data
+plt.errorbar(x = data_HL[X], markersize=15, y = data_HL['Ploss']/(data_HL['AYC_NE']**alpha),xerr = data_HL[Xe], yerr = y_err ,fmt='x', label = 'HL',color = 'blue')
+
+#for i, txt in enumerate(data_HL['shot']):
+#    plt.annotate(txt, (list(data_HL['X1Z'])[i], list(data_HL['Ploss']/(data_HL['NE']**alpha))[i]))
+
+plt.ylim([3e-10,2.2e-9])
+plt.legend()
+plt.xlabel(r'X point height [m]' )
+plt.ylabel(r'$P_{loss}/N_e^\alpha$ [Wm^3]')
+plt.show()
+
