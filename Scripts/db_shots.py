@@ -140,7 +140,7 @@ shots = [
 
 #%%
 # new data shots
-from pull_data_2019_IP_new_shots import signals
+from signal_dict_2019_IP import signals
 session = 'IP_scan+IP on E_R'
 geometry = 'CND'
 
