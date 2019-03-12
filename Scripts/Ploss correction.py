@@ -6,7 +6,15 @@ Created on Sat Jan 19 11:08:38 2019
 
 PLOT FILE
 
-1. press play
+1. press play (NOT QUITE)
+
+1. initiate
+2. load session
+3. run results
+2. load another session
+.....
+3. save results
+4. plot
 
 """
 
@@ -29,8 +37,7 @@ dic = (['shot','shot_time','time','time_em','time_ep','transition',
 """
 
 
-db = pd.DataFrame(columns=['shot', 'shot_time', 'time', 'time_em', 'time_ep', 'transition', 'session', 'geometry', 'Ploss', 'Ploss_e', 'BT', 'BT_e','BTOut','BTOut_e','IP', 'IP_e', 'KAPPA', 'KAPPA_e', 'AYC_NE', 'AYC_NE_e', 'AYE_NE', 'AYE_NE_e', 'ANE_DENSITY', 'ANE_DENSITY_e', 'AYC_TE', 'AYC_TE_e', 'AYE_TE', 'AYE_TE_e', 'AYC_PE', 'AYC_PE_e', 'AYE_PE', 'AYE_PE_e', 'NE', 'NE_e', 'TE', 'TE_e', 'PE', 'PE_e', 'X1Z', 'X1Z_e', 'X2Z', 'X2Z_e','SAREA','SAREA_e'])
-
+db = pd.DataFrame(columns=['shot', 'shot_time', 'time', 'time_em', 'time_ep', 'transition', 'session', 'geometry', 'Ploss', 'Ploss_e', 'BT', 'BT_e','BTOut','BTOut_e','IP', 'IP_e', 'KAPPA', 'KAPPA_e', 'AYC_NE', 'AYC_NE_e', 'AYE_NE', 'AYE_NE_e', 'ANE_DENSITY', 'ANE_DENSITY_e', 'AYC_TE', 'AYC_TE_e', 'AYE_TE', 'AYE_TE_e', 'AYC_PE', 'AYC_PE_e', 'AYE_PE', 'AYE_PE_e', 'NE', 'NE_e', 'TE', 'TE_e', 'PE', 'PE_e', 'X1Z', 'X1Z_e', 'X2Z', 'X2Z_e','SAREA','SAREA_e','AIM_DA_TO','AIM_DA_TO_e'])
 #db.loc[len(db)]=dic
 
 
@@ -179,7 +186,6 @@ shots = [
 'Shot(27588, LHt=[(0.2222, 0.222, 0.2223)],HLt=[(0.2667, 0.265, 0.267)])',
 'Shot(27589, LHt=[(0.2001, 0.200, 0.201)],HLt=[(0.329, 0.328, 0.3293)])'
 ]
-shots=['Shot(27035, LHt=[(0.2868,0.2865,0.287)], HLt = [(0.3096,0.3096,0.3098)])']
 
 #%%
 
@@ -194,7 +200,7 @@ for shot_str in shots:
                                'AYC_TE','AYE_TE',
                                'AYC_PE','AYE_PE',
                                'NE', 'TE', 'PE',
-                               'X1Z','X2Z','SAREA']
+                               'X1Z','X2Z','SAREA','AIM_DA_TO']
     
     # here iterate shots
     
@@ -363,7 +369,7 @@ for shot_str in shots:
 
 #%%
         
-writer = pd.ExcelWriter('shot_db_Ploss_corr.xlsx')
+writer = pd.ExcelWriter('shot_db_REAL_Ploss_corr.xlsx')
 db.to_excel(writer,'Sheet1')
 writer.save()
 
