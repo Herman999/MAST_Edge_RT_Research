@@ -33,7 +33,7 @@ data = data[~(abs(data['X2Z_e'])>=1)]
 data = data[~(data['Ploss']==0)]
 
 # drop unnecessary columns
-data.drop(['time_em','time_ep','BT','BT_e','IP','IP_e','KAPPA','KAPPA_e','AYE_NE_e','AYE_NE','ANE_DENSITY','ANE_DENSITY_e','AYC_TE_e','AYE_TE','AYE_TE_e','AYC_PE', 'AYC_PE_e','AYE_PE','AYE_PE_e'],axis=1,inplace=True)
+data.drop(['time_em','time_ep','BT','BT_e','KAPPA','KAPPA_e','AYE_NE_e','AYE_NE','ANE_DENSITY','ANE_DENSITY_e','AYC_TE_e','AYE_TE','AYE_TE_e','AYC_PE', 'AYC_PE_e','AYE_PE','AYE_PE_e'],axis=1,inplace=True)
 
 # select diagnostic for NE --> I use AYC because cross-session compatible
 AYC_NE = data[~(data['AYC_NE']=='')]
@@ -69,7 +69,15 @@ plt.title(r'All data {1} Point Height Study ($\alpha={0}$, SN)'.format(alpha,X))
 
 y_err = np.sqrt(list((data_LH['Ploss_e']/data_LH['Ploss'])**2 + (data_LH['AYC_NE_e']/data_LH['AYC_NE'])**2)) # perc error
 y_err = y_err * data_LH['Ploss']/(data_LH['AYC_NE']**alpha) # * data
-plt.errorbar(x = data_LH[X], markersize=15, y = data_LH['Ploss']/(data_LH['AYC_NE']**alpha),xerr = data_LH[Xe], yerr = y_err ,fmt='x', label = 'LH',color = 'red')
+for xpt,ploss,ne,xpt_err,y_err,IP in zip(data_LH[X],data_LH['Ploss'],data_LH['AYC_NE'],data_LH[Xe],y_err,data_LH['IP']):
+    if IP < 740:
+        marker = 'x'
+    elif IP < 780:
+        marker='o'
+    else:
+        marker='s'
+    plt.errorbar(xpt, ploss/ne,xerr=xpt_err,yerr=y_err, markersize=15, fmt=marker, label='LH',color='red')
+#plt.errorbar(x = data_LH[X], markersize=15, y = data_LH['Ploss']/(data_LH['AYC_NE']**alpha),xerr = data_LH[Xe], yerr = y_err ,fmt='x', label = 'LH',color = 'red')
 
 
 #for i, txt in enumerate(data_LH['shot']):
@@ -78,9 +86,11 @@ plt.errorbar(x = data_LH[X], markersize=15, y = data_LH['Ploss']/(data_LH['AYC_N
 
 
 # PLOT HL   
-y_err = np.sqrt(list((data_HL['Ploss_e']/data_HL['Ploss'])**2 + (data_HL['AYC_NE_e']/data_HL['AYC_NE'])**2)) # perc error
-y_err = y_err * data_HL['Ploss']/(data_HL['AYC_NE']**alpha) # * data
-plt.errorbar(x = data_HL[X], markersize=15, y = data_HL['Ploss']/(data_HL['AYC_NE']**alpha),xerr = data_HL[Xe], yerr = y_err ,fmt='x', label = 'HL',color = 'blue')
+# =============================================================================
+# y_err = np.sqrt(list((data_HL['Ploss_e']/data_HL['Ploss'])**2 + (data_HL['AYC_NE_e']/data_HL['AYC_NE'])**2)) # perc error
+# y_err = y_err * data_HL['Ploss']/(data_HL['AYC_NE']**alpha) # * data
+# plt.errorbar(x = data_HL[X], markersize=15, y = data_HL['Ploss']/(data_HL['AYC_NE']**alpha),xerr = data_HL[Xe], yerr = y_err ,fmt='x', label = 'HL',color = 'blue')
+# =============================================================================
 
 #for i, txt in enumerate(data_HL['shot']):
 #    plt.annotate(txt, (list(data_HL[X])[i], list(data_HL['Ploss']/(data_HL['AYC_NE']**alpha))[i]))
