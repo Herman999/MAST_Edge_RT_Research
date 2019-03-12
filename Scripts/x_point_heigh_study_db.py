@@ -14,7 +14,7 @@ import pandas as pd
 alpha = 0.8
 
 #load from db
-data = pd.read_excel('shot_database_ALL_SHOTS_NewX1X2_.xlsx')
+data = pd.read_excel('shot_db_REAL_Ploss_corr.xlsx')
 
 # sellect desired configuration
 #data = data[(data['geometry']=='SN')]
