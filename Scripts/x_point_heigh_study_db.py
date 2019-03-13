@@ -2,7 +2,11 @@
 """
 Created on Mon Jan 21 12:22:54 2019
 
-@author: Tomas
+@author: Tomas/Ronan
+
+PLOT Pth v XPT seperated by IP
+
+1. press play
 """
 
 
@@ -55,18 +59,20 @@ x_high_i = []
 y_high_i = []
 x_low_i = []
 y_low_i = []
-# PLOT LH
+zs=[]
 
+# PLOT LH
 y_err = np.sqrt(list((data_LH['Ploss_e']/data_LH['Ploss'])**2 + (data_LH['AYC_NE_e']/data_LH['AYC_NE'])**2)) # perc error
 y_err = y_err * data_LH['Ploss']/(data_LH['AYC_NE']**alpha) # * data
 for xpt,ploss,ne,xpt_err,y_err,IP,sesh,shot in zip(data_LH[X],data_LH['Ploss'],data_LH['AYC_NE'],data_LH[Xe],y_err,data_LH['IP'],data_LH['session'],data_LH['shot']):
-    if IP < 750:
+    
+    if IP < 755:
         marker = 'x'
         col = 'b' # lowest IP
         x_low_i.append(xpt)
         y_low_i.append(ploss/ne**alpha)
         
-    elif IP < 780:
+    elif IP < 775:
         marker='1'
         col='r' # average IP
         if ploss/ne**alpha >0:
@@ -80,23 +86,21 @@ for xpt,ploss,ne,xpt_err,y_err,IP,sesh,shot in zip(data_LH[X],data_LH['Ploss'],d
 #    if '17FEB10-Hmodebetascan' in sesh:
 #        col='g'
 #        plt.annotate(shot, (xpt, ploss/ne**alpha))
-    plt.errorbar(xpt, ploss/ne**alpha,xerr=xpt_err,yerr=y_err, markersize=15, fmt='.', label='LH',color=col)
-#plt.errorbar(x = data_LH[X], markersize=15, y = data_LH['Ploss']/(data_LH['AYC_NE']**alpha),xerr = data_LH[Xe], yerr = y_err ,fmt='x', label = 'LH',color = 'red')
-    
-#for i, txt in enumerate(data_LH['shot']):
-#    plt.annotate(txt, (list(data_LH[X])[i], list(data_LH['Ploss']/(data_LH['AYC_NE']**alpha))[i]))
+        
+    plt.annotate(shot,(xpt, ploss/ne**alpha))
+    plt.errorbar(xpt, ploss/ne**alpha,xerr=xpt_err,yerr=y_err, markersize=15, fmt='.', label='LH',c=col)
 
 # PLOT HL   
 # =============================================================================
 y_err = np.sqrt(list((data_HL['Ploss_e']/data_HL['Ploss'])**2 + (data_HL['AYC_NE_e']/data_HL['AYC_NE'])**2)) # perc error
 y_err = y_err * data_HL['Ploss']/(data_HL['AYC_NE']**alpha) # * data
 for xpt,ploss,ne,xpt_err,y_err,IP,sesh,shot in zip(data_HL[X],data_HL['Ploss'],data_HL['AYC_NE'],data_HL[Xe],y_err,data_HL['IP'],data_HL['session'],data_HL['shot']):
-    if IP < 750:
+    if IP < 755:
         marker = 'x'
         col = 'b' # lowest IP
         x_low_i.append(xpt)
         y_low_i.append(ploss/ne**alpha)
-    elif IP < 780:
+    elif IP < 775:
         marker='1'
         col='r' # average IP
         if ploss/ne**alpha >0:
@@ -105,14 +109,14 @@ for xpt,ploss,ne,xpt_err,y_err,IP,sesh,shot in zip(data_HL[X],data_HL['Ploss'],d
     else:
         marker='s'
         col='khaki' # highest IP
-    plt.errorbar(xpt, ploss/ne**alpha,xerr=xpt_err,yerr=y_err, markersize=15, fmt='.', label='LH',color=col)
-    #plt.annotate(shot, (xpt, ploss/ne**alpha))
-#    plt.errorbar(x = data_HL[X], markersize=15, y = data_HL['Ploss']/(data_HL['AYC_NE']**alpha),xerr = data_HL[Xe], yerr = y_err ,fmt='x', label = 'HL',color = 'blue')
+    
+    plt.annotate(shot,(xpt, ploss/ne**alpha))
+    #plt.annotate(str(int(np.round(IP,-1))),(xpt, ploss/ne**alpha) )
+    plt.errorbar(xpt, ploss/ne**alpha,xerr=xpt_err,yerr=y_err, markersize=15, fmt='.', label='LH',c=col)
 # =============================================================================
 
-#for i, txt in enumerate(data_HL['shot']):
-#    plt.annotate(txt, (list(data_HL[X])[i], list(data_HL['Ploss']/(data_HL['AYC_NE']**alpha))[i]))
 
+plt.gray()
 plt.ylim([0,2.6e-9])
 plt.xlim([0.28,0.65])
 #plt.legend()
@@ -121,10 +125,10 @@ plt.ylabel(r'$P_{loss}/N_e^\alpha$ [Wm^3]')
 plt.show()
 
 
-p = np.poly1d(np.polyfit(x_high_i,y_high_i,1))
-stx = np.arange(0.3,0.7,0.05)
-plt.plot(stx,p(stx), c='r')
-
-p = np.poly1d(np.polyfit(x_low_i,y_low_i,1))
-stx = np.arange(0.3,0.7,0.05)
-plt.plot(stx,p(stx), c='b')
+#p = np.poly1d(np.polyfit(x_high_i,y_high_i,1))
+#stx = np.arange(0.3,0.7,0.05)
+#plt.plot(stx,p(stx), c='r')
+#
+#p = np.poly1d(np.polyfit(x_low_i,y_low_i,1))
+#stx = np.arange(0.3,0.7,0.05)
+#plt.plot(stx,p(stx), c='b')
