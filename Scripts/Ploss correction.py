@@ -22,7 +22,7 @@ PLOT FILE
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+plt.rcParams.update({'font.size': 14})
 #%%
 def doitall(shots,session,geometry,db):
     #function that does it all.
