@@ -191,7 +191,10 @@ def doitall(shots,session,geometry,db):
                 singal_t_err_spread = max(singal_t_err_range) - min(singal_t_err_range) + np.mean(np.abs(singal_t_err_error_range))
                 
                 
-                if parameter not in ['X1Z','X2Z']:
+                if parameter in ['AIM_DA_TO']:
+                    dic[parameter] = singal_at_t1
+                    dic[parameter+'_e'] = singal_at_t1_err
+                elif parameter not in ['X1Z','X2Z']:
                     # add parameter to dic
                     dic[parameter] = singal_at_t1
                     dic[parameter+'_e'] = singal_t_err_spread
@@ -369,20 +372,27 @@ db = doitall(shots,'17NOV11-LHlowIP','DN',db)
 #%%
 
         
-writer = pd.ExcelWriter('shot_db_REAL_Ploss_corr.xlsx')
-db.to_excel(writer,'Sheet1')
-writer.save()
+#writer = pd.ExcelWriter('shot_db_REAL_Ploss_corr.xlsx')
+#db.to_excel(writer,'Sheet1')
+#writer.save()
 
 #%%
 #use db to plot ploss/ne v zxpt
 alpha=0.8
-data = db
+
+#data = db
+data = pd.read_excel('shot_db_REAL_Ploss_corr.xlsx')
+
+# FILTER SINGLE NULS
+data = data[~(data.geometry=='SN')]
 
 # filter corrupted X1Z or X
 data = data[~(abs(data['X2Z_e'])>=1)]
 
 # cut of Ploss = 0 
 data = data[~(data['Ploss']==0)]
+data = data[~(data['Ploss'].isnull())]
+data = data[~(data['AYC_NE']=='')]
 
 # drop unnecessary columns
 data.drop(['time_em','time_ep','BT','BT_e','IP','IP_e','KAPPA','KAPPA_e','AYE_NE_e','AYE_NE','ANE_DENSITY','ANE_DENSITY_e','AYC_TE_e','AYE_TE','AYE_TE_e','AYC_PE', 'AYC_PE_e','AYE_PE','AYE_PE_e'],axis=1,inplace=True)
@@ -405,7 +415,9 @@ plt.figure(figsize=(13,9))
 plt.title(r'{1} Point Height Study ($\alpha={0}$, CDN and DN)'.format(alpha,X))
 
 # PLOT LH
-y_err = np.sqrt(list((data_LH['Ploss_e']/data_LH['Ploss'])**2 + (data_LH['AYC_NE_e']/data_LH['AYC_NE'])**2)) # perc error
+y_err = np.sqrt(list(
+        (data_LH['Ploss_e']/data_LH['Ploss'])**2 + (data_LH['AYC_NE_e']/data_LH['AYC_NE'])**2
+        )) # perc error
 y_err = y_err * data_LH['Ploss']/(data_LH['AYC_NE']**alpha) # * data
 plt.errorbar(x = data_LH[X], markersize=15, y = data_LH['Ploss']/(data_LH['AYC_NE']**alpha),xerr = data_LH[Xe], yerr = y_err ,fmt='x', label = 'LH',color = 'red')
 
@@ -426,4 +438,66 @@ plt.legend()
 plt.xlabel(r'X point height [m]' )
 plt.ylabel(r'$P_{loss}/N_e^\alpha$ [Wm^3]')
 plt.show()
+
+#%%
+
+# D alpha analysis
+
+
+
+
+
+fig, ax = plt.subplots(2,sharex=True,figsize=(11.5,8))
+
+
+textstr = r'$I_p=500-700$kA $B_t=-0.425$T'
+#ax[0].text(1.08, 4.5e19, textstr, fontsize=14)
+ax[0].text(-1.045, 4.5e19, textstr, fontsize=14)
+ax[0].set_title(r'Neutrals Recycling Study on {} point height'.format(X))
+
+y_err = np.sqrt(list((data_LH['Ploss_e']/data_LH['Ploss'])**2 + (data_LH['AYC_NE_e']/data_LH['AYC_NE'])**2)) # perc error
+y_err = y_err * data_LH['Ploss']/(data_LH['AYC_NE']**alpha) # * data
+ax[0].errorbar(x = data_LH[X], markersize=15, y = data_LH['Ploss']/(data_LH['AYC_NE']**alpha),xerr = data_LH[Xe], yerr = y_err ,fmt='x', label = 'LH',color = 'red')
+
+#for i, txt in enumerate(data_LH['shot']):
+#    plt.annotate(txt, (list(data_LH['X1Z'])[i], list(data_LH['Ploss']/(data_LH['NE']**alpha))[i]))
+
+
+y_err = np.sqrt(list((data_HL['Ploss_e']/data_HL['Ploss'])**2 + (data_HL['AYC_NE_e']/data_HL['AYC_NE'])**2)) # perc error
+y_err = y_err * data_HL['Ploss']/(data_HL['AYC_NE']**alpha) # * data
+ax[0].errorbar(x = data_HL[X], markersize=15, y = data_HL['Ploss']/(data_HL['AYC_NE']**alpha),xerr = data_HL[Xe], yerr = y_err ,fmt='x', label = 'HL',color = 'blue')
+
+#for i, txt in enumerate(data_HL['shot']):
+#    plt.annotate(txt, (list(data_HL['X1Z'])[i], list(data_HL['Ploss']/(data_HL['NE']**alpha))[i]))
+
+ax[0].axvline(x=0.5,color='orange',linestyle='dashed')
+ax[0].set_ylim([3e-10,2.2e-9])
+ax[0].set_xlim([0.39,0.54])
+ax[0].set_xlabel(r'X point height [m]' )
+ax[0].set_ylabel(r'$P_{loss}/N_e^\alpha$ [Wm^3]')
+ax[0].legend()
+# D ALPHA
+    
+# filter 
+data_LH = data_LH[~(data_LH.AIM_DA_TO=='')]
+data_HL = data_HL[~(data_HL.AIM_DA_TO=='')]
+data_LH = data_LH[data_LH.AIM_DA_TO>=0]
+data_HL = data_HL[data_HL.AIM_DA_TO>=0]
+
+ax[1].set_xlabel('X point height [m]')
+ax[1].set_ylabel(r'$D_{\alpha}$ $ [A.U.]$')
+ax[1].set_ylim([0,1.5e19])
+ax[1].axvline(x=0.5,color='orange',linestyle='dashed')
+ax[1].errorbar(fmt='o',x=data_LH[X],y=data_LH['AIM_DA_TO'],xerr=data_LH[Xe],yerr=data_LH['AIM_DA_TO_e'],c='red',label='LH')
+ax[1].errorbar(fmt='o',x=data_HL[X],y=data_HL['AIM_DA_TO'],xerr=data_HL[Xe],yerr=data_HL['AIM_DA_TO_e'],c='blue',label='HL')
+ax[1].legend()
+
+
+
+
+
+
+
+
+
 
