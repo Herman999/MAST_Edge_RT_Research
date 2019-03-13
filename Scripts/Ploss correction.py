@@ -22,7 +22,7 @@ PLOT FILE
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
+plt.rcParams.update({'font.size': 14})
 #%%
 def doitall(shots,session,geometry,db):
     #function that does it all.
@@ -491,6 +491,8 @@ ax[1].axvline(x=0.5,color='orange',linestyle='dashed')
 ax[1].errorbar(fmt='o',x=data_LH[X],y=data_LH['AIM_DA_TO'],xerr=data_LH[Xe],yerr=data_LH['AIM_DA_TO_e'],c='red',label='LH')
 ax[1].errorbar(fmt='o',x=data_HL[X],y=data_HL['AIM_DA_TO'],xerr=data_HL[Xe],yerr=data_HL['AIM_DA_TO_e'],c='blue',label='HL')
 ax[1].legend()
+
+
 
 
 

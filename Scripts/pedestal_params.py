@@ -3,6 +3,18 @@
 Created on Thu Jan 31 10:37:24 2019
 
 @author: Tomas
+
+USE:
+    
+DO NOT PRESS PLAY
+1. Initiate
+2. Chose session (no need for correction in geometry or time) 
+3. run LH data collection
+4. save data
+5. run HL data collection
+6. return to point 2. untill you run out of sessions
+7. Plot and celebrate
+
 """
 
 # Pedestal parameters dependance on average density
@@ -527,7 +539,7 @@ for i in range(len(HL_ne_average)):
     dic['pe_at_ped_e'] = HL_pe_at_ped_e[i]
     ped_db.loc[len(ped_db)]=dic
     
-writer = pd.ExcelWriter('ML_data_PED_new.xlsx')
+writer = pd.ExcelWriter('db_ped_final.xlsx')
 ped_db.to_excel(writer,'Sheet1')
 writer.save()
 
