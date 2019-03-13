@@ -62,7 +62,7 @@ X='X1Z'
 Xe='X1Z_e'
 
 plt.figure(figsize=(11.5,8))
-plt.title(r'All data {1} Point Height Study ($\alpha={0}$, SN)'.format(alpha,X))
+plt.title(r'All data {1} Point Height Study ($\alpha={0}$)'.format(alpha,X))
 
 
 # PLOT LH
@@ -72,11 +72,14 @@ y_err = y_err * data_LH['Ploss']/(data_LH['AYC_NE']**alpha) # * data
 for xpt,ploss,ne,xpt_err,y_err,IP in zip(data_LH[X],data_LH['Ploss'],data_LH['AYC_NE'],data_LH[Xe],y_err,data_LH['IP']):
     if IP < 740:
         marker = 'x'
+        col = 'darkred'
     elif IP < 780:
-        marker='o'
+        marker='1'
+        col='r'
     else:
         marker='s'
-    plt.errorbar(xpt, ploss/ne,xerr=xpt_err,yerr=y_err, markersize=15, fmt=marker, label='LH',color='red')
+        col='khaki'
+    plt.errorbar(xpt, ploss/ne**alpha,xerr=xpt_err,yerr=y_err, markersize=15, fmt='.', label='LH',color=col)
 #plt.errorbar(x = data_LH[X], markersize=15, y = data_LH['Ploss']/(data_LH['AYC_NE']**alpha),xerr = data_LH[Xe], yerr = y_err ,fmt='x', label = 'LH',color = 'red')
 
 
@@ -97,7 +100,7 @@ for xpt,ploss,ne,xpt_err,y_err,IP in zip(data_LH[X],data_LH['Ploss'],data_LH['AY
 
 plt.ylim([0,2.6e-9])
 plt.xlim([0.28,0.65])
-plt.legend()
+#plt.legend()
 plt.xlabel(r'X point height [m]' )
 plt.ylabel(r'$P_{loss}/N_e^\alpha$ [Wm^3]')
 plt.show()
