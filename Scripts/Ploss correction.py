@@ -8,14 +8,6 @@ PLOT FILE
 
 1. press play
 
-1. initiate
-2. load session
-3. run results
-2. load another session
-.....
-3. save results
-4. plot
-
 """
 
 

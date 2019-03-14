@@ -114,8 +114,6 @@ for xpt,ploss,ne,xpt_err,y_err,IP,sesh,shot in zip(data_HL[X],data_HL['Ploss'],d
     #plt.annotate(str(int(np.round(IP,-1))),(xpt, ploss/ne**alpha) )
     plt.errorbar(xpt, ploss/ne**alpha,xerr=xpt_err,yerr=y_err, markersize=15, fmt='.', label='LH',c=col)
 # =============================================================================
-
-
 plt.gray()
 plt.ylim([0,2.6e-9])
 plt.xlim([0.28,0.65])
@@ -123,12 +121,12 @@ plt.xlim([0.28,0.65])
 plt.xlabel(r'X point height [m]' )
 plt.ylabel(r'$P_{loss}/N_e^\alpha$ [Wm^3]')
 plt.show()
-
-
 #p = np.poly1d(np.polyfit(x_high_i,y_high_i,1))
 #stx = np.arange(0.3,0.7,0.05)
 #plt.plot(stx,p(stx), c='r')
-#
 #p = np.poly1d(np.polyfit(x_low_i,y_low_i,1))
 #stx = np.arange(0.3,0.7,0.05)
 #plt.plot(stx,p(stx), c='b')
+
+#%%
+# plot Dalpha with IP seperation

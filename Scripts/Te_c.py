@@ -21,28 +21,18 @@ d1= Shot(27035, LHt=[(0.2868,0.2865,0.287)], HLt = [(0.3096,0.3096,0.3098)])
 d2= Shot(27036, LHt = [(0.2565, 0.2545,0.258)], HLt = [(0.3261,0.3261,0.327)])
 d3= Shot(27039, LHt=[(0.298,0.297,0.295)], HLt = [(0.330, 0.3299, 0.3301)])
 
-
 x1 = Shot(27453, LHt=[(0.295,0.2945,0.2955)], HLt=[(0.3105,0.3099,0.311)])
 x2 = Shot(24328, LHt=[(0.251, 0.2506, 0.2514)],HLt=[(0.2895, 0.2894, 0.2896)])
 x3 = Shot(24132, LHt=[(0.2637,0.262,0.264),(0.2945,0.294,0.295)], HLt=[(0.283,0.282,0.2835),(0.340,0.339,0.341)])
 
-#%%
-
-for shot in [d1,d2,d3, x1,x2,x3]:
-    shot.plot_JP(plot_thomson=4, label_thomson=True)
-
-#%% more Z-x-pt data, to try again...
+# more Z-x-pt data, to try again...
 from signal_dict_10_NOV_11 import signals
 z1 = Shot(20480, LHt=[(0.1975,0.1974,0.1976)], HLt=[(0.267,0.2669,0.2671)])
 from signal_dict_13_DEC_PULL import signals
 z2 = Shot(24130, LHt=[(0.285,0.2845,0.2855)], HLt=[(0.3325,0.332,0.333)])
 from signal_dict_10_NOV_11 import signals
 z3 = Shot(27449, LHt=[(0.115,0.110,0.120)], HLt=[(0.301,0.300,0.306)])
-#%%
-for shot in [z3]:
-    shot.plot_JP(plot_thomson=4, label_thomson=True)
 
-#%%
 # IP scan shots
 runfile('C:/Users/rbatt/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/rbatt/MAST_Edge_RT_Research/Scripts')
 from signal_dict_2019_IP import signals
@@ -50,9 +40,17 @@ i1= Shot(30351, LHt=[(0.300, 0.295, 0.334)],HLt=[(0.620, 0.615, 0.622)])
 i2= Shot(30356, LHt=[(0.273, 0.270, 0.275)],HLt=[(0.2791, 0.2790, 0.2794)]) # very very limited h mode. Will it produce any Te>Tec?
 i3= Shot(30358, LHt=[(0.1975, 0.19745, 0.1976)],HLt=[(0.3425, 0.342, 0.343)])
 
-#%%
-for shot in [i1,i2,i3]:
-    shot.plot_JP(plot_thomson=4,label_thomson=True)
+#high IP shots
+hip1 = Shot(24524, LHt=[(0.201, 0.197, 0.202)],HLt=[(0.355, 0.354, 0.3558)])
+
+
+#%% JP PLOTS
+#for shot in [d1,d2,d3, x1,x2,x3]:
+#    shot.plot_JP(plot_thomson=4, label_thomson=True)
+#for shot in [z3]:
+#    shot.plot_JP(plot_thomson=4, label_thomson=True)
+#for shot in [i1,i2,i3]:
+#    shot.plot_JP(plot_thomson=4,label_thomson=True)
 
 #%%
 #all shots with '000_goodbad_indexs.pickle'
@@ -85,9 +83,6 @@ def goodbads(shotclass):
 #%%
 # TE data generally not good enough for xpoint height scan shots x1,x2,x3
 # So want to check by hand the values
-with open(r"27449_goodbad_indexs.pickle", 'rb') as input_file:
-    good, bad = pickle.load(input_file)
-
 
 tgood = []
 tbad = []
@@ -108,8 +103,8 @@ for ind in good:
 #%%
 import pickle
 
-
 def Tecplots(shotclasslist, label_index=True, include_big_errors=True):
+    # plot Tec stuff for all shots in shotclasslist.
     plt.figure('Te/c', figsize=(6,5))
     for shot in shotclasslist:
        with open(r"{}_goodbad_indexs.pickle".format(shot.ShotNumber), "rb") as input_file:
