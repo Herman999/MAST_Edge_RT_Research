@@ -15,6 +15,10 @@ import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size': 14})
 # ITER SCALING
 
+#data = db
+data = pd.read_excel('shot_db_REAL_Ploss_corr.xlsx')
+
+
 # TAKIZUKA
 # A = aspect ratio
 # F =  A/(1- np.sqrt(2( 1 + A )))
@@ -23,11 +27,17 @@ plt.rcParams.update({'font.size': 14})
 A = 1.307
 F = A/ (1 - np.sqrt(2/ ( 1 + A )))
 
+a = 0.65
+R = 0.85
+
+u0 = 4*np.pi*1e-7
+Bpol = u0 * data['IP']*1000 / 2 / 3.14 * 0.765
+data['BTOut'] = np.sqrt( data['BTOut']**2 + Bpol**2 )
+
 alpha=0.8
 
 
-#data = db
-data = pd.read_excel('shot_db_REAL_Ploss_corr.xlsx')
+
 
 # FILTER SINGLE NULS
 data = data[~(data.geometry=='SN')]
