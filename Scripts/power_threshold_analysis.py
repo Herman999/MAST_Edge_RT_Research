@@ -3,6 +3,15 @@
 Created on Tue Nov 20 12:02:30 2018
 
 @author: Tomas
+
+# TO USE
+# 1. Initiate
+2. LOAD SESSION 1
+3. RUN DATA ANALYSSIS
+4. RETURN AND LOAD SESION 2
+5. RUN PLTTING for old method
+6. RUN REST IN SECTIONS NORMALY 
+7. ENJOY
 """
 
 from signal_dict_10_NOV_11 import signals
@@ -333,7 +342,7 @@ textstr = r'$I_p=700$kA $B_t=-0.425$T'
 plt.text(3.6e19, 8e6, textstr, fontsize=14)
 plt.xlim([9e18,4.5e19])
 plt.ylim([0,7.8e6])
-plt.title(r'$P_{th}$ scaling $L \to H$ and $H \to L$')
+plt.title(r'$P_{th}$ dependance $L \to H$ and $H \to L$')
 plt.xlabel(r'$n_e$ [$n^{-3}$]')
 plt.ylabel('Ploss [W]')
 plt.ticklabel_format(axis='y',scilimits=(0,0))
@@ -575,7 +584,7 @@ textstr = r'$I_p=700$kA $B_t=-0.425$T'
 plt.text(3.6e19, 8e6, textstr, fontsize=14)
 plt.xlim([9e18,4.5e19])
 plt.ylim([0,7.8e6])
-plt.title(r'$P_{th}$ scaling $L \to H$ and $H \to L$')
+plt.title(r'$P_{th}$ dependance $L \to H$ and $H \to L$')
 plt.xlabel(r'$n_e$ [$n^{-3}$]')
 plt.ylabel('Ploss [W]')
 plt.ticklabel_format(axis='y',scilimits=(0,0))
