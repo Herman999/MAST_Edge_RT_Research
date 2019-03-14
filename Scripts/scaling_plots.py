@@ -57,8 +57,8 @@ AYC_NE = data #data[~(data['AYC_NE']=='')]
 combined = pd.concat([AYC_NE])#,NE])
 combined.drop(['AYC_TE','AYC_NE','AYC_NE_e'],axis=1)
 
-
-combined['TAKIZUKY'] = 0.072 * abs(data.BTOut)**0.7 * (data.AYC_NE/1e20 )**0.7 * data.SAREA**0.9 * F**0.5
+zeff =2.5
+combined['TAKIZUKY'] = 0.072 * abs(data.BTOut)**0.7 * (data.AYC_NE/1e20 )**0.7 * data.SAREA**0.9 * F**0.5 * zeff**0.7
 
 
 data_LH = combined[combined['transition']=='LH']
@@ -95,7 +95,7 @@ plt.errorbar(x = data_HL['TAKIZUKY'], markersize=15, y = data_HL['Ploss'],xerr =
 
 #plt.ylim([3e-10,2.2e-9])
 plt.plot(np.arange(0.4,80),np.arange(0.4,80))
-plt.scatter(80,80,label='ITER')
+plt.scatter(80,80,label='ITER',marker ='*',c='r',s=200)
 plt.yscale('log')
 plt.xscale('log')
 plt.legend()
