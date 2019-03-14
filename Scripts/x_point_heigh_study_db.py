@@ -95,12 +95,12 @@ for xpt,ploss,ne,xpt_err,y_err,IP,sesh,shot in zip(data_LH[X],data_LH['Ploss'],d
 y_err = np.sqrt(list((data_HL['Ploss_e']/data_HL['Ploss'])**2 + (data_HL['AYC_NE_e']/data_HL['AYC_NE'])**2)) # perc error
 y_err = y_err * data_HL['Ploss']/(data_HL['AYC_NE']**alpha) # * data
 for xpt,ploss,ne,xpt_err,y_err,IP,sesh,shot in zip(data_HL[X],data_HL['Ploss'],data_HL['AYC_NE'],data_HL[Xe],y_err,data_HL['IP'],data_HL['session'],data_HL['shot']):
-    if IP < 755:
+    if IP < 750:
         marker = 'x'
         col = 'b' # lowest IP
         x_low_i.append(xpt)
         y_low_i.append(ploss/ne**alpha)
-    elif IP < 775:
+    elif IP < 770:
         marker='1'
         col='r' # average IP
         if ploss/ne**alpha >0:
