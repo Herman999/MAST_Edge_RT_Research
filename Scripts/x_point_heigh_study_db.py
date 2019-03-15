@@ -66,13 +66,13 @@ y_err = np.sqrt(list((data_LH['Ploss_e']/data_LH['Ploss'])**2 + (data_LH['AYC_NE
 y_err = y_err * data_LH['Ploss']/(data_LH['AYC_NE']**alpha) # * data
 for xpt,ploss,ne,xpt_err,y_err,IP,sesh,shot in zip(data_LH[X],data_LH['Ploss'],data_LH['AYC_NE'],data_LH[Xe],y_err,data_LH['IP'],data_LH['session'],data_LH['shot']):
     
-    if IP < 755:
+    if IP < 750:
         marker = 'x'
         col = 'b' # lowest IP
         x_low_i.append(xpt)
         y_low_i.append(ploss/ne**alpha)
         
-    elif IP < 775:
+    elif IP < 770:
         marker='1'
         col='r' # average IP
         if ploss/ne**alpha >0:
@@ -89,6 +89,7 @@ for xpt,ploss,ne,xpt_err,y_err,IP,sesh,shot in zip(data_LH[X],data_LH['Ploss'],d
         
     plt.annotate(shot,(xpt, ploss/ne**alpha))
     plt.errorbar(xpt, ploss/ne**alpha,xerr=xpt_err,yerr=y_err, markersize=15, fmt='.', label='LH',c=col)
+
 
 # PLOT HL   
 # =============================================================================
@@ -110,9 +111,11 @@ for xpt,ploss,ne,xpt_err,y_err,IP,sesh,shot in zip(data_HL[X],data_HL['Ploss'],d
         marker='s'
         col='khaki' # highest IP
     
-    plt.annotate(shot,(xpt, ploss/ne**alpha))
-    #plt.annotate(str(int(np.round(IP,-1))),(xpt, ploss/ne**alpha) )
+    #plt.annotate(shot,(xpt, ploss/ne**alpha))
+    plt.annotate(str(int(np.round(IP,-1))),(xpt, ploss/ne**alpha) )
     plt.errorbar(xpt, ploss/ne**alpha,xerr=xpt_err,yerr=y_err, markersize=15, fmt='.', label='LH',c=col)
+
+
 # =============================================================================
 plt.gray()
 plt.ylim([0,2.6e-9])

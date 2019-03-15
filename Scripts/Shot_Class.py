@@ -215,9 +215,13 @@ class Shot():
         
 # can this be done better, taking account of xer,yer?
         
+        
+        sol_cut = knee+width
+        
+        
         # T_e via 3 point average.
         ptavg = 3 # how many points to average over
-        y_smooth = pd.DataFrame(y).rolling(ptavg).mean().values.squeeze()
+        y_smooth = pd.DataFrame(y).rolling(ptavg, center=True).mean().values.squeeze()
         T_e = np.interp(R_max_slope, x,y_smooth)
         #error calculation
         
@@ -237,13 +241,16 @@ class Shot():
         B_t = np.interp(edge_ne_fit[1], B_times, Bts) # find B_T at time of NE fit
         
         Ln = -ne_max_slope/max_slope
+        Theta = T_e / np.sqrt(Ln)
+        Theta_err = T_e_err/np.sqrt(Ln)
         Theta_c = A * np.power(np.abs(B_t), 2./3.)
         T_ec = Theta_c * np.sqrt(Ln)
+        
                 
     #    print('max slope: {0:.3e}. ne at max slope: {1:.3e}. Bt = {2}'.format(max_slope, ne_max_slope, B_t))
-        return (T_e, T_e_err, T_ec, Theta_c)
+        return (T_e, T_e_err, T_ec, (Theta,Theta_c,Theta_err))
     
-    def Te_Tec_all(self, good_indexes, A=1., label=False, bigerrs=True):
+    def Te_Tec_all(self, good_indexes, A=1., label=False, bigerrs=True, Tec_err = None):
         
         cols = {'LH':'orange', 
                 'L':'red', 
@@ -255,18 +262,26 @@ class Shot():
                   (self._LHt[0][2], 'LH'),
                   (self._HLt[0][1], 'H'),
                   (self._HLt[0][2], 'HL'),
-                  (0.5, 'L')
+                  (0.8, 'L')
                   ]
         if len(self._LHt)>1:
-            print('more than one h mode period. shot {}'.format(self.ShotNumber))
-            return 
-            # must edit this if second trasitions.
+            if len(self._LHt)>2:
+                print('more than two h mode periods! You must be kidding. Shot {}'.format(self.ShotNumber))
+            lookup = [(self._LHt[0][1], 'L'),
+                  (self._LHt[0][2], 'LH'),
+                  (self._HLt[0][1], 'H'),
+                  (self._HLt[0][2], 'HL'), # end of first H-mode
+                  (self._LHt[1][1], 'L'),
+                  (self._LHt[1][2], 'LH'),
+                  (self._HLt[1][1], 'H'),
+                  (self._HLt[1][2], 'HL'), # end of second H-mode
+                  (0.8, 'L')
+                  ] 
         
         plt.figure('Te/c')
         plt.xlabel('Tec')
         plt.ylabel('Te')
-#        plt.xlim(0,10)
-#        plt.ylim(0,300)
+        plt.title('Shot {}'.format(self.ShotNumber))
         
         for ind, time in enumerate(self.data['AYE_R']['time']):
             if ind not in good_indexes:
@@ -275,24 +290,60 @@ class Shot():
                 label= lookup[bisect.bisect(lookup,(time,))][1] #'L', 'LH', 'H' etc
                 if label in ['L','LH']:
         # here the calls to self.Te_Tec are made for given index
-                    Te,Te_err,Tec,Thetac = self.Te_Tec(ind)
+                    Te,Te_err,Tec,(theta,theta_c,theta_err) = self.Te_Tec(ind)
                 else: # its 'H' or 'HL'
-                    Te,Te_err,Tec,Thetac = self.Te_Tec(ind)
+                    Te,Te_err,Tec,(theta,theta_c,theta_err) = self.Te_Tec(ind)
                 
                 if Te_err/Te > 1:
-                    print('Error Warning index {}'.format(ind))
-                    if bigerrs == False:
-                        continue
+                    print('Error Warning: index {}'.format(ind))
+                    if bigerrs == False: 
+                        continue # if 'include big errs = False' exit loop, don't plot point
                 
                 plt.figure('Te/c')
-                plt.errorbar(Tec*A, Te, yerr=Te_err, marker='x', c=cols[label])
+                plt.errorbar(Tec*A, Te, yerr=Te_err,xerr=Tec_err, marker='x', c=cols[label])
                 if label == True:
                     plt.annotate(str(ind), [Tec*A, Te])
                 plt.figure('simple Te')
                 plt.errorbar(time,Te, yerr=Te_err, marker='x', c=cols[label])
-
-
-
+                plt.figure('Theta')
+                plt.errorbar(time,theta,yerr=theta_err, c=cols[label])
+                plt.scatter(time,A*theta_c, c='k')
+        
+        plt.figure('Theta')
+        if self._LHt:
+            for tset in self._LHt:  # tset = (time, -tlim_err, =tlim_err)
+                plt.axvline(tset[0], c='g', lw=1, ls='--', clip_on=False) #draw vertical line for transition
+                if tset[1] != 0:
+                    plt.axvline(tset[1], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+                if tset[2] != 0:
+                    plt.axvline(tset[2], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+        if self._HLt:
+            for tset in self._HLt:  # tset = (time, -tlim_err, +tlim_err)
+                plt.axvline(tset[0], c='r', lw=1, ls='--', clip_on=False)   
+                if tset[1] != 0:
+                    plt.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6)
+                if tset[2] != 0:
+                    plt.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6) 
+                    
+        plt.figure('simple Te')
+        plt.xlabel('time')
+        plt.ylabel('Te')
+        plt.title('Shot {}'.format(self.ShotNumber))
+        if self._LHt:
+            for tset in self._LHt:  # tset = (time, -tlim_err, =tlim_err)
+                plt.axvline(tset[0], c='g', lw=1, ls='--', clip_on=False) #draw vertical line for transition
+                if tset[1] != 0:
+                    plt.axvline(tset[1], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+                if tset[2] != 0:
+                    plt.axvline(tset[2], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+        if self._HLt:
+            for tset in self._HLt:  # tset = (time, -tlim_err, +tlim_err)
+                plt.axvline(tset[0], c='r', lw=1, ls='--', clip_on=False)   
+                if tset[1] != 0:
+                    plt.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6)
+                if tset[2] != 0:
+                    plt.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6)
+        
         # additional plot points for legend generation
 # plt.scatter(-1,-1, marker='x', c='r', label='L')   
 # plt.scatter(-1,-1, marker='x', c='g', label='H')

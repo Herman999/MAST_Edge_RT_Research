@@ -40,12 +40,21 @@ i1= Shot(30351, LHt=[(0.300, 0.295, 0.334)],HLt=[(0.620, 0.615, 0.622)])
 i2= Shot(30356, LHt=[(0.273, 0.270, 0.275)],HLt=[(0.2791, 0.2790, 0.2794)]) # very very limited h mode. Will it produce any Te>Tec?
 i3= Shot(30358, LHt=[(0.1975, 0.19745, 0.1976)],HLt=[(0.3425, 0.342, 0.343)])
 
+#%%
+# =============================================================================
+# Work on 14/3/19
+# =============================================================================
 #high IP shots
 hip1 = Shot(24524, LHt=[(0.201, 0.197, 0.202)],HLt=[(0.355, 0.354, 0.3558)])
 hip2 = Shot(24522, LHt=[(0.2535, 0.253, 0.254)],HLt=[(0.3555, 0.355, 0.3558)])
 
+#med IP shots
+mip1 = Shot(24328, LHt=[(0.251, 0.2506, 0.2514)],HLt=[(0.2895, 0.2894, 0.2896)])
+mip2 = Shot(24325, LHt=[(0.2515,0.2512,0.2518), (0.319, 0.317,0.321)],HLt=[(0.2845,0.2843,0.2847), (0.345,0.344,0.346)])
+mip3 = Shot(24128, LHt=[(0.2572,0.257,0.258)], HLt=[(0.3435,0.343,0.344)])
 
-
+for shot in [mip1,mip2,mip3]:
+    shot.plot_JP(plot_thomson=4, label_thomson=True)
 
 #%% JP PLOTS
 #for shot in [d1,d2,d3, x1,x2,x3]:
@@ -57,21 +66,23 @@ hip2 = Shot(24522, LHt=[(0.2535, 0.253, 0.254)],HLt=[(0.3555, 0.355, 0.3558)])
 
 #%%
 #all shots with '000_goodbad_indexs.pickle'
-alls = [d1,d2,d3,x1,x2,x3,z2,z3,i1,i2,i3]    
+alls = [d1,d2,d3,x1,x2,x3,z2,z3,i1,i2,i3,mip1,mip2,mip3]    
 
 #%% generate good, bad indexes lists for shot.
 
 # d2 = 27036
-good = []
-bad = []
-for i in range(0,94): #0,1,...,81
-    res, t, xys, canvas = i3.fit_tanh_pedestal(i)
-    fig = bh.ohno(canvas, '0')
-    yesno = fig.do_verify()
-    if yesno == True:
-        good.append(i)
-    else:
-        bad.append(i)
+def checkne(shotclass, maxindex = 120):
+    good = []
+    bad = []
+    for i in range(0,maxindex): #0,1,...,81
+        res, t, xys, canvas = shotclass.fit_tanh_pedestal(i)
+        fig = bh.ohno(canvas, '0')
+        yesno = fig.do_verify()
+        if yesno == True:
+            good.append(i)
+        else:
+            bad.append(i)
+    return good, bad
 #%% Saving and laoding data from pickle
 import pickle        
 def dumpgoodbads(shotclass):
@@ -80,33 +91,40 @@ def dumpgoodbads(shotclass):
         
 def goodbads(shotclass):
     with open(r"{}_goodbad_indexs.pickle".format(shotclass.ShotNumber), 'rb') as input_file:
-        go, ba = pickle.load(input_file)
+        goo, baa = pickle.load(input_file)
     return goo,baa
 
 #%%
 # TE data generally not good enough for xpoint height scan shots x1,x2,x3
 # So want to check by hand the values
-
-tgood = []
-tbad = []
-for ind in good:
-    te, tec = x3.Te_Tec(ind)
-    res,t,xys,canvas = x2.fit_tanh_pedestal(ind, sig='TE')
-    
-    res,t,xys,canv = x2.fit_tanh_pedestal(ind)
-    knee, width, maxs, nemaxs,neknee = x2._tanh_params(res)
-    plt.axvline(knee+width/2., c='purple')
-    
-    fig = bh.ohno(canvas, 'Te = {}'.format(te))
-    yesno = fig.do_verify()
-    if yesno == True:
-        tgood.append(ind)
-    else:
-        tbad.append(ind)
+def checkTe(shotclass):
+    good, bad = goodbads(shotclass)
+    tgood = []
+    tbad = []
+    for ind in good:
+        te,te_er, tec, Thetac = shotclass.Te_Tec(ind)  # calculate Te/c
+        res_ne,t,xys,canv = shotclass.fit_tanh_pedestal(ind, preview=False) # find (accepted) ne fit
+        res,t,xys,canvas = shotclass.fit_tanh_pedestal(ind, sig='TE') # display Te pedestal
+        
+        knee, width, maxs, nemaxs, neknee = shotclass._tanh_params(res_ne) # get ne fit parameters
+        plt.axvline(knee+width/2., c='yellow', lw=10) # show on Te pedestal the location of steepest ne
+        plt.axhline(te, c='yellow', lw=10)
+        try:
+            plt.ylim(0,2*te) # give Te pedestal plot resonable y limits
+        except:
+            pass
+        fig = bh.ohno(canvas, 'Te = {}'.format(te))
+        yesno = fig.do_verify()
+        if yesno == True:
+            tgood.append(ind)
+        else:
+            tbad.append(ind)
+        
+    print('Lenght of good reduced from {} to {}'.format(len(good), len(tgood)))
 #%%
 import pickle
 
-def Tecplots(shotclasslist, label_index=True, include_big_errors=True):
+def Tecplots(shotclasslist, label_index=True, include_big_errors=True, Aconst=832, Tec_err = None):
     # plot Tec stuff for all shots in shotclasslist.
     plt.figure('Te/c', figsize=(6,5))
     for shot in shotclasslist:
@@ -117,18 +135,22 @@ def Tecplots(shotclasslist, label_index=True, include_big_errors=True):
            if Te<0: #sanity checks
                shot.fit_tanh_pedestal(ind)
                shot.fit_tanh_pedestal(ind, sig='TE')
-       shot.Te_Tec_all(good, A=832, label=label_index, bigerrs=include_big_errors)
+       shot.Te_Tec_all(good, A=Aconst, label=label_index, bigerrs=include_big_errors, Tec_err=Tec_err)
+       
        
 #%%
 Tecplots([i1,i3])
 Tecplots([d1,d2,d3])
 Tecplots([x1,x2,x3])
 #%%
+Tecplots(alls,include_big_errors=False, Aconst=600, Tec_err=2)
+
+#%%
 
 plt.xlabel('$T_{ec}\ (eV)$')
 plt.ylabel('$T_{e}\ (eV)$')
-plt.xlim(0,145)
-plt.ylim(0,145)
+plt.xlim(0,180)
+plt.ylim(0,180)#
 
 xs = [-20,300]
 plt.plot(xs,np.array(xs), lw=1, ls='--', alpha=0.5, c='k')
