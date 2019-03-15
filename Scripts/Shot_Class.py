@@ -250,7 +250,7 @@ class Shot():
     #    print('max slope: {0:.3e}. ne at max slope: {1:.3e}. Bt = {2}'.format(max_slope, ne_max_slope, B_t))
         return (T_e, T_e_err, T_ec, (Theta,Theta_c,Theta_err))
     
-    def Te_Tec_all(self, good_indexes, A=1., label=False, bigerrs=True, Tec_err = None):
+    def Te_Tec_all(self, good_indexes, A=1., label=False, bigerrs=True, Tec_err = None, theta_transition_times=False):
         
         cols = {'LH':'orange', 
                 'L':'red', 
@@ -308,22 +308,22 @@ class Shot():
                 plt.figure('Theta')
                 plt.errorbar(time,theta,yerr=theta_err, c=cols[label])
                 plt.scatter(time,A*theta_c, c='k')
-        
-        plt.figure('Theta')
-        if self._LHt:
-            for tset in self._LHt:  # tset = (time, -tlim_err, =tlim_err)
-                plt.axvline(tset[0], c='g', lw=1, ls='--', clip_on=False) #draw vertical line for transition
-                if tset[1] != 0:
-                    plt.axvline(tset[1], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
-                if tset[2] != 0:
-                    plt.axvline(tset[2], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
-        if self._HLt:
-            for tset in self._HLt:  # tset = (time, -tlim_err, +tlim_err)
-                plt.axvline(tset[0], c='r', lw=1, ls='--', clip_on=False)   
-                if tset[1] != 0:
-                    plt.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6)
-                if tset[2] != 0:
-                    plt.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6) 
+        if theta_transition_times == True:
+            plt.figure('Theta')
+            if self._LHt:
+                for tset in self._LHt:  # tset = (time, -tlim_err, =tlim_err)
+                    plt.axvline(tset[0], c='g', lw=1, ls='--', clip_on=False) #draw vertical line for transition
+                    if tset[1] != 0:
+                        plt.axvline(tset[1], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+                    if tset[2] != 0:
+                        plt.axvline(tset[2], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+            if self._HLt:
+                for tset in self._HLt:  # tset = (time, -tlim_err, +tlim_err)
+                    plt.axvline(tset[0], c='r', lw=1, ls='--', clip_on=False)   
+                    if tset[1] != 0:
+                        plt.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6)
+                    if tset[2] != 0:
+                        plt.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6) 
                     
         plt.figure('simple Te')
         plt.xlabel('time')
