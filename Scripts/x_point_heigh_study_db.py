@@ -7,6 +7,8 @@ Created on Mon Jan 21 12:22:54 2019
 PLOT Pth v XPT seperated by IP
 
 1. press play
+
+'OLD METHOD' SPLITS BY CURRENT
 """
 
 

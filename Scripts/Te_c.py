@@ -124,7 +124,7 @@ def checkTe(shotclass):
 #%%
 import pickle
 
-def Tecplots(shotclasslist, label_index=True, include_big_errors=True, Aconst=832, Tec_err = None):
+def Tecplots(shotclasslist, label_index=True, include_big_errors=True, Aconst=832, Tec_err = None, theta_transition_times=False):
     # plot Tec stuff for all shots in shotclasslist.
     plt.figure('Te/c', figsize=(6,5))
     for shot in shotclasslist:
@@ -135,7 +135,7 @@ def Tecplots(shotclasslist, label_index=True, include_big_errors=True, Aconst=83
            if Te<0: #sanity checks
                shot.fit_tanh_pedestal(ind)
                shot.fit_tanh_pedestal(ind, sig='TE')
-       shot.Te_Tec_all(good, A=Aconst, label=label_index, bigerrs=include_big_errors, Tec_err=Tec_err)
+       shot.Te_Tec_all(good, A=Aconst, label=label_index, bigerrs=include_big_errors, Tec_err=Tec_err, theta_transition_times=theta_transition_times)
        
        
 #%%
@@ -158,3 +158,20 @@ plt.scatter(-1,-1, marker='x', c='r', label='L')
 plt.scatter(-1,-1, marker='x', c='g', label='H')
 plt.scatter(-1,-1, marker='x', c='blue', label='HL')
 #plt.legend(title=r"$Mode$")        
+
+#%% Good plot
+Tecplots(alls,include_big_errors=False, Aconst=600, Tec_err=2, theta_transition_times=False)
+plt.figure('Te/c')
+plt.xlabel('$T_{ec}\ (eV)$')
+plt.ylabel('$T_{e}\ (eV)$')
+plt.xlim(0,160)
+plt.ylim(0,400)#
+
+xs = [-20,300]
+plt.plot(xs,np.array(xs), lw=1, ls='--', alpha=0.5, c='k')
+plt.scatter(-1,-1, marker='x', c='r', label='L')   
+plt.scatter(-1,-1, marker='x', c='g', label='H')
+plt.scatter(-1,-1, marker='x', c='blue', label='HL')
+plt.scatter(-1,-1, marker='x', c='orange', label='LH')
+plt.legend()
+plt.fill_betweenx(np.linspace(0,1000),np.linspace(0,1000),0, alpha=0.2)
