@@ -7,14 +7,14 @@ Te/c plot
 """
 import numpy as np
 import matplotlib.pyplot as plt
-import ByHand as bh
+#import ByHand as bh
 
 #%% data import
 from Shot_Class import Shot
 session = '06-Oct-11'  #Measure LH power threshold at a range of densities.
 geometry = 'CND'
 #buggy runfile command hopefully works here
-runfile('C:/Users/rbatt/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/rbatt/MAST_Edge_RT_Research/Scripts')
+runfile('C:/Users/Tomas/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/Tomas/MAST_Edge_RT_Research/Scripts')
 from signal_dict_06_OCT_11 import signals
 #s1= Shot(27030, LHt=[(0.1928, 0.193, 0.1927)], HLt=[(0.1963, 0.1963,0.19637)]) ### bad shot
 d1= Shot(27035, LHt=[(0.2868,0.2865,0.287)], HLt = [(0.3096,0.3096,0.3098)])
@@ -34,7 +34,7 @@ from signal_dict_10_NOV_11 import signals
 z3 = Shot(27449, LHt=[(0.115,0.110,0.120)], HLt=[(0.301,0.300,0.306)])
 
 # IP scan shots
-runfile('C:/Users/rbatt/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/rbatt/MAST_Edge_RT_Research/Scripts')
+runfile('C:/Users/Tomas/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/Tomas/MAST_Edge_RT_Research/Scripts')
 from signal_dict_2019_IP import signals
 i1= Shot(30351, LHt=[(0.300, 0.295, 0.334)],HLt=[(0.620, 0.615, 0.622)])
 i2= Shot(30356, LHt=[(0.273, 0.270, 0.275)],HLt=[(0.2791, 0.2790, 0.2794)]) # very very limited h mode. Will it produce any Te>Tec?

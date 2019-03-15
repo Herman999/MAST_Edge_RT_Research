@@ -9,7 +9,7 @@ PLOTS THE PSI98 != R_MAX_SLOPE PLOT
 """
 import numpy as np
 import matplotlib.pyplot as plt
-import ByHand as bh
+#import ByHand as bh
 
 #the following is the method used to generate data which is stored in pickle and is used in plot below
 
