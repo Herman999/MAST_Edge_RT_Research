@@ -65,27 +65,29 @@ for shot in all_shots:
 
 #%%
 # Generating figure from above
-plt.figure()
+plt.figure(figsize=(10,7.2))
+plt.rcParams.update({'font.size': 14})
+plt.title('Core TS and Edge TS Comparison')
 #plt.ylim(0,4e19)
 #plt.xlim(0,4e19)
 
-x = np.linspace(0,5e19)
-plt.plot(x,x, ls='--', c='red', label='1:1')
-plt.xlabel('ne_core')
-plt.ylabel('ne_edge')
-
+x = np.linspace(0,4e19)
+plt.plot(x,x, ls='--', c='red', label='1:1',linewidth=4)
+plt.xlabel(r'$n_e$ Core TS [$\times 10^{19}$m$^{-3}$]')
+plt.ylabel(r'$n_e$ Edge TS [$\times 10^{19}$m$^{-3}$]')
+plt.ylim([0,5e19])
 # remove impossible values <0 (results of poor polyfits)
 ees, ccs = np.asarray(ees), np.asarray(ccs)
 condition = np.where((ees>0)&(ccs>0)&(ccs<0.4e20))
 ees = ees[condition]
 ccs = ccs[condition]
 
-plt.scatter(ccs,ees,marker='x',c='b', alpha=0.5)
+plt.scatter(ccs,ees,marker='x',c='b', alpha=0.3)
 
 st_poly = np.poly1d(np.polyfit(ccs,ees,1)) # fit line to data points
 
 x = np.linspace(0,4e19)
-plt.plot(x,st_poly(x), c='red', label='fit={}'.format(str(st_poly)))
+plt.plot(x,st_poly(x), c='red',linewidth=4, label='fit={}'.format(str(st_poly)))
 
 plt.legend()
 

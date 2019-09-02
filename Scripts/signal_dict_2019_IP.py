@@ -1,79 +1,35 @@
-# -*- coding: utf-8 -*-
+
 """
-Created on Tue Jun 21  2018
+Example of Signals Definitions, which links data files structures to physical data/diagnostics.
 
-@author: jb4317, Jan-Peter Baehner
-
-version2
 
 New routine to pull data from MAST data base via pyuda and transfere to files
 """
+# Pyuda to be used for data download only
 #import pyuda
 #client=pyuda.Client()   #set up pyuda
-
 #from data_access_funcs import save_signal_data
 
-# all new
+
+# Definition of new shots. This is for data downloading purposes and isn't needed for analysis.
 shotnos = [
-# Pedestal Scaling in IP not that releacnt
-30340,
-30341,
-30342,
-30344,
-30348,
-30351,
-30352,
-30353,
-30355,
-30356,
-30358,
-30359,
-30361,
-30362,
+# Pedestal Scaling in IP not that relevant
+30340,30341,30342,30344,30348,30351,30352,30353,30355,30356,30358,30359,30361,30362,
 
 #Influence of IP to E_R
-24426,
-24428,
-24430,
-24431,
+24426,24428,24430,24431,
 
 # 17FEB10  BETA SCAN, BT
-24514,
-24517,
-24518,
-24522,
-24524,
-24525,
+24514,24517,24518,24522,24524,24525,
 
-# Transition access LH dependance on IP
-29482,
-29485,
-29486,
-29487,
-29488,
-29489,
-29493,
-29494,
-29495,
-29496,
+# Transition access LH dependence on IP
+29482,29485,29486,29487,29488,29489,29493,29494,29495,29496,
 
 # 17NOV11 LH transition programme
-27571,
-27572,
-27573,
-27574,
-27586,
-27587,
-27588,
-27589,
-
-
-
+27571,27572,27573,27574,27586,27587,27588,27589,
 ]
 
-# session ended early due to inadequate progress. h-mode weaker. suggestion its time to boronise.
-
-
+# Signals Definitions:
 # below lists signals currently in our data set, many more exist
 
 signals=dict(# NEW AT TOP
@@ -185,27 +141,3 @@ signals=dict(# NEW AT TOP
             Vloop = 'ESM_V_LOOP_DYNAMIC', #plasma surface Vloop, calculated allowing for the movement of the LCFS; i.e. in the observer's frame of reference.
             BT='EFM_BVAC_RMAG',
             )      
-
-"""
-for shot in shotnos:
-    loaded=[]
-    notloaded=[]
-    for sig in signals:
-        try:
-            temp_obj=client.get(signals[sig],shot) #create temporary object pulled form MAST database
-            filename=str(shot)+'_'+sig+'.p' #create filename
-            save_signal_data(temp_obj,filename) #save data of parameter in pickle file
-            loaded.append(sig)
-        except pyuda.UDAException as err: #exception for param not in database
-            notloaded.append(sig)
-    
-    # print out info on loaded signals:
-    if not loaded:
-        print('%d: No signal could be loaded!'%shot)
-    elif not notloaded:
-        print('%d: All signals could be loaded and saved!'%shot)#: ',*loaded)
-    else:
-        #print('Signals loaded and saved: ',*loaded)
-        print('%d: Signals that could not be loaded: '%shot,*notloaded)
-"""
-#dsd

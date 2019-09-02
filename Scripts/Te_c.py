@@ -10,11 +10,11 @@ import matplotlib.pyplot as plt
 #import ByHand as bh
 
 #%% data import
-from Shot_Class import Shot
+#from Shot_Class import Shot
 session = '06-Oct-11'  #Measure LH power threshold at a range of densities.
 geometry = 'CND'
 #buggy runfile command hopefully works here
-runfile('C:/Users/Tomas/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/Tomas/MAST_Edge_RT_Research/Scripts')
+#runfile('C:/Users/Tomas/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/Tomas/MAST_Edge_RT_Research/Scripts')
 from signal_dict_06_OCT_11 import signals
 #s1= Shot(27030, LHt=[(0.1928, 0.193, 0.1927)], HLt=[(0.1963, 0.1963,0.19637)]) ### bad shot
 d1= Shot(27035, LHt=[(0.2868,0.2865,0.287)], HLt = [(0.3096,0.3096,0.3098)])
@@ -34,7 +34,7 @@ from signal_dict_10_NOV_11 import signals
 z3 = Shot(27449, LHt=[(0.115,0.110,0.120)], HLt=[(0.301,0.300,0.306)])
 
 # IP scan shots
-runfile('C:/Users/Tomas/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/Tomas/MAST_Edge_RT_Research/Scripts')
+#runfile('C:/Users/Tomas/MAST_Edge_RT_Research/Scripts/Shot_Class.py', wdir='C:/Users/Tomas/MAST_Edge_RT_Research/Scripts')
 from signal_dict_2019_IP import signals
 i1= Shot(30351, LHt=[(0.300, 0.295, 0.334)],HLt=[(0.620, 0.615, 0.622)])
 i2= Shot(30356, LHt=[(0.273, 0.270, 0.275)],HLt=[(0.2791, 0.2790, 0.2794)]) # very very limited h mode. Will it produce any Te>Tec?
@@ -53,8 +53,9 @@ mip1 = Shot(24328, LHt=[(0.251, 0.2506, 0.2514)],HLt=[(0.2895, 0.2894, 0.2896)])
 mip2 = Shot(24325, LHt=[(0.2515,0.2512,0.2518), (0.319, 0.317,0.321)],HLt=[(0.2845,0.2843,0.2847), (0.345,0.344,0.346)])
 mip3 = Shot(24128, LHt=[(0.2572,0.257,0.258)], HLt=[(0.3435,0.343,0.344)])
 
-for shot in [mip1,mip2,mip3]:
-    shot.plot_JP(plot_thomson=4, label_thomson=True)
+#for shot in [mip1,mip2,mip3]:
+for shot in [d1,d2,d3]:
+    shot.plot_JP(plot_thomson=4, label_thomson=False)
 
 #%% JP PLOTS
 #for shot in [d1,d2,d3, x1,x2,x3]:
@@ -126,7 +127,7 @@ import pickle
 
 def Tecplots(shotclasslist, label_index=True, include_big_errors=True, Aconst=832, Tec_err = None, theta_transition_times=False):
     # plot Tec stuff for all shots in shotclasslist.
-    plt.figure('Te/c', figsize=(6,5))
+    plt.figure('Te/c',figsize=(10,7.2)) #figsize=(6,5))
     for shot in shotclasslist:
        with open(r"{}_goodbad_indexs.pickle".format(shot.ShotNumber), "rb") as input_file:
             good, bad = pickle.load(input_file) # indicies
@@ -160,8 +161,11 @@ plt.scatter(-1,-1, marker='x', c='blue', label='HL')
 #plt.legend(title=r"$Mode$")        
 
 #%% Good plot
+plt.close('all')
 Tecplots(alls,include_big_errors=False, Aconst=600, Tec_err=2, theta_transition_times=False)
-plt.figure('Te/c')
+plt.figure('Te/c')#,figsize=(10,7.2))
+plt.rcParams.update({'font.size': 14})
+plt.title('Guzdar $T_e/T_{ec}$ separation on MAST')
 plt.xlabel('$T_{ec}\ (eV)$')
 plt.ylabel('$T_{e}\ (eV)$')
 plt.xlim(0,160)

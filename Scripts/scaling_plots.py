@@ -12,7 +12,7 @@ Created on Wed Mar 13 12:50:18 2019
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-plt.rcParams.update({'font.size': 14})
+plt.rcParams.update({'font.size': 16})
 # ITER SCALING
 
 #data = db
@@ -65,8 +65,8 @@ data_LH = combined[combined['transition']=='LH']
 data_HL = combined[combined['transition']=='HL']
 
 
-
-plt.figure(figsize=(13,9))
+plt.figure(figsize=(10,7.2))
+plt.rcParams.update({'font.size': 14})
 plt.title(r'MAST Pth comparison with Takizuky scaling')
 
 # PLOT LH
@@ -96,10 +96,11 @@ plt.errorbar(x = data_HL['TAKIZUKY'], markersize=15, y = data_HL['Ploss'],xerr =
 #plt.ylim([3e-10,2.2e-9])
 plt.plot(np.arange(0.4,80),np.arange(0.4,80))
 plt.scatter(80,80,label='ITER',marker ='*',c='r',s=200)
+plt.title(r'MAST $P_{th}$ and Takazuka $P_{th}$ scaling')
 plt.yscale('log')
 plt.xscale('log')
 plt.legend()
-plt.xlabel(r'TAKIZUKY [MW]' )
-plt.ylabel(r'MAST Pth [MW]')
+plt.xlabel(r'$P_{th}$ Takazuka [MW]' )
+plt.ylabel(r'$P_{th}$ MAST [MW]')
 plt.show()
 

@@ -265,13 +265,15 @@ ne_HL_e = list(db[(db['transition']=='HL')]['AYC_NE_e'])
 
 # ------------------------- LH
 
-plt.figure(figsize=(11.5,8))
+#plt.figure(figsize=(11.5,8))
+
+plt.figure(figsize=(10,7.2))
 plt.rcParams.update({'font.size': 14})
-plt.errorbar(x = ne_LH, markersize=10, y = ploss_LH , xerr=ne_LH_e,yerr = ploss_LH_e,fmt='o', label = 'LH AYC_NE',color = 'red')
+plt.errorbar(x = ne_LH, markersize=10, y = ploss_LH , xerr=ne_LH_e,yerr = ploss_LH_e,fmt='o', label = 'LH TS $n_e$',color = 'red')
 
 
-for i, txt in enumerate(LH_shot_list):
-    plt.annotate(txt, (list(ne_LH)[i], list(ploss_LH)[i]))
+#for i, txt in enumerate(LH_shot_list):
+#    plt.annotate(txt, (list(ne_LH)[i], list(ploss_LH)[i]))
 
 #plt.errorbar(x = dflh_ANE_NE['p_value'], markersize=10, y = dflh_ANE_NE_ploss['p_value'], xerr=dflh_ANE_NE['range_err'], yerr = dflh_ANE_NE_ploss['range_err'],fmt='o', label = 'LH ANE_NE',color = 'r')
 
@@ -302,11 +304,11 @@ xnew =np.linspace(min(x_data),max(x_data), 30)
 plt.plot(np.exp(xnew), np.exp(a*xnew+b),linestyle='dashed',color='orange',label = r'$L \to H$ loglog fit $\alpha=${0} $\pm$ {1}'.format(np.round(a,2), np.round(a_v,2)))
 
 # --------------------- HL
-plt.errorbar(x = ne_HL, markersize=10, y = ploss_HL , xerr=ne_HL_e,yerr = ploss_HL_e,fmt='o', label = 'HL AYC_NE',color = 'blue')
+plt.errorbar(x = ne_HL, markersize=10, y = ploss_HL , xerr=ne_HL_e,yerr = ploss_HL_e,fmt='o', label = 'HL TS $n_e$',color = 'blue')
 
 
-for i, txt in enumerate(HL_shot_list):
-    plt.annotate(txt, (list(ne_HL)[i], list(ploss_HL)[i]))
+#for i, txt in enumerate(HL_shot_list):
+#    plt.annotate(txt, (list(ne_HL)[i], list(ploss_HL)[i]))
 
 
 x_data = np.log(ne_HL)
@@ -342,16 +344,16 @@ textstr = r'$I_p=700$kA $B_t=-0.425$T'
 plt.text(3.6e19, 8e6, textstr, fontsize=14)
 plt.xlim([9e18,4.5e19])
 plt.ylim([0,7.8e6])
-plt.title(r'$P_{th}$ dependance $L \to H$ and $H \to L$')
-plt.xlabel(r'$n_e$ [$n^{-3}$]')
-plt.ylabel('Ploss [W]')
+plt.title(r'$P_{th}$ $L \to H$ and $H \to L$')
+plt.xlabel(r'$n_e$ [$\times 10^{19}$ m$^{-3}$]')
+plt.ylabel(r'$P_{loss}$ [$\times 10^{6}$ W]')
 plt.ticklabel_format(axis='y',scilimits=(0,0))
 #plt.show()
 
 
 #%%
         
-# EVERYTHING BELOW IS RUBBISH
+# EVERYTHING BELOW IS THE CORECTED METhOD
 
 # correctly identified transitions
 from signal_dict_10_NOV_11 import signals
@@ -431,12 +433,16 @@ dflh_ANE_NE_ploss  = dflh_ANE_NE_ploss[(dflh_ANE_NE_ploss.index.isin(dflh_ANE_NE
 
 
 
-plt.figure(figsize=(11.5,8))
-plt.errorbar(x = dflh_AYC_NE['p_value'], markersize=10, y = dflh_AYC_NE_ploss['p_value'], xerr=dflh_AYC_NE['p_value_err'],yerr =  dflh_AYC_NE_ploss['range_err'],fmt='o', label = 'LH AYC_NE',color = 'red')
+#plt.figure(figsize=(11.5,8))
+
+plt.figure(figsize=(10,7.2))
+plt.rcParams.update({'font.size': 14})
+
+plt.errorbar(x = dflh_AYC_NE['p_value'], markersize=10, y = dflh_AYC_NE_ploss['p_value'], xerr=dflh_AYC_NE['p_value_err'],yerr =  dflh_AYC_NE_ploss['range_err'],fmt='o', label = 'LH TS $n_e$',color = 'red')
 
 
-for i, txt in enumerate(dflh_AYC_NE_shots):
-    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
+#for i, txt in enumerate(dflh_AYC_NE_shots):
+#    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
 
 #plt.errorbar(x = dflh_ANE_NE['p_value'], markersize=10, y = dflh_ANE_NE_ploss['p_value'], xerr=dflh_ANE_NE['range_err'], yerr = dflh_ANE_NE_ploss['range_err'],fmt='o', label = 'LH ANE_NE',color = 'r')
 
@@ -498,7 +504,7 @@ print(r'the LH $\alpha$ proportanility coeficient is {0} \pm {1}'.format(a,a_v))
 #plt.scatter(np.power(x_raw,a),y_raw)
 
 xnew =np.linspace(min(x_data),max(x_data), 30)
-plt.plot(np.exp(xnew), np.exp(a*xnew+b),linestyle='dashed',color='orange',label = r'$L \to H$ loglog fit $\alpha=${0} $\pm$ {1}'.format(np.round(a,2), np.round(a_v,2)))
+plt.plot(np.exp(xnew), np.exp(a*xnew+b),linestyle='dashed',color='red',label = r'$L \to H$ loglog fit $\alpha=${0} $\pm$ {1}'.format(np.round(a,2), np.round(a_v,2)))
 
 #%%
 # Here do HL analysis and plot
@@ -528,10 +534,10 @@ dflh_ANE_NE_ploss  = dflh_ANE_NE_ploss[(dflh_ANE_NE_ploss.index.isin(dflh_ANE_NE
 
 
 
-plt.errorbar(x = dflh_AYC_NE['p_value'], markersize=10, y = dflh_AYC_NE_ploss['p_value'], xerr=dflh_AYC_NE['p_value_err'],yerr =  dflh_AYC_NE_ploss['range_err'],fmt='x', label = 'HL AYC_NE',color = 'blue')
+plt.errorbar(x = dflh_AYC_NE['p_value'], markersize=10, y = dflh_AYC_NE_ploss['p_value'], xerr=dflh_AYC_NE['p_value_err'],yerr =  dflh_AYC_NE_ploss['range_err'],fmt='o', label = 'HL TS $n_e$',color = 'blue')
 
-for i, txt in enumerate(dflh_AYC_NE_shots):
-    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
+#for i, txt in enumerate(dflh_AYC_NE_shots):
+#    plt.annotate(txt, (list(dflh_AYC_NE['p_value'])[i], list(dflh_AYC_NE_ploss['p_value'])[i]))
 
 #plt.errorbar(x = dflh_ANE_NE['p_value'], markersize=10, y = dflh_ANE_NE_ploss['p_value'], xerr=dflh_ANE_NE['range_err'], yerr = dflh_ANE_NE_ploss['range_err'],fmt='x', label = 'HL ANE_NE',color = 'lime')
 
@@ -570,7 +576,7 @@ print(r'the HL $\alpha$ proportanility coeficient is {0} \pm {1}'.format(a,a_v))
 #plt.scatter(np.power(x_raw,a),y_raw)
 
 xnew =np.linspace(min(x_data),np.log(4e19), 30)
-plt.plot(np.exp(xnew), np.exp(a*xnew+b),linestyle='dashed', color = 'green',label = r'$H \to L$ loglog fit $\alpha=${0} $\pm$ {1}'.format(np.round(a,2), np.round(a_v,2)))
+plt.plot(np.exp(xnew), np.exp(a*xnew+b),linestyle='dashed', color = 'blue',label = r'$H \to L$ loglog fit $\alpha=${0} $\pm$ {1}'.format(np.round(a,2), np.round(a_v,2)))
 
 
 
@@ -584,9 +590,15 @@ textstr = r'$I_p=700$kA $B_t=-0.425$T'
 plt.text(3.6e19, 8e6, textstr, fontsize=14)
 plt.xlim([9e18,4.5e19])
 plt.ylim([0,7.8e6])
-plt.title(r'$P_{th}$ dependance $L \to H$ and $H \to L$')
-plt.xlabel(r'$n_e$ [$n^{-3}$]')
-plt.ylabel('Ploss [W]')
+#plt.title(r'DN')
+
+plt.title(r'$P_{th}$ $L \to H$ and $H \to L$')
+#plt.xlabel(r'$n_e$ [$n^{-3}$]')
+#plt.ylabel('$P_{pth}$ [W]')
+plt.ylabel(r'$P_{loss}$ [$\times 10^{6}$ W]')
+plt.xlabel(r'$<\overline{n_e}> $ [$\times 10^{19}$ m$^{-3}$]')
+
+
 plt.ticklabel_format(axis='y',scilimits=(0,0))
 #plt.show()
 

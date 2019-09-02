@@ -418,11 +418,11 @@ pe_at_ped_e.extend(HL_pe_at_ped_e)
 # NE            
 #fig, ax = plt.subplots(3,sharex=True,figsize=(13,9))
 
-fig, ax = plt.subplots(3,sharex=True,figsize=(11.5,6))
+fig, ax = plt.subplots(3,sharex=True,figsize=(10,7.2))
 
 
 textstr = r'$I_p$ $450-900$kA $B_t$ $0.37-0.45$T'
-ax[0].text(3.65e19, 4.65e19, textstr, fontsize=14)
+ax[0].text(3.05e19, 4.65e19, textstr, fontsize=14)
 
 #ax[0].set_title(r'Pedestal Characteristics on $\overline{n_e}$')
 ax[0].errorbar(fmt='o',x=LH_ne_average,y=LH_ne_at_ped,xerr=LH_ne_average_e,c='red',label='LH')
@@ -442,9 +442,10 @@ plt.rcParams.update({'font.size': 17})
 neav = np.linspace(min(ne_average),max(ne_average))
 nefit = res[1] + res[0] * neav
 ax[0].plot(neav,nefit,'--')#,label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
+ax[0].set_xlim([0.7e19,4.5e19])  # YASMIN REQUEST
 ax[0].set_ylim([0,4.5e19])
 #ax[0].set_xlabel(r'$\overline{n_e}$ [$m^{-3}$]')
-ax[0].set_ylabel(r'$ne_{ped} [M^{-3}]$')
+ax[0].set_ylabel(r'$ne_{ped} [m^{-3}]$')
 ax[0].legend(loc=4)
 #ax[0].set_ylim([0,0.05e21])
 
@@ -496,7 +497,7 @@ nefit = res[1] + res[0] * neav
 ax[2].plot(neav,nefit,'--',label=r'fit k={0}$\pm${1} '.format("{:.2E}".format(res[0]),"{:.2E}".format(cov[0,0]),"{:.2E}".format(res[1])))
 
 ax[2].set_xlabel(r'$\overline{n_e}$ [$m^{-3}$]')
-ax[2].set_ylabel(r'$Pe_{ped} [a.u.]$')
+ax[2].set_ylabel(r'$Pe_{ped} [Pa]$')
 #ax[2].legend()
 
 #%%

@@ -170,10 +170,17 @@ data_LH = data_LH[~(data_LH['Ploss'].isnull())]
 data_HL = data_HL[~(data_HL['Ploss']==0)]
 data_HL = data_HL[~(data_HL['Ploss'].isnull())]
 
-plt.figure(figsize=(11.5,8))
+#plt.figure(figsize=(11.5,8))
+plt.figure(figsize=(11.5,7.2))
+plt.rcParams.update({'font.size': 14})
 alpha=0.77
-plt.title(r'Pth dependance on {1} ($\alpha={0}$) IP Separation <{2}'.format(alpha,X,750))
+plt.title(r'$P_{th}$ dependance on $Z^{lower}_{x-pt}$ $n_e^{0.77}$ norm.')
+ 
 
+textstr = r'$670<I_p<750$kA'
+plt.text(0.4513, 9.05e-9, textstr, fontsize=14)   
+textstr=r'$-0.375<B_t<-0.425$T'
+plt.text(0.446, 8.5e-9, textstr, fontsize=14)   
  
 # PLOT LH
 y_err = np.sqrt(list((data_LH['Ploss_e']/data_LH['Ploss'])**2 + (data_LH['AYC_NE_e']/data_LH['AYC_NE'])**2)) # perc error
@@ -187,12 +194,13 @@ plt.errorbar(data_HL[X], data_HL['Ploss']/(data_HL['AYC_NE']**alpha),xerr=data_H
 plt.ylim([0,9.6e-9])
 plt.xlim([0.43,0.54])
 plt.axvline(x=0.5,color='orange',linestyle='dashed')
-plt.legend()
-plt.xlabel(r'X point height [m]' )
-plt.ylabel(r'$P_{loss}/N_e^\alpha$ [Wm^3]')
+plt.legend(loc=2)
+plt.xlabel(r'$Z^{lower}_{x-pt}$ [m]')
+plt.ylabel(r'$P_{th}/N_e^{0.77}$ [$\times 10^{-8}$ Wm$^3$]')
 
 plt.show()
 
+#%%
 # Plot 2
 
 # below 750
@@ -205,9 +213,18 @@ data_LH = data_LH[~(data_LH['Ploss'].isnull())]
 data_HL = data_HL[~(data_HL['Ploss']==0)]
 data_HL = data_HL[~(data_HL['Ploss'].isnull())]
 
-plt.figure(figsize=(11.5,8))
-plt.title(r'Pth dependance on {1} ($\alpha={0}$) Separation 750<IP{2}'.format(alpha,X,770))
+#plt.figure(figsize=(11.5,8))
+plt.figure(figsize=(11.5,7.2))
+plt.rcParams.update({'font.size': 14})
+plt.title(r'$P_{th}$ dependance on $Z^{lower}_{x-pt}$ $n_e^{0.77}$ norm')#.format(str(alpha),X,770))
 
+
+
+textstr = r'$750<I_p<770$kA'
+plt.text(0.4513, 9.05e-9, textstr, fontsize=14)   
+textstr=r'$-0.375<B_t<-0.425$T'
+plt.text(0.446, 8.5e-9, textstr, fontsize=14)   
+ 
  
 # PLOT LH
 #alpha = 0.77
@@ -220,13 +237,14 @@ y_err = y_err * data_HL['Ploss']/(data_HL['AYC_NE']**alpha) # * data
 plt.errorbar(data_HL[X], data_HL['Ploss']/(data_HL['AYC_NE']**alpha),xerr=data_HL[Xe],yerr=y_err, markersize=15, fmt='.', label='HL',c='b')
 
 #plt.ylim([0,9.4e-9])
-#plt.xlim([0.43,0.54])
+plt.ylim([0,9.6e-9])
+plt.xlim([0.43,0.54])
 plt.axvline(x=0.5,color='orange',linestyle='dashed')
-plt.legend()
-plt.xlabel(r'X point height [m]' )
+plt.legend(loc=2)
+plt.xlabel(r'$Z^{lower}_{x-pt}$ [m]')
 #plt.xscale('log')
 #plt.yscale('log')
-plt.ylabel(r'$P_{loss}/N_e^\alpha$ [Wm^3]')
+plt.ylabel(r'$P_{th}/N_e^{0.77}$ [$\times 10^{-8}$ Wm$^3$]')
 
 plt.show()
 
@@ -367,21 +385,32 @@ data_HL = data_HL[~(data_HL.AIM_DA_TO=='')]
 data_LH = data_LH[data_LH.AIM_DA_TO>=0]
 data_HL = data_HL[data_HL.AIM_DA_TO>=0]
 
-plt.figure(figsize=(11.5,8))
-plt.title(r'$D_{\alpha}$ dependance on X1 with $ne^{0.77}$ IP Separation <750')
+#plt.figure(figsize=(11.5,8))
+plt.figure(figsize=(11.5,7.2))
+plt.rcParams.update({'font.size': 14})
+plt.title(r'$D_{\alpha}$ dependance on $Z^{lower}_{x-pt}$')
 
  
+textstr = r'$670<I_p<750$kA'
+plt.text(0.451, 1.7e19, textstr, fontsize=14)   
+textstr=r'$-0.375<B_t<-0.425$T'
+plt.text(0.446, 1.6e19, textstr, fontsize=14)   
+
+plt.text(0.43, 1.845e19, 'Testtest', color='white', 
+        bbox=dict(facecolor='white', edgecolor='white'))
+
+
 # PLOT LH
 plt.errorbar(data_LH[X], data_LH['AIM_DA_TO'],xerr=data_LH[Xe],yerr=data_LH['AIM_DA_TO_e'], markersize=15, fmt='.', label='LH',c='r')
 plt.errorbar(data_HL[X], data_HL['AIM_DA_TO'],xerr=data_HL[Xe],yerr=data_HL['AIM_DA_TO_e'], markersize=15, fmt='.', label='HL',c='b')
 
 
-plt.xlabel(X+' height above divertor [m]')
+plt.xlabel(r'$Z^{lower}_{x-pt}$ [m]')
 plt.ylabel(r'$D_{\alpha}$ $ [x10^{19} \ p^h/sr. m^{2}. s]$')
 plt.xlim([0.43,0.54])
 plt.ylim([0,1.8e19])
 plt.axvline(x=0.5,color='orange',linestyle='dashed')
-plt.legend()
+plt.legend(loc=2)
 
 
 # Plot 4 D alpha
@@ -397,18 +426,28 @@ data_HL = data_HL[~(data_HL.AIM_DA_TO=='')]
 data_LH = data_LH[data_LH.AIM_DA_TO>=0]
 data_HL = data_HL[data_HL.AIM_DA_TO>=0]
 
-plt.figure(figsize=(11.5,8))
-plt.title(r'$D_{\alpha}$ dependance on X1 with $ne^{0.77}$ Separation 750<IP<770')
+#plt.figure(figsize=(11.5,8))
+plt.figure(figsize=(11.5,7.2))
+plt.rcParams.update({'font.size': 14})
+plt.title(r'$D_{\alpha}$ dependance on $Z^{lower}_{x-pt}$')
 
- 
+textstr = r'$750<I_p<770$kA'
+plt.text(0.451, 1.7e19, textstr, fontsize=14)   
+textstr=r'$-0.375<B_t<-0.425$T'
+plt.text(0.446, 1.6e19, textstr, fontsize=14)   
+
+# test box here
+plt.text(0.43, 1.845e19, 'Testtest', color='white', 
+        bbox=dict(facecolor='white', edgecolor='white'))
+
 # PLOT LH
 plt.errorbar(data_LH[X], data_LH['AIM_DA_TO'],xerr=data_LH[Xe],yerr=data_LH['AIM_DA_TO_e'], markersize=15, fmt='.', label='LH',c='r')
 plt.errorbar(data_HL[X], data_HL['AIM_DA_TO'],xerr=data_HL[Xe],yerr=data_HL['AIM_DA_TO_e'], markersize=15, fmt='.', label='HL',c='b')
 
 
-plt.xlabel(X+' height above divertor [m]')
+plt.xlabel(r'$Z^{lower}_{x-pt}$ [m]')
 plt.ylabel(r'$D_{\alpha}$ $ [x10^{19} \ p^h/sr. m^{2}. s]$')
 plt.xlim([0.43,0.54])
 plt.ylim([0,1.8e19])
 plt.axvline(x=0.5,color='orange',linestyle='dashed')
-plt.legend()
+plt.legend(loc=2)

@@ -131,13 +131,15 @@ with open(r"Psi_Justification_data.pickle", "rb") as intput_file:
      good_data = pickle.load(intput_file)
 
 
-plt.figure('comp6')
+plt.figure(figsize=(10,7.2))
+plt.rcParams.update({'font.size': 14})
+
 for rf, r100, r98, r95 in good_data: # in good data is sets of [R_max_slope, R_Psi100, R_Psi98, R_Psi95]
         plt.scatter(rf,r100, c='g', marker='o')
         plt.scatter(rf,r98, c='r', marker='x')
         plt.scatter(rf,r95, c='b', marker='^')
 
-#plt.title('green = P100; red = P98; blue = P95')
+plt.title('Comparison of $\Psi$ to pedestal fitting')
 plt.xlabel(r'$R_{max\ slope\ from\ ne\ pedestal} \ [m]$')
 plt.ylabel(r'$R_{\Psi} \ [m]$')
 

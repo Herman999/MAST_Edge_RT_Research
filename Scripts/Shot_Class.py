@@ -1,24 +1,31 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu Nov  8 12:28:08 2018
+MSci Project: PLAS-Andrew-1
+Title: L-H Transitions and Pedestal Characterisation Studies on MAST
 
-@author: Tomas
+This code is the core of analysis. Produced with project partner.
+Separate scripts have been written for particular purposes calling methods in Shot Class.
+In total 8000 lines of code were produced with Shot Class being over 1000. Lot of data issues/inconsistency had to be dealt with automatically in Shot Class
+Requirements: Python 3 and standard packages. Signals definitions. Previous work (JP) scripts,such as "do_odr, ped_tanh_odr2, tanh", are required.
+Example of Signals definition is appended below this Shot Class.
+All scripts are available at Github repository, https://github.com/Herman999/
+
 """
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import bisect
 
 
-# Import this using below:
+# Import this using below to set working path:
 #import sys
 #sys.path.append(r'C:\Users\Tomas\Imperial College London\Battle, Ronan - Shared MSci project\Scripts') # "/Users/Tomas/Imperial\ College London/Battle,\ Ronan\ -\ Shared\ MSci\ project/Scripts")
 #sys.path.append(r'C:\Users\rbatt\OneDrive - Imperial College London\Shared MSci project\Scripts')
 #from Shot_Class import Shot
 
-# import signals dictionaries
 # import pickle loading function
 from data_access_funcs import load_signal_data
+# import fiting functions built by JP (prvious work)
 from fit_funcs import do_odr, ped_tanh_odr2, tanh
 
 # =============================================================================
@@ -56,7 +63,8 @@ class Transition():
 class Shot():
     def __init__(self, ShotNumber, LHt = None, HLt = None):
         """
-        LHt, HLt = [(time, +error, -error), (time, +error, -error)]
+        Initiate Shot object
+        transition times needed in format: LHt, HLt = [(time, +error, -error), (time, +error, -error)]
         """
 #       must define signals dictionary here based on shot number/session series
         self.data = {} # initialise data dictionary
@@ -73,10 +81,16 @@ class Shot():
                 self.unloaded.append(sig)
     
     def signals_present(self):
+        """
+        Returns all present signals in Shot
+        """
         keys = self.data.keys()
         return len(keys), keys
     
     def signal_has_errors(self, SignalName):
+        """
+        Return whether signal has errors
+        """
         if self.data[SignalName]['errors'] is None:
             return False
         else:
@@ -344,7 +358,7 @@ class Shot():
                 if tset[2] != 0:
                     plt.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6)
         
-        # additional plot points for legend generation
+        # additional plot points for legend generation (FAKE POINTS OUTSIDE OF PLOT)
 # plt.scatter(-1,-1, marker='x', c='r', label='L')   
 # plt.scatter(-1,-1, marker='x', c='g', label='H')
 # plt.scatter(-1,-1, marker='x', c='orange', label='LH')
@@ -442,6 +456,8 @@ class Shot():
 ######### add title for core or edge ########
         return result, time (x,y)
     
+
+    
     def fit_tanh_pedestal(self, index, scaling = 1./0.9, sig='NE', preview=True, guess=[2.5e19,2.5e19,1.38,0.05,1e19,1.,1.]):
         """ Fits modified 'ped_tanh_odr2' fn to AYE thomson for signal=sig at index
         x = self.data['AYE_sig']['data'][index] + self.data['AYC_sig']['data'][index]
@@ -498,18 +514,21 @@ class Shot():
         """
         For 'preview' of result from fit_core/edge_tanh_pedestal only.
         """
-        fig = plt.figure()
+        plt.rcParams.update({'font.size': 15})
+        fig = plt.figure(figsize=(10,7.2))
+        
         canvas_name= '{0} {1} pedestal at {2:3f} s'.format(self.ShotNumber,sig,time)
         fig.canvas.set_window_title(canvas_name)
         
         #show data and fit
-        plt.errorbar(x,y, yerr=yr, xerr=xr, elinewidth=0.5)
+        plt.errorbar(x,y, yerr=yr, xerr=xr,fmt='x',mfc='blue',elinewidth=2,markersize=15)
 
         fitx = np.arange(np.min(x),np.max(x),step=0.001)
-        plt.plot(fitx, ped_tanh_odr2(result,fitx), c='r', label='mtanh fit')
+        plt.plot(fitx, ped_tanh_odr2(result,fitx), c='r',lw=3, label='mtanh fit')
         
         plt.xlabel('R [m]')
-        plt.ylabel(sig)
+        plt.ylabel(r'$N_e$ [$\times 10^{19}$m$^{-3}$]')
+        
         plt.ylim(0,)
 
         # mark useful labels
@@ -518,19 +537,22 @@ class Shot():
         midpt = knee + width/2
         max_slope = -2* result[0]/result[3]
         y_knee = ped_tanh_odr2(result, knee)
-        plt.axvline(knee, ls='--', c='k',label='knee= {0:.3g}'.format(y_knee))
-        plt.axvline(knee + width,ls='--', c='b', label='knee+width')
+        plt.axvline(knee, ls='--', c='k',lw = 3,label='Pedestal') #, label='knee= {0:.3g}'.format(y_knee))
+        plt.axvline(knee + width,ls='--', c='k',lw=3)#, label='knee+width')
     
         # show max slope 
         slope_xs = x
         y_mid = ped_tanh_odr2(result, midpt)
         slope_ys = (y_mid-max_slope*midpt) + max_slope* slope_xs
-        plt.plot(slope_xs, slope_ys, c='g',label='grad= {0:.2g}'.format(max_slope))
-        plt.legend() 
+        plt.plot(slope_xs, slope_ys, c='g',lw=3,label='Max gradient')#label='grad= {0:.2g}'.format(max_slope))
+        plt.legend(loc=1) 
         
         return canvas_name
     
     def plot_signal(self, SignalName, figname = None):
+        """
+        Plots specified signal for general inspection
+        """
         # this could go into another file anyway with plotting stuff
         if len(self.data[SignalName]['data'].shape) >1:
             x, y = self.data[SignalName]['time'] , np.nanmean(self.data[SignalName]['data'], axis=1) 
@@ -707,12 +729,7 @@ class Shot():
                     self._pandas['range_err'].append(singal_t_err_spread)
                     
                     continue # return to next parameter in parameters
-                    
-
-                
-                
-
-                
+                                    
                 # get parameter at transition
                 singal_at_t1 = np.interp(t1, self.data[parameter]['time'] , self.data[parameter]['data'])
                 
@@ -917,13 +934,15 @@ class Shot():
     def plot_JP_report(self, tlim = (0,0.5), ip = 'IP', wmhd = 'WMHD', coreTe = 'AYC_TE0', 
                 ne = 'ANE_DENSITY', Dalpha = 'AIM_DA_TO', Bt = 'BT',
                 Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM',
-                plot_thomson = False, label_thomson = False):
+                plot_thomson = False, label_thomson = False,figsize=(12,8),fontsize=16,width=1):
         """
         Plot some signals together on single figure FOR REPORT
         """         
         n_signals = 7 # number of signals to be plotted
         # make figure and adjust boundaries
-        fig, ax = plt.subplots(n_signals, sharex=True, figsize=(6,5))
+        plt.rcParams.update({'font.size': fontsize})
+        fig, ax = plt.subplots(n_signals, sharex=True, figsize=figsize)
+        
         fig.canvas.set_window_title('Shot {} FOR REPORT'.format(self.ShotNumber))
         fig.subplots_adjust(top=0.935,bottom=0.12,left=0.1,right=0.975,hspace=0.0,wspace=0.2)    
         # add figure title, labels, set time range
@@ -931,28 +950,39 @@ class Shot():
         ax[-1].set_xlabel('$time \ [s]$')
         ax[-1].set_xlim(tlim)
         
+        if plot_thomson:
+            for i in self.data['AYC_NE']['time']:
+                ax[plot_thomson].axvline(i,color='orange',linestyle='dashed')
+            if label_thomson == True:
+                for index, t in enumerate(self.data['AYE_NE']['time']):
+                    ax[plot_thomson].text(t,0.,str(index))
+        
         # mark LH, HL transition points
         if self._LHt:
             for tset in self._LHt:  # tset = (time, -tlim_err, =tlim_err)
                 for axes in ax:
-                    axes.axvline(tset[0], c='g', lw=1, ls='--', clip_on=False) #draw vertical line for transition
+                    axes.axvline(tset[0], c='g', lw=width, ls='--', clip_on=False,linewidth=width) #draw vertical line for transition
                     if tset[1] != 0:
-                        axes.axvline(tset[1], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+                        axes.axvline(tset[1], c='g', lw=width, ls=':', clip_on=False, alpha= 0.6,linewidth=width) # draw error line
                     if tset[2] != 0:
-                        axes.axvline(tset[2], c='g', lw=1, ls=':', clip_on=False, alpha= 0.6) # draw error line
+                        axes.axvline(tset[2], c='g', lw=width, ls=':', clip_on=False, alpha= 0.6,linewidth=width) # draw error line
         if self._HLt:
             for tset in self._HLt:  # tset = (time, -tlim_err, +tlim_err)
                 for axes in ax:
-                    axes.axvline(tset[0], c='r', lw=1, ls='--', clip_on=False)   
+                    axes.axvline(tset[0], c='r', lw=width, ls='--', clip_on=False,linewidth=width)   
                     if tset[1] != 0:
-                        axes.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6)
+                        axes.axvline(tset[1], c='r', lw=width, ls=':', clip_on=False, alpha= 0.6,linewidth=width)
                     if tset[2] != 0:
-                        axes.axvline(tset[1], c='r', lw=1, ls=':', clip_on=False, alpha= 0.6)
+                        axes.axvline(tset[1], c='r', lw=width, ls=':', clip_on=False, alpha= 0.6,linewidth=width)
+        
+        for axes in ax: axes.axvline(0.248, c='gray', lw=width, ls='--', clip_on=False,linewidth=width)
+        
+        
         # plot plasma current, ax = 0
         self._plot_ax_sig2(ax, ip, 0, signame = 'I_{p}')
         # plot n_e
         self._plot_ax_sig2(ax, ne, 1, signame = 'n_{e}', plot_errors='fill', units=r'$x10^{20} m^{2}$', annot=False) # , units='m^{-2}')
-        ax[1].annotate(r'$n_{e} \ [x10^{20} \ m^{-2}]$', xy=(0.01,0.65), xycoords='axes fraction', fontsize=11)
+        ax[1].annotate(r'$n_{e} \ [x10^{20} \ m^{-3}]$', xy=(0.01,0.65), xycoords='axes fraction', fontsize=11)
         # plot WMHD
         self._plot_ax_sig2(ax, wmhd,2 , signame = 'W_{MHD}')
         # plot core T_e
@@ -964,11 +994,19 @@ class Shot():
         # plot B_T
         self._plot_ax_sig2(ax, Bt, 5, signame = 'B_{T}')
         # plot powers
-        #self._plot_ax_sig(ax, POHM, panel = 6, signame = 'Pohm', label='POHM', errors=True) #Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM'
+        
+        #self._plot_ax_sig2(ax, POHM, panel = 6, plot_errors='fill', annot=False) #Ploss = 'Ploss', PINJ = 'PINJ', POHM = 'POHM'
         self._plot_ax_sig2(ax, Ploss, panel = 6, signame = 'P_{loss}', plot_errors='fill')
         self._plot_ax_sig2(ax, PINJ, panel = 6, plot_errors='fill', annot=False)
         
+        #ax[6].annotate(r'$P_{ohm}$ \ [MW]$', xy = (0.01,0.3), xycoords='axes fraction', fontsize=11, color='#8B0000')
         ax[6].annotate(r'$P_{inj} \ [MW]$', xy = (0.01,0.3), xycoords='axes fraction', fontsize=11, color='#8B0000')
+        
+        ax[2].set_ylim([0,0.12])
+        ax[3].set_ylim([0,1.5])
+        ax[4].set_ylim([0,4.5])
+        ax[5].set_ylim([-0.8,-0.35])
+        
         return fig, ax
 
     
